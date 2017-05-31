@@ -2,21 +2,26 @@ package civ.Control;
 
 import civ.Model.Advance;
 
+import java.util.LinkedList;
+
 /**
  * Created by miku on 31/05/2017.
  * my first polymorphic 'switch'
  */
 public class Endings {
 
-    public class Conditional{
+    public class Conditional {
         public boolean isReversedAging(){
             return Civilization.currentPlayer.advances.list.contains(Advance.ReversedAging);
         }
         public boolean isEnvironmentalist(){
             return Civilization.worldGreenLevel > 0 ? true:false;
         }
-        public boolean isSpaceRace(){
-            return Civilization.currentPlayer.rocketBuilt;
+        public boolean isSpaceRace() { return Civilization.currentPlayer.rocketBuilt; }
+        public boolean isTradeSupremacy() {
+            LinkedList<Player> otherPlayers = Civilization.players.listOfPLayers;
+            otherPlayers.remove(Civilization.currentPlayer);
+            return Civilization.currentPlayer.corporations.list.size()>=8;
         }
     }
 
@@ -47,7 +52,7 @@ public class Endings {
 
     public class TradeSupremacy extends End {
         public String message() {
-            String message = "All corporations are run by your nation.";
+            String message = "All world corporations are run by your nation.";
             System.out.println();
             return message;
         }

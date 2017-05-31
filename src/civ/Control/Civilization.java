@@ -8,7 +8,7 @@ import civ.gui.Setup;
  * Created by miku on 30/05/2017.
  */
 public class Civilization {
-    private static RoundTable players = new RoundTable(3);
+    static RoundTable players = new RoundTable(3);
     private static Data gameData =  new Data();
     public static String type;
     public static Player currentPlayer;
@@ -32,14 +32,11 @@ public class Civilization {
 
     private static void endCondition(Player player) {
 
-        EndOfGame endOfGame = findCondition();
-        endOfGame.method();
-
     }
 
     private static EndOfGame findCondition() {
         //TODO
-        return EndOfGame.LOSS_OF_FREEDOM;
+        return new EndOfGame();
     }
 
     private static void gameRound(Player player) {
@@ -52,7 +49,6 @@ public class Civilization {
         //citygrowth
         //citybuildings
         //orders
-        //
         currentPlayer = player;
         endCondition(player);
     }

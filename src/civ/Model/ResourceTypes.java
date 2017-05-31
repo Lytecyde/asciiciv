@@ -18,6 +18,6 @@ public enum ResourceTypes {
     Plays,
     Films,
     Jewellery,
-    Oil
+    Oil;
 
 }

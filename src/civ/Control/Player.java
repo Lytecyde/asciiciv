@@ -1,9 +1,6 @@
 package civ.Control;
 
-import civ.Model.Advances;
-import civ.Model.Cities;
-import civ.Model.ID;
-import civ.Model.Units;
+import civ.Model.*;
 
 import java.util.HashMap;
 
@@ -24,6 +21,7 @@ public class Player {
     int pollution = 0;
     boolean rocketBuilt = false;
     Cities cities = new Cities();
+    Corporations corporations = new Corporations();
 
     public Player(){
         System.out.println("LOG: player created as default");
