@@ -21,7 +21,22 @@ public class Endings {
         public boolean isTradeSupremacy() {
             LinkedList<Player> otherPlayers = Civilization.players.listOfPLayers;
             otherPlayers.remove(Civilization.currentPlayer);
-            return Civilization.currentPlayer.corporations.list.size()>=8;
+            int otherCorporationsCount =0;
+            boolean isForeignCorporation[] = new boolean[otherPlayers.size()];
+            int i =0;
+            for(Player p : otherPlayers) isForeignCorporation[++i] = isOtherCorporationsExist(p);
+            return Civilization.currentPlayer.corporations.list.size() >= 8 &&
+                    areAllTrue(isForeignCorporation);
+        }
+        public boolean areAllTrue(boolean[] array)
+        {
+            for(boolean b : array) if(b) return true;
+            return false;
+        }
+
+
+        private boolean isOtherCorporationsExist(Player p) {
+            return p.corporations.list.size() >= 0;
         }
     }
 

@@ -30,7 +30,7 @@ public class Civilization {
         for(Player player: RoundTable.listOfPLayers)gameRound(player);
     }
 
-    private static void endCondition(Player player) {
+    private static void endCondition() {
 
     }
 
@@ -50,6 +50,6 @@ public class Civilization {
         //citybuildings
         //orders
         currentPlayer = player;
-        endCondition(player);
+        endCondition();
     }
 }
