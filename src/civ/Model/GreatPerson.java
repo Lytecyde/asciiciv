@@ -5,4 +5,5 @@ package civ.Model;
  */
 public class GreatPerson {
     ID identification = new ID();
+
 }

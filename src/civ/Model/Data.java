@@ -1,5 +1,7 @@
 package civ.Model;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 
 /**
@@ -9,12 +11,13 @@ public class Data {
 
     public static LinkedList<String> nations = new LinkedList<>();
 
+    public static int numberOfArrowKeyPresses = 0;
     public Data() {
         generateNationsList();
     }
 
     private void generateNationsList() {
-        for(String s: Nation.names) nations.add(s);
+         Collections.addAll(nations, Nation.names);
     }
 
     public static final int scapegoatingEffect = 1;
@@ -38,14 +41,197 @@ public class Data {
 
         };
         public static String[] leadersNames = {
-                "Ramses",
-                "Hammurabi",
+                "Narmer",
+                "Sargon",
                 "Alexander",
                 "Cesar",
-                "",
-                "",
-                "",
-                ""
+                "Bismarck",
+                "Rörich",
+                "Arthur",
+                "Washington"
         };
+    }
+    public static class Advancements {
+        public static final String[] names = {
+                "Mining",
+            "Engineering",
+            "Waterworks",
+            "Roads",
+            "Bridges",
+            "Tunnels",
+
+                "Irrigation",
+            "Fertilisers",
+            "Fishfarming",
+            "Almanach",
+            "Husbandry",
+            "Hydroponics",
+
+                "Riverboat",
+            "Fishing",
+            "Cartography",
+            "Sailing",
+            "Navigation",
+            "Seadrones",
+
+                "Writing",
+            "Philosophy",
+            "Academy",
+            "University",
+            "MOOC",
+            "Augmented Intelligence",
+
+                "Mechanical calculators",
+            "Vacuum tubes",
+            "Silicon",
+            "Mobiles",
+            "Nano",
+            "Quantum",
+
+                "Software",
+            "DataBases",
+            "Networks",
+            "Social Media",
+            "Deep Learning",
+            "Artificial Intelligence",
+
+            "Myths",
+            "Rituals",
+            "Ceremonies",
+            "Priesthood",
+            "Theocracy",
+            "Transpersonality",
+
+                "Bartering",
+            "Trade",
+            "Currency",
+            "Banking",
+            "Taxation",
+            "Blockchain",
+
+                "Paintings",
+            "Sculptures",
+            "Architecture",
+            "Theatre",
+            "Film",
+            "Games",
+
+                "Mathematics",
+            "Physics",
+            "Biology",
+            "Chemistry",
+            "Economics",
+            "Informatics",
+
+            "Fermentation",
+            "Canning",
+            "Sanitation",
+            "Medicine",
+            "Surgery",
+            "Antibiotics",
+            "Reversed Aging",
+
+                "Pottery",
+            "Metal working",
+            "Plastics",
+            "Fuels",
+            "Nanotech",
+            "4D materials",
+
+                "Tactics",
+            "Strategy",
+            "Siegecraft",
+            "Artillery",
+            "Blitz",
+            "Electronic",
+
+                "Riding",
+                "Seaships",
+                "Trains",
+                "Automobiles",
+                "Airplanes",
+                "Rockets",
+            "Peer Review",
+            "Falsification",
+            "Paradigms",
+            "Experimentation",
+            "Observation",
+            "Theorisation"
+        };
+        int costs[] = {
+                0,
+                60,
+                80,
+                100,
+                100,
+                100,
+                0,
+                60,
+                80,
+                100,
+                100,
+                100,
+
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+
+
+        };
+
+        public String[][] prerequirements = {
+                {"",""},
+                {"",""}};
     }
 }

@@ -1,6 +1,6 @@
 package civ.Control;
 
-import civ.Model.Advance;
+import civ.Model.*;
 
 import java.util.LinkedList;
 
@@ -12,32 +12,116 @@ public class Endings {
 
     public class Conditional {
         public boolean isReversedAging(){
-            return Civilization.currentPlayer.advances.list.contains(Advance.ReversedAging);
+            return Civilization.currentPlayer.advances.acquired.contains(
+                    (Object) "Reversed Aging");
         }
         public boolean isEnvironmentalist(){
-            return Civilization.worldGreenLevel > 0 ? true:false;
+            return Civilization.worldGreenLevel > 0 ;
         }
         public boolean isSpaceRace() { return Civilization.currentPlayer.rocketBuilt; }
         public boolean isTradeSupremacy() {
-            LinkedList<Player> otherPlayers = Civilization.players.listOfPLayers;
-            otherPlayers.remove(Civilization.currentPlayer);
-            int otherCorporationsCount =0;
-            boolean isForeignCorporation[] = new boolean[otherPlayers.size()];
-            int i =0;
-            for(Player p : otherPlayers) isForeignCorporation[++i] = isOtherCorporationsExist(p);
-            return Civilization.currentPlayer.corporations.list.size() >= 8 &&
-                    areAllTrue(isForeignCorporation);
+            LinkedList<Player> otherPlayers = groupOtherPlayersList();
+            boolean[] isForeignCorporation = findForeignCorporations(otherPlayers);
+            return isMajorityOfCorporations() &&
+                    !isOneAmong(isForeignCorporation) ;
         }
-        public boolean areAllTrue(boolean[] array)
+        private boolean isMajorityOfCorporations() {
+            int halfOfPotentialCorporations = ResourceTypes.values().length/2;
+            return Civilization.currentPlayer.corporations.list.size() >= halfOfPotentialCorporations;
+        }
+
+        private LinkedList<Player> groupOtherPlayersList() {
+            LinkedList<Player> otherPlayers = Civilization.players.listOfPlayers;
+            otherPlayers.remove(Civilization.currentPlayer);
+            return otherPlayers;
+        }
+
+        public boolean isProsperity(){
+            int loadsOfMoneyFactor = 100;
+            return Civilization.currentPlayer.funds >
+                (Civilization.currentPlayer.population * loadsOfMoneyFactor);
+        }
+
+        public boolean isArtilectBuilt(){
+            return Civilization.currentPlayer.advances.acquired.contains(
+                    (Object) "Artificial Intelligence");
+        }
+        public boolean isHappy(){
+            return Civilization.currentPlayer.happiness == Civilization.currentPlayer.population &&
+                Civilization.currentPlayer.population  > sumOfOtherPopulations();
+        }
+
+        private int sumOfOtherPopulations() {
+            LinkedList<Player> otherPlayers = groupOtherPlayersList();
+            int sum = 0;
+            for(Player p:otherPlayers) sum = sum + p.population;
+            return sum;
+        }
+
+        public boolean isEducation(){
+            return Civilization.currentPlayer.education > sumOfOtherEducated();
+        }
+
+        private int sumOfOtherEducated() {
+            LinkedList<Player> otherPlayers = groupOtherPlayersList();
+            int sum = 0;
+            for(Player p:otherPlayers) sum = sum + p.education;
+            return sum;
+        }
+
+
+        private boolean[] findForeignCorporations(LinkedList<Player> otherPlayers) {
+            int otherCorporationsCount = 0;
+            boolean isForeignCorporation[] = new boolean[otherPlayers.size()];
+
+            for(Player p : otherPlayers) isForeignCorporation[++otherCorporationsCount] = isOtherCorporationsExist(p);
+            return isForeignCorporation;
+        }
+
+        private boolean isOneAmong(boolean[] array)
         {
-            for(boolean b : array) if(b) return true;
-            return false;
+            boolean isOneInArray = false;
+            for(boolean b : array) isOneInArray |= b;
+            return isOneInArray;
+
         }
 
 
         private boolean isOtherCorporationsExist(Player p) {
             return p.corporations.list.size() >= 0;
         }
+
+        public Conditional(){
+            boolean[] listOfVictoryConditions = {
+                    isReversedAging(),
+                    isArtilectBuilt(),
+                    isEnvironmentalist(),
+                    isHappy(),
+                    isTradeSupremacy(),
+                    isProsperity(),
+                    isSpaceRace(),
+                    isEducation(),
+                    isEnlightenment()
+
+            };
+        }
+
+        public boolean isVictory(boolean[] listOfVictoryConditions){
+            return isOneAmong(listOfVictoryConditions);
+        }
+
+        public boolean isEnlightenment() {
+            return Civilization.currentPlayer.population < sumOfPreachers();
+
+        }
+
+        private int sumOfPreachers() {
+            return Units.sumOfUnit(UnitType.MONK);
+        }
+
+
+
+
     }
 
 

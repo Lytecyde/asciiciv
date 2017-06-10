@@ -1,5 +1,7 @@
 package civ.Model;
 
+import civ.Control.Civilization;
+
 import java.util.LinkedList;
 
 /**
@@ -7,10 +9,20 @@ import java.util.LinkedList;
  */
 public class Units {
     public static LinkedList<Unit> list = new LinkedList<>();
-    Unit activeUnit;
+    Unit activeUnit = new Unit(UnitType.SETTLER);
     public Units(){
         populateStartList();
         activeUnit = list.getFirst();
+    }
+
+    public static int sumOfUnit(UnitType unitType) {
+
+        int count = 0;
+        for(Unit u:list) {
+            String type = u.identification.type;
+            count += type.equals(unitType.name())? 1 : 0;
+        }
+        return count;
     }
 
     private void populateStartList() {
@@ -18,6 +30,7 @@ public class Units {
         list.add(unit);
         unit = new Unit(UnitType.WARRIOR);
         list.add(unit);
+
     }
 
 }

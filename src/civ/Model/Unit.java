@@ -7,20 +7,17 @@ import civ.Control.Player;
 import java.util.HashMap;
 
 
+
+
 /**
  * Created by miku on 30/05/2017.
  */
 public class Unit {
     private Location location;
-    private ID identification;
+    public ID identification = new ID();
     private String ownerNation;
     private String commandingNation;
     private String homeCity;
-    //powers
-    private int power;
-    private int strength;
-    private int defence;
-    private int move;
     //acquired properties
     private boolean veteran;
     private boolean mechanised;
@@ -28,6 +25,7 @@ public class Unit {
     private boolean airborne;
     private boolean infected;
     private boolean fortified;
+    private boolean vigil;
     //setSkills
     public static boolean foundCity;
     public static boolean build;
@@ -49,11 +47,21 @@ public class Unit {
 
 
     private HashMap<Player, Integer> natives;
+    private boolean working;
 
-
+    private void initialiseProperties(){
+        veteran = false;
+        mechanised = false;
+        naval = false;
+        airborne = false;
+        infected = false;
+        fortified = false;
+        vigil = false;
+        working = false;
+    }
 
     private void setSkills(){
-        foundCity = true;
+        foundCity = false;
         build = false;
         diplomacy = false;
         trade = false;
@@ -68,19 +76,21 @@ public class Unit {
     }
 
     public Unit(UnitType unitType){
-        identification.id = Civilization.currentPlayer.unitCount;
-        Civilization.currentPlayer.unitCount++;
+
+        identification.id = Civilization.totalUnitCount;
+        Civilization.totalUnitCount++;
+
+        Player current = Civilization.getCurrentPlayer();
+        ownerNation = current.nationName;
         identification.type = unitType.name();
         identification.name = ownerNation + identification.type + Integer.toString(identification.id);
 
         switch(unitType){
             case SETTLER:
-
-
-                power = 1;
-                strength = 1;
-                defence = 1;
-                move = 1;
+                int power = 1;
+                int strength = 1;
+                int defence = 1;
+                int move = 1;
 
                 veteran = false;
                 mechanised = false;
@@ -280,4 +290,47 @@ public class Unit {
     public String getType() {
         return identification.type;
     }
+
+    public boolean isInfected(){ return infected; }
+
+    public void contractsInfection() { infected = true; }
+
+    public void infectionHealed() { infected = false; }
+
+    public void fortify() { fortified = true; }
+
+    public void unfortify() { fortified = false; }
+
+    public boolean isFortified() { return fortified; }
+
+    public void embark() { naval = true; }
+
+    public void disembark() { naval = false; }
+
+    public boolean isNaval() {return naval;}
+
+    public void setAirborne() { airborne = true;}
+
+    public void finishFlight() { airborne = false; }
+
+    public boolean isAirborne() { return airborne; }
+
+    public void setVigil() { vigil = true; }
+
+    public void activate() { vigil = false; }
+
+    public boolean isOnVigil() { return vigil; }
+
+    public void onTransport() { mechanised = true; }
+
+    public void onFoot() { mechanised = false; }
+
+    public boolean isMechanised() { return mechanised; }
+
+    public void working() { working = true; }
+
+    public void ready() { working = false; }
+
+    public boolean isWorking() { return working; }
+
 }

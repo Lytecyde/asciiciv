@@ -5,9 +5,13 @@ package civ.Model;
  */
 public enum ResourceTypes {
     Wheat,
+    Meat,
     Cotton,
     Clay,
     Wood,
+    Paper,
+    Gold,
+    Books,
     Wine,
     Fruits,
     Aromas,
@@ -16,8 +20,19 @@ public enum ResourceTypes {
     Blueprints,
     Sculptures,
     Plays,
+    Devices,
+    Steel,
+    Fertilisers,
+    Medications,
     Films,
+    Broadcasts,
     Jewellery,
-    Oil;
+    Oil,
+    Plastics,
+    Electricity,
+    Electronics,
+    Software,
+    Podcasts;
 
+    Tool tool;
 }

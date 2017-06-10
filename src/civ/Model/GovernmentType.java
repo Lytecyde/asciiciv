@@ -8,8 +8,8 @@ public enum GovernmentType {
     Communism,
     Socialism,
     Liberalism,
-    Capitalism,
+    Plutocracy,
     Nationalism,
     Monarchy,
-    Autocracy;
+    Autocracy
 }
