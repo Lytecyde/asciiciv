@@ -1,9 +1,6 @@
 package civ.Model;
 
-import civ.Control.Civilization;
 import civ.gui.View;
-
-import javax.lang.model.type.NullType;
 
 /**
  * Created by miku on 31/05/2017.
@@ -24,7 +21,7 @@ public class Location {
         this.y = y;
     }
 
-    public void movement(DirectionType n){
+    public Location movement(DirectionType n){
         //Location locationAfterMove = null;
         switch (n){
             case NORTH:
@@ -50,6 +47,7 @@ public class Location {
 
 
         //return locationAfterMove;
+        return this;
     }
 
     private boolean isNull(Object object) {
@@ -68,7 +66,7 @@ public class Location {
     }
 
     private boolean isLegalXIncrease() {
-        return this.x < View.cols - 1;
+        return this.x < View.rows - 1;
     }
 
     private boolean isLegalYDecrease() {
@@ -76,7 +74,7 @@ public class Location {
     }
 
     private boolean isLegalYIncrease() {
-        return this.y < View.rows -1 ;
+        return this.y < View.cols -1 ;
     }
 
 }

@@ -16,6 +16,7 @@ public class Advance {
     LinkedList<String> prerequirements = new LinkedList<>();
     LinkedList<String> makesAvailable = new LinkedList<>();
     LinkedList<String> buildables = new LinkedList<>();
+    LinkedList<String> units = new LinkedList<>();
 
 
     public ID getIdentification() {

@@ -19,7 +19,7 @@ import static javax.swing.BorderFactory.createBevelBorder;
  * Created by miku on 30/05/2017.
  */
 public class View extends JFrame implements ActionListener {
-    Location location = new Location(7,11);
+    Location location = new Location(7, 11);
 
     JPanel text = new JPanel();
 
@@ -30,7 +30,7 @@ public class View extends JFrame implements ActionListener {
     public JPanel control = new JPanel();
     public JPanel globeMap = new JPanel();
     public JPanel dataBoard = new JPanel();
-    public  JPanel worldMapPanel = new JPanel();//TODO:should a controller supply the
+    public JPanel worldMapPanel = new JPanel();//TODO:should a controller supply the
     // data
     // actually
     char[][] map =
@@ -40,20 +40,24 @@ public class View extends JFrame implements ActionListener {
     private final int cellSize = 15;
     private static WorldMap worldMapPanelContents;
     private static JLabel cursor;
-    public View(){
+    private static JLabel label;
+    private JLabel transparentLabel;
+
+    public View() {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setPreferredSize(new Dimension(640, 640));
         this.setLayout(new BorderLayout());
         this.worldMapPanel = createContent();
-        placeContent(this.worldMapPanel);
+        placeContentTo(this.worldMapPanel);
         MyKeyListener mkl = new MyKeyListener();
         addKeyListener(mkl);
         placeMenuBar();
         //
-        defineCursor();
+        addCellsToPanel(getCells());
         placeCursor(location);
         repaint();
         pack();
-        setPreferredSize(new Dimension(640,400));
+
         setVisible(true);
     }
 
@@ -101,19 +105,18 @@ public class View extends JFrame implements ActionListener {
         jmiFortify.addActionListener(this);
 
 
-        jmiExit.addActionListener( this);
+        jmiExit.addActionListener(this);
         jmiAbout.addActionListener(this);
 
         this.setJMenuBar(jmb);
     }
 
-    private void placeContent( JPanel worldMap) {
+    private void placeContentTo(JPanel worldMap) {
         textArea.setEnabled(false);
         this.add(text, BorderLayout.SOUTH);
         this.add(control, BorderLayout.EAST);
         this.add(worldMap, BorderLayout.CENTER);
     }
-
 
 
     private JPanel createContent() {
@@ -123,6 +126,7 @@ public class View extends JFrame implements ActionListener {
         createTextPanel();
         createMapPanel();
         worldMapPanel = createWorldMap();
+
         return worldMapPanel;
     }
 
@@ -131,10 +135,10 @@ public class View extends JFrame implements ActionListener {
     }
 
     private JPanel createWorldMap() {
-        System.out.println("Generating the map");
         worldMapPanelContents = new WorldMap(MapType.VISIBLE);
-
         worldMapPanel.add(worldMapPanelContents.getMap());
+        placeMapLabels();
+        worldMapPanel.setVisible(true);
         worldMapPanel.repaint();
         return worldMapPanel;
     }
@@ -145,29 +149,34 @@ public class View extends JFrame implements ActionListener {
     }
 
     private void createControlPanel() {
-        control.setLayout(new GridLayout(1,2));
+        control.setLayout(new GridLayout(2, 1));
         control.add(globeMap);
 
-        JLabel funds = new JLabel("Funds: " +
-                Civilization.currentPlayer.funds);
-        dataBoard.add(funds);
+        createDataBoard();
         control.add(dataBoard);
         control.repaint();
     }
 
+    private void createDataBoard() {
+        dataBoard.setLayout(new GridLayout(2,1));
+        JLabel funds = new JLabel("Funds: " +
+                Civilization.currentPlayer.funds);
+        JLabel pollution = new JLabel("Pollution: " +
+                Civilization.currentPlayer.pollution);
+        dataBoard.add(funds);
+        dataBoard.add(pollution);
+    }
+
     private void createMapPanel() {
-
-
         worldMapPanel.setPreferredSize(
                 new Dimension(
-                    cols*cellSize+10, rows*cellSize+10));
-
+                        cols * cellSize + 10,
+                        rows * cellSize + 10));
         worldMapPanel.setVisible(true);
-
     }
 
     private void createMap() {
-
+        //code for the asciimap goes here
     }
 
 
@@ -175,7 +184,7 @@ public class View extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         String command = e.getActionCommand();
         textArea.setText(command);
-        switch(command){
+        switch (command) {
             case "About":
                 String about = "Game variant of the famed Civilization game," +
                         "in a minimalist setting. \n Civilization " +
@@ -188,57 +197,159 @@ public class View extends JFrame implements ActionListener {
 
 
     private void placeCursor(Location location) {
-        textArea.setText(location.getX() +":"
-                +location.getY()+"::"
-                +Data.numberOfArrowKeyPresses);
+        textArea.setText(location.getX() + ":"
+                + location.getY() + "::"
+                + Data.numberOfArrowKeyPresses);
         Data.numberOfArrowKeyPresses++;
         //remove a label from location
-        WorldMap.panelHolderGrid[location.getX()][location.getY()]
-         .removeAll();
-        WorldMap.panelHolderGrid[location.getX()][location.getY()].add
-                (this.cursor);
+        JPanel p = WorldMap.panelHolderGrid[location.getX()][location.getY()];
+        JLabel c = defineCursor((JLabel) p.getComponent(0));
 
-        WorldMap.addCellsToGrid(cols,rows, WorldMap.panelHolderGrid);
+        removeAndAdd(
+                WorldMap.panelHolderGrid[location.getX()][location.getY()], c);
+
+        WorldMap.addToGrid(WorldMap.panelHolderGrid);
         WorldMap.map.revalidate();
         WorldMap.map.repaint();
         //repaint
     }
 
+    private void placeOldLabelBackTo(Location location) {
+        JLabel c = seaLabel();
+        removeAndAdd(
+                WorldMap.panelHolderGrid[location.getX()][location.getY()], c);
+
+        WorldMap.addToGrid(WorldMap.panelHolderGrid);
+        WorldMap.map.revalidate();
+        WorldMap.map.repaint();
+
+    }
+    private void placeLabel(Location location, LandType type) {
+        JLabel c = getLabelBy(type);
+
+        removeAndAdd(
+                WorldMap.panelHolderGrid[location.getX()][location.getY()], c);
+
+        WorldMap.addToGrid(WorldMap.panelHolderGrid);
+        WorldMap.map.revalidate();
+        WorldMap.map.repaint();
+        //repaint
+    }
+
+    private JLabel getLabelBy(LandType type) {
+        JLabel c;
+        switch(type){
+            case SEA:
+            return seaLabel();
+
+            case LAND:
+                return landLabel();
+
+            case MOUNTAIN:
+                return mountainLabel();
+
+            case DESERT:
+                return desertLabel();
+                
+            default:
+                return seaLabel();
+        }
+        //return c;
+    }
+
+    private JLabel landLabel() {
+        JLabel label = new JLabel();
+        label.setOpaque(true);
+        label.setBackground(Color.green);
+        label.setForeground(new Color(34,139,34));
+        label.setText("♠");
+        label.setPreferredSize(new Dimension(cellSize, cellSize));
+        return label;
+
+    }
+    private JLabel mountainLabel() {
+        JLabel label = new JLabel();
+        label.setOpaque(true);
+        label.setBackground(Color.green);
+        label.setForeground(Color.white);
+        label.setText("M");
+        label.setPreferredSize(new Dimension(cellSize, cellSize));
+        return label;
+
+    }
+    private JLabel desertLabel() {
+        JLabel label = new JLabel();
+        label.setOpaque(true);
+        label.setBackground(Color.yellow);
+        label.setForeground(Color.white);
+        label.setText("~");
+        label.setPreferredSize(new Dimension(cellSize, cellSize));
+        return label;
+
+    }
+    private JLabel seaLabel() {
+        JLabel label = new JLabel();
+        label.setOpaque(true);
+        label.setBackground(Color.cyan);
+        label.setText("~");
+        label.setPreferredSize(new Dimension(cellSize, cellSize));
+        return label;
+    }
+    private void placeMapLabels(){
+        Location l;
+        for (int x = 0; x < rows; x++) {
+            for (int y = 0; y < cols; y++) {
+                l = new Location(x,y);
+                placeLabel(l,LandType.SEA);
+            }
+        }
+    }
+
+    private void removeAndAdd(JPanel jPanel, JLabel c) {
+        jPanel.removeAll();
+        jPanel.add(c);
+    }
+
     private JLabel[][] getCells() {
-        JLabel[][] localMapCells = new JLabel[cols][rows];
-        for (int x = 0; x < cols; x++) {
-            for (int y = 0; y < rows; y++) {
+        JLabel[][] localMapCells = new JLabel[rows][cols];
+        for (int x = 0; x < rows; x++) {
+            for (int y = 0; y < cols; y++) {
                 localMapCells[x][y] = WorldMap.mapCells[x][y];
+
             }
         }
         return localMapCells;
     }
 
     private void addCellsToPanel(JLabel[][] localMapCells) {
-        for (int x = 0; x < cols; x++) {
-            for (int y = 0; y < rows; y++) {
+        for (int x = 0; x < rows; x++) {
+            for (int y = 0; y < cols; y++) {
                 this.worldMapPanel.add(localMapCells[x][y]);
                 this.worldMapPanel.revalidate();
                 this.worldMapPanel.repaint();
             }
         }
-
     }
 
-    private void defineCursor() {
-        this.cursor = new JLabel();
+    private JLabel defineCursor(JLabel cursor) {
+        cursor = getCells()[location.x][location.y];
         Border raised = createBevelBorder(BevelBorder.RAISED,
                 Color.PINK, Color.RED);
-        this.cursor.setBackground(Color.red);
-        this.cursor.setBorder(raised);
-        this.cursor.setPreferredSize(new Dimension(cellSize,cellSize));
+        //this.cursor.setBackground(Color.red);
+        cursor.setBorder(raised);
+        cursor.setPreferredSize(new Dimension(cellSize, cellSize));
+        return cursor;
     }
 
-    public class MyKeyListener implements KeyListener{
+
+
+
+    public class MyKeyListener implements KeyListener {
         @Override
         public void keyReleased(KeyEvent e) {
 
         }
+
         @Override
         public void keyTyped(KeyEvent e) {
 
@@ -248,37 +359,40 @@ public class View extends JFrame implements ActionListener {
         public void keyPressed(KeyEvent e) {
             Location aftermove;
             System.out.println("" +
-                    Data.numberOfArrowKeyPresses +" : "+ e.getKeyCode());
+                    Data.numberOfArrowKeyPresses + " : " + e.getKeyCode());
             try {
                 switch (e.getKeyCode()) {
 
                     case 37:
-
-                        location.movement(DirectionType.NORTH);
-                        placeCursor(location);
+                        placeOldLabelBackTo(location);
+                        aftermove = location.movement(DirectionType.NORTH);
+                        placeCursor(aftermove);
 
                         break;
                     case 39:
-                        location.movement(DirectionType.SOUTH);
-                        placeCursor(location);
+                        placeOldLabelBackTo(location);
+                        aftermove = location.movement(DirectionType.SOUTH);
+                        placeCursor(aftermove);
 
                         break;
                     case 38:
-                        location.movement(DirectionType.WEST);
-                         placeCursor(location);
+                        placeOldLabelBackTo(location);
+                        aftermove = location.movement(DirectionType.WEST);
+                        placeCursor(aftermove);
 
                         break;
                     case 40:
-                        location.movement(DirectionType.EAST);
-                        placeCursor(location);
+                        placeOldLabelBackTo(location);
+                        aftermove = location.movement(DirectionType.EAST);
+                        placeCursor(aftermove);
 
                         break;
 
                 }
-            }catch(ArrayIndexOutOfBoundsException aiobe){
-                System.out.println( aiobe );
+            } catch (ArrayIndexOutOfBoundsException aiobe) {
+                System.out.println(aiobe +"movement went out");
             }
         }
     }
-
 }
+

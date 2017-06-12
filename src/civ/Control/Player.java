@@ -13,12 +13,12 @@ public class Player {
     ID identification = new ID();
     int population;
     int incomePerTurn;
-    public int funds;
+    public int funds =100;
     //static int percentage = 100;
     public int unitCount;
     public Units units;
     Advances advances = new Advances();
-    int pollution = 0;
+    public int pollution = 0;
     boolean rocketBuilt = false;
     public Cities cities = new Cities();
     public Corporations corporations = new Corporations();
