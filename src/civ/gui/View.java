@@ -19,7 +19,8 @@ import static javax.swing.BorderFactory.createBevelBorder;
  * Created by miku on 30/05/2017.
  */
 public class View extends JFrame implements ActionListener {
-    Location location = new Location(7, 11);
+    final Location CENTRE = new Location(7, 11);
+    Location location = CENTRE;
 
     JPanel text = new JPanel();
 
@@ -30,9 +31,8 @@ public class View extends JFrame implements ActionListener {
     public JPanel control = new JPanel();
     public JPanel globeMap = new JPanel();
     public JPanel dataBoard = new JPanel();
-    public JPanel worldMapPanel = new JPanel();//TODO:should a controller supply the
-    // data
-    // actually
+    //TODO:should a controller supply the data actually
+    public JPanel worldMapPanel = new JPanel();
     char[][] map =
             new char[Civilization.gameMapSizeX][Civilization.gameMapSizeY];
     public static final int cols = 24;
@@ -41,7 +41,7 @@ public class View extends JFrame implements ActionListener {
     private static WorldMap worldMapPanelContents;
     private static JLabel cursor;
     private static JLabel label;
-    private JLabel transparentLabel;
+    private static JLabel transparentLabel;
 
     public View() {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -52,8 +52,10 @@ public class View extends JFrame implements ActionListener {
         MyKeyListener mkl = new MyKeyListener();
         addKeyListener(mkl);
         placeMenuBar();
-        //
         addCellsToPanel(getCells());
+
+        location = CENTRE;
+        transparentLabel = getCells()[location.x][location.y];
         placeCursor(location);
         repaint();
         pack();
@@ -197,31 +199,22 @@ public class View extends JFrame implements ActionListener {
 
 
     private void placeCursor(Location location) {
-        textArea.setText(location.getX() + ":"
-                + location.getY() + "::"
-                + Data.numberOfArrowKeyPresses);
-        Data.numberOfArrowKeyPresses++;
-        //remove a label from location
+
         JPanel p = WorldMap.panelHolderGrid[location.getX()][location.getY()];
         JLabel c = defineCursor((JLabel) p.getComponent(0));
 
         removeAndAdd(
                 WorldMap.panelHolderGrid[location.getX()][location.getY()], c);
+        showMap();
 
-        WorldMap.addToGrid(WorldMap.panelHolderGrid);
-        WorldMap.map.revalidate();
-        WorldMap.map.repaint();
-        //repaint
     }
 
-    private void placeOldLabelBackTo(Location location) {
-        JLabel c = seaLabel();
+    private void placeOldLabelBackTo(Location location, Location aftermove) {
+        JLabel c = getCells()[location.getX()][location.getY()];
         removeAndAdd(
-                WorldMap.panelHolderGrid[location.getX()][location.getY()], c);
+                WorldMap.panelHolderGrid[aftermove.getX()][aftermove.getY()], c);
 
-        WorldMap.addToGrid(WorldMap.panelHolderGrid);
-        WorldMap.map.revalidate();
-        WorldMap.map.repaint();
+        showMap();
 
     }
     private void placeLabel(Location location, LandType type) {
@@ -230,17 +223,21 @@ public class View extends JFrame implements ActionListener {
         removeAndAdd(
                 WorldMap.panelHolderGrid[location.getX()][location.getY()], c);
 
+        showMap();
+
+    }
+
+    private void showMap() {
         WorldMap.addToGrid(WorldMap.panelHolderGrid);
         WorldMap.map.revalidate();
         WorldMap.map.repaint();
-        //repaint
     }
 
     private JLabel getLabelBy(LandType type) {
         JLabel c;
         switch(type){
             case SEA:
-            return seaLabel();
+                return seaLabel();
 
             case LAND:
                 return landLabel();
@@ -263,6 +260,15 @@ public class View extends JFrame implements ActionListener {
         label.setBackground(Color.green);
         label.setForeground(new Color(34,139,34));
         label.setText("♠");
+        label.setPreferredSize(new Dimension(cellSize, cellSize));
+        return label;
+
+    }private JLabel riverLabel() {
+        JLabel label = new JLabel();
+        label.setOpaque(true);
+        label.setBackground(new Color(34,139,34));
+        label.setForeground(Color.blue);
+        label.setText("~");
         label.setPreferredSize(new Dimension(cellSize, cellSize));
         return label;
 
@@ -315,7 +321,6 @@ public class View extends JFrame implements ActionListener {
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
                 localMapCells[x][y] = WorldMap.mapCells[x][y];
-
             }
         }
         return localMapCells;
@@ -332,7 +337,8 @@ public class View extends JFrame implements ActionListener {
     }
 
     private JLabel defineCursor(JLabel cursor) {
-        cursor = getCells()[location.x][location.y];
+
+        //cursor = getCells()[location.x][location.y];
         Border raised = createBevelBorder(BevelBorder.RAISED,
                 Color.PINK, Color.RED);
         //this.cursor.setBackground(Color.red);
@@ -357,34 +363,50 @@ public class View extends JFrame implements ActionListener {
 
         @Override
         public void keyPressed(KeyEvent e) {
-            Location aftermove;
+            Location aftermove ;
+            Location previous = location;
             System.out.println("" +
                     Data.numberOfArrowKeyPresses + " : " + e.getKeyCode());
+            JLabel[][] g;
             try {
                 switch (e.getKeyCode()) {
 
                     case 37:
-                        placeOldLabelBackTo(location);
-                        aftermove = location.movement(DirectionType.NORTH);
+                        aftermove = previous.movement(DirectionType.NORTH);
+                        System.out.println("location:"+previous.x +", "+
+                                previous.y +"::"+aftermove.x + ", " +
+                                aftermove.y);
+                        placeOldLabelBackTo(location, aftermove);
                         placeCursor(aftermove);
-
+                        //location = aftermove;
                         break;
                     case 39:
-                        placeOldLabelBackTo(location);
                         aftermove = location.movement(DirectionType.SOUTH);
+                        System.out.println("location:"+location.x +", "+
+                                location.y +"::"+aftermove.x + ", " +
+                                aftermove.y);
+                        placeOldLabelBackTo(location, aftermove);
                         placeCursor(aftermove);
-
+                        //location = aftermove;
                         break;
                     case 38:
-                        placeOldLabelBackTo(location);
                         aftermove = location.movement(DirectionType.WEST);
+                        System.out.println("location:"+location.x +", "+
+                                location.y +"::"+aftermove.x + ", " +
+                                aftermove.y);
+                        placeOldLabelBackTo(location, aftermove);
                         placeCursor(aftermove);
+                        //location = aftermove;
 
                         break;
                     case 40:
-                        placeOldLabelBackTo(location);
                         aftermove = location.movement(DirectionType.EAST);
+                        System.out.println("location:"+location.x +", "+
+                                location.y +"::"+aftermove.x + ", " +
+                                aftermove.y);
+                        placeOldLabelBackTo(location, aftermove);
                         placeCursor(aftermove);
+                        //location = aftermove;
 
                         break;
 
@@ -393,6 +415,10 @@ public class View extends JFrame implements ActionListener {
                 System.out.println(aiobe +"movement went out");
             }
         }
+    }
+
+    private boolean isbothEqual(Location location, Location aftermove) {
+        return (location.x == aftermove.x) && (location.y == aftermove.y);
     }
 }
 

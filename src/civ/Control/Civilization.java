@@ -69,11 +69,8 @@ public class Civilization {
 
     private static void gameTurn(Player player) {
         ministries(player);
-
         unitLeadership(player);
-
         cityManagement(player);
-
         endCondition();
         endTurn();
     }
