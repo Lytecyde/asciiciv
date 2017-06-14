@@ -10,9 +10,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-import javax.swing.border.BevelBorder;
-import javax.swing.border.Border;
-
 import static javax.swing.BorderFactory.createBevelBorder;
 
 /**
@@ -21,11 +18,8 @@ import static javax.swing.BorderFactory.createBevelBorder;
 public class View extends JFrame implements ActionListener {
     final Location CENTRE = new Location(7, 11);
     Location location = CENTRE;
-
     JPanel text = new JPanel();
-
     JTextArea textArea = new JTextArea(5, 80);
-
     int x = 0;
     int y = 0;
     public JPanel control = new JPanel();
@@ -33,34 +27,50 @@ public class View extends JFrame implements ActionListener {
     public JPanel dataBoard = new JPanel();
     //TODO:should a controller supply the data actually
     public JPanel worldMapPanel = new JPanel();
+
     char[][] map =
             new char[Civilization.gameMapSizeX][Civilization.gameMapSizeY];
     public static final int cols = 24;
     public static final int rows = 16;
     private final int cellSize = 15;
-    private static WorldMap worldMapPanelContents;
-    private static JLabel cursor;
+    private static WorldMap worldMapPanelContents = new WorldMap(
+            MapType.VISIBLE);
+    private JLabel cursor;
     private static JLabel label;
-    private static JLabel transparentLabel;
-
+    public JPanel[][] cellGrid;
     public View() {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setPreferredSize(new Dimension(640, 640));
-        this.setLayout(new BorderLayout());
-        this.worldMapPanel = createContent();
-        placeContentTo(this.worldMapPanel);
+        setLayout(new BorderLayout());
+
+        cellGrid = new JPanel[rows][cols];
+        cellGrid = getCellGrid();
+
+        addCellsToPanel();
+        worldMapPanel = createContent();
+        placeContentToView(this.worldMapPanel);
         MyKeyListener mkl = new MyKeyListener();
         addKeyListener(mkl);
         placeMenuBar();
-        addCellsToPanel(getCells());
-
         location = CENTRE;
-        transparentLabel = getCells()[location.x][location.y];
-        placeCursor(location);
+        //transparentLabel = getCellsFromWorldMap()[location.x][location.y];
+
+        placeCursorOnPanel(location);
         repaint();
         pack();
 
         setVisible(true);
+    }
+
+    private JPanel[][] getCellGrid() {
+
+        for (int x = 0; x < rows; x++) {
+            for (int y = 0; y < cols; y++) {
+                cellGrid[x][y] = new JPanel();
+                cellGrid[x][y].add(getCellsFromWorldMap()[x][y]);
+            }
+        }
+        return cellGrid;
     }
 
     private void placeMenuBar() {
@@ -113,7 +123,7 @@ public class View extends JFrame implements ActionListener {
         this.setJMenuBar(jmb);
     }
 
-    private void placeContentTo(JPanel worldMap) {
+    private void placeContentToView(JPanel worldMap) {
         textArea.setEnabled(false);
         this.add(text, BorderLayout.SOUTH);
         this.add(control, BorderLayout.EAST);
@@ -179,6 +189,7 @@ public class View extends JFrame implements ActionListener {
 
     private void createMap() {
         //code for the asciimap goes here
+        //TODO should be moved to worldmap
     }
 
 
@@ -198,31 +209,51 @@ public class View extends JFrame implements ActionListener {
     }
 
 
-    private void placeCursor(Location location) {
+    private void placeCursorOnPanel(Location location) {
 
-        JPanel p = WorldMap.panelHolderGrid[location.getX()][location.getY()];
-        JLabel c = defineCursor((JLabel) p.getComponent(0));
-
-        removeAndAdd(
-                WorldMap.panelHolderGrid[location.getX()][location.getY()], c);
+        JPanel p = cellGrid[location.x][location.y];
+        JLabel c = defineCursor();
+        removeAndAdd(p, c);
         showMap();
 
     }
+    private JLabel defineCursor() {
+        JLabel c = new JLabel();
+        JLabel contents = getCellsFromWorldMap()[CENTRE.getX()][CENTRE.getY()];
+        c.setOpaque(true);
+        c.setText(contents.getText());
+        c.setForeground(Color.red);
+        c.setBackground(Color.white);
+        c.setPreferredSize(contents.getPreferredSize());
+        c.setVisible(true);
 
+        return c;
+    }
     private void placeOldLabelBackTo(Location location, Location aftermove) {
-        JLabel c = getCells()[location.getX()][location.getY()];
-        removeAndAdd(
-                WorldMap.panelHolderGrid[aftermove.getX()][aftermove.getY()], c);
+        JLabel c = new JLabel();
+        JLabel contents = getCellsFromWorldMap()
+                [location.getX()]
+                [location.getY()];
+        c.setOpaque(true);
+        c.setText(contents.getText());
+        c.setForeground(contents.getForeground());
+        c.setBackground(contents.getBackground());
+        c.setPreferredSize(contents.getPreferredSize());
 
+        c.setVisible(true);
+        //c.setBorder(javax.swing.BorderFactory.createEmptyBorder());
+        removeAndAdd(
+                WorldMap.panelHolderGrid
+                        [aftermove.getX()]
+                        [aftermove.getY()],
+                c);
         showMap();
 
     }
     private void placeLabel(Location location, LandType type) {
         JLabel c = getLabelBy(type);
-
-        removeAndAdd(
-                WorldMap.panelHolderGrid[location.getX()][location.getY()], c);
-
+        JPanel p = cellGrid[location.x][location.y];
+        removeAndAdd(p, c);
         showMap();
 
     }
@@ -287,7 +318,7 @@ public class View extends JFrame implements ActionListener {
         JLabel label = new JLabel();
         label.setOpaque(true);
         label.setBackground(Color.yellow);
-        label.setForeground(Color.white);
+        label.setForeground(Color.orange);
         label.setText("~");
         label.setPreferredSize(new Dimension(cellSize, cellSize));
         return label;
@@ -296,6 +327,7 @@ public class View extends JFrame implements ActionListener {
     private JLabel seaLabel() {
         JLabel label = new JLabel();
         label.setOpaque(true);
+        label.setForeground(Color.black);
         label.setBackground(Color.cyan);
         label.setText("~");
         label.setPreferredSize(new Dimension(cellSize, cellSize));
@@ -306,7 +338,7 @@ public class View extends JFrame implements ActionListener {
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
                 l = new Location(x,y);
-                placeLabel(l,LandType.SEA);
+                placeLabel(l,LandType.MOUNTAIN);
             }
         }
     }
@@ -316,7 +348,7 @@ public class View extends JFrame implements ActionListener {
         jPanel.add(c);
     }
 
-    private JLabel[][] getCells() {
+    private JLabel[][] getCellsFromWorldMap() {
         JLabel[][] localMapCells = new JLabel[rows][cols];
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
@@ -326,29 +358,15 @@ public class View extends JFrame implements ActionListener {
         return localMapCells;
     }
 
-    private void addCellsToPanel(JLabel[][] localMapCells) {
+    private void addCellsToPanel() {
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
-                this.worldMapPanel.add(localMapCells[x][y]);
-                this.worldMapPanel.revalidate();
-                this.worldMapPanel.repaint();
+                worldMapPanel.add(cellGrid[x][y]);
+                worldMapPanel.revalidate();
+                worldMapPanel.repaint();
             }
         }
     }
-
-    private JLabel defineCursor(JLabel cursor) {
-
-        //cursor = getCells()[location.x][location.y];
-        Border raised = createBevelBorder(BevelBorder.RAISED,
-                Color.PINK, Color.RED);
-        //this.cursor.setBackground(Color.red);
-        cursor.setBorder(raised);
-        cursor.setPreferredSize(new Dimension(cellSize, cellSize));
-        return cursor;
-    }
-
-
-
 
     public class MyKeyListener implements KeyListener {
         @Override
@@ -363,8 +381,8 @@ public class View extends JFrame implements ActionListener {
 
         @Override
         public void keyPressed(KeyEvent e) {
-            Location aftermove ;
-            Location previous = location;
+            Location aftermove;
+            Location previous = new Location(location.getX(), location.getY());
             System.out.println("" +
                     Data.numberOfArrowKeyPresses + " : " + e.getKeyCode());
             JLabel[][] g;
@@ -376,37 +394,37 @@ public class View extends JFrame implements ActionListener {
                         System.out.println("location:"+previous.x +", "+
                                 previous.y +"::"+aftermove.x + ", " +
                                 aftermove.y);
-                        placeOldLabelBackTo(location, aftermove);
-                        placeCursor(aftermove);
-                        //location = aftermove;
+                        placeOldLabelBackTo(previous, aftermove);
+                        placeCursorOnPanel(aftermove);
+                        location = aftermove;
                         break;
                     case 39:
-                        aftermove = location.movement(DirectionType.SOUTH);
-                        System.out.println("location:"+location.x +", "+
-                                location.y +"::"+aftermove.x + ", " +
+                        aftermove = previous.movement(DirectionType.SOUTH);
+                        System.out.println("location:"+previous.x +", "+
+                                previous.y +"::"+aftermove.x + ", " +
                                 aftermove.y);
-                        placeOldLabelBackTo(location, aftermove);
-                        placeCursor(aftermove);
-                        //location = aftermove;
+                        placeOldLabelBackTo(previous, aftermove);
+                        placeCursorOnPanel(aftermove);
+                        location = aftermove;
                         break;
                     case 38:
-                        aftermove = location.movement(DirectionType.WEST);
-                        System.out.println("location:"+location.x +", "+
-                                location.y +"::"+aftermove.x + ", " +
+                        aftermove = previous.movement(DirectionType.WEST);
+                        System.out.println("location:"+previous.x +", "+
+                                previous.y +"::"+aftermove.x + ", " +
                                 aftermove.y);
-                        placeOldLabelBackTo(location, aftermove);
-                        placeCursor(aftermove);
-                        //location = aftermove;
+                        placeOldLabelBackTo(previous, aftermove);
+                        placeCursorOnPanel(aftermove);
+                        location = aftermove;
 
                         break;
                     case 40:
-                        aftermove = location.movement(DirectionType.EAST);
-                        System.out.println("location:"+location.x +", "+
-                                location.y +"::"+aftermove.x + ", " +
+                        aftermove = previous.movement(DirectionType.EAST);
+                        System.out.println("location:"+previous.x +", "+
+                                previous.y +"::"+aftermove.x + ", " +
                                 aftermove.y);
-                        placeOldLabelBackTo(location, aftermove);
-                        placeCursor(aftermove);
-                        //location = aftermove;
+                        placeOldLabelBackTo(previous, aftermove);
+                        placeCursorOnPanel(aftermove);
+                        location = aftermove;
 
                         break;
 
@@ -419,6 +437,9 @@ public class View extends JFrame implements ActionListener {
 
     private boolean isbothEqual(Location location, Location aftermove) {
         return (location.x == aftermove.x) && (location.y == aftermove.y);
+    }
+
+    private class EmptyBorderForLabel {
     }
 }
 
