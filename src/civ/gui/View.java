@@ -42,13 +42,16 @@ public class View extends JFrame implements ActionListener {
         setupView();
         initCellGrid();
         createContent();
-        getCellGrid();
+        placeMenuBar();
+        makeCellGrid();
         placeMapLabels();
-        placeCursorOnPanel(location);
-        placeContentToView(worldMap);
-        repaint();
-        pack();
+        placeCursorOnPanelAt(location);
+        placeContentToViewFrom(worldMap);
         setVisible(true);
+        pack();
+        repaint();
+
+
     }
 
     private void setupView() {
@@ -59,25 +62,20 @@ public class View extends JFrame implements ActionListener {
         addKeyListener(mkl);
     }
 
-    private void getCellGrid() {
-
+    private void makeCellGrid() {
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
-
                 cellGrid[x][y].add(getCellsFromWorldMap()[x][y]);
             }
         }
-        //return cellGrid;
     }
 
     private void initCellGrid(){
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
                 cellGrid[x][y] = new JPanel();
-
             }
         }
-
     }
 
 
@@ -111,6 +109,20 @@ public class View extends JFrame implements ActionListener {
         jmOrders.add(jmiFortify);
         jmb.add(jmOrders);
 
+        JMenu jmMinistries = new JMenu("Ministries");
+        JMenuItem jmiFinancial = new JMenuItem("Financial");
+        JMenuItem jmiSocial = new JMenuItem("Social");
+        JMenuItem jmiInterior = new JMenuItem("Interior");
+        JMenuItem jmiForeignAffairs = new JMenuItem("Foreign Affairs");
+        JMenuItem jmiDefence = new JMenuItem("Defence");
+
+        jmMinistries.add(jmiFinancial);
+        jmMinistries.add(jmiSocial);
+        jmMinistries.add(jmiInterior);
+        jmMinistries.add(jmiForeignAffairs);
+        jmMinistries.add(jmiDefence);
+        jmb.add(jmMinistries);
+
         JMenu jmHelp = new JMenu("Help");
         JMenuItem jmiAbout = new JMenuItem("About");
         jmHelp.add(jmiAbout);
@@ -120,10 +132,10 @@ public class View extends JFrame implements ActionListener {
         jmiClose.addActionListener(this);
         jmiSave.addActionListener(this);
 
-        jmiOperate.addActionListener(this);
-        jmiHeal.addActionListener(this);
-        jmiVigil.addActionListener(this);
-        jmiFortify.addActionListener(this);
+        jmiFinancial.addActionListener(this);
+        jmiSocial.addActionListener(this);
+        jmiInterior.addActionListener(this);
+        jmiForeignAffairs.addActionListener(this);
 
 
         jmiExit.addActionListener(this);
@@ -132,7 +144,7 @@ public class View extends JFrame implements ActionListener {
         this.setJMenuBar(jmb);
     }
 
-    private void placeContentToView(JPanel worldMap) {
+    private void placeContentToViewFrom(JPanel worldMap) {
         textArea.setEnabled(false);
         this.add(text, BorderLayout.SOUTH);
         this.add(control, BorderLayout.EAST);
@@ -216,7 +228,7 @@ public class View extends JFrame implements ActionListener {
     }
 
 
-    private void placeCursorOnPanel(Location location) {
+    private void placeCursorOnPanelAt(Location location) {
 
         JPanel p = cellGrid[location.x][location.y];
         JLabel c = defineCursor(CENTRE);
@@ -402,7 +414,7 @@ public class View extends JFrame implements ActionListener {
                                 previous.y +"::"+aftermove.x + ", " +
                                 aftermove.y);
                         placeOldLabelBackTo(previous, aftermove);
-                        placeCursorOnPanel(aftermove);
+                        placeCursorOnPanelAt(aftermove);
                         location = aftermove;
                         break;
                     case 39:
@@ -411,7 +423,7 @@ public class View extends JFrame implements ActionListener {
                                 previous.y +"::"+aftermove.x + ", " +
                                 aftermove.y);
                         placeOldLabelBackTo(previous, aftermove);
-                        placeCursorOnPanel(aftermove);
+                        placeCursorOnPanelAt(aftermove);
                         location = aftermove;
                         break;
                     case 38:
@@ -420,7 +432,7 @@ public class View extends JFrame implements ActionListener {
                                 previous.y +"::"+aftermove.x + ", " +
                                 aftermove.y);
                         placeOldLabelBackTo(previous, aftermove);
-                        placeCursorOnPanel(aftermove);
+                        placeCursorOnPanelAt(aftermove);
                         location = aftermove;
 
                         break;
@@ -430,7 +442,7 @@ public class View extends JFrame implements ActionListener {
                                 previous.y +"::"+aftermove.x + ", " +
                                 aftermove.y);
                         placeOldLabelBackTo(previous, aftermove);
-                        placeCursorOnPanel(aftermove);
+                        placeCursorOnPanelAt(aftermove);
                         location = aftermove;
 
                         break;

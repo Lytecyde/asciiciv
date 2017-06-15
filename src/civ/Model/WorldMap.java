@@ -131,7 +131,7 @@ public class WorldMap {
     }
 
     private void generateMap(){
-        System.out.println("Generating seaworld");
+        //System.out.println("Generating seaworld");
         JPanel[][] a = getContentsPanelsForGrid();
         setAttributesForAll();
         addToGrid(a);
