@@ -26,7 +26,7 @@ public class View extends JFrame implements ActionListener {
     public JPanel globeMap = new JPanel();
     public JPanel dataBoard = new JPanel();
     //TODO:should a controller supply the data actually
-    public JPanel worldMapPanel = new JPanel();
+    public JPanel worldMap = new JPanel();
 
     char[][] map =
             new char[Civilization.gameMapSizeX][Civilization.gameMapSizeY];
@@ -37,41 +37,50 @@ public class View extends JFrame implements ActionListener {
             MapType.VISIBLE);
     private JLabel cursor;
     private static JLabel label;
-    public JPanel[][] cellGrid;
+    public JPanel[][] cellGrid = new JPanel[rows][cols];
     public View() {
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new Dimension(640, 640));
-        setLayout(new BorderLayout());
-
-        cellGrid = new JPanel[rows][cols];
-        cellGrid = getCellGrid();
-
-        addCellsToPanel();
-        worldMapPanel = createContent();
-        placeContentToView(this.worldMapPanel);
-        MyKeyListener mkl = new MyKeyListener();
-        addKeyListener(mkl);
-        placeMenuBar();
-        location = CENTRE;
-        //transparentLabel = getCellsFromWorldMap()[location.x][location.y];
-
+        setupView();
+        initCellGrid();
+        createContent();
+        getCellGrid();
+        placeMapLabels();
         placeCursorOnPanel(location);
+        placeContentToView(worldMap);
         repaint();
         pack();
-
         setVisible(true);
     }
 
-    private JPanel[][] getCellGrid() {
+    private void setupView() {
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setPreferredSize(new Dimension(640, 640));
+        setLayout(new BorderLayout());
+        MyKeyListener mkl = new MyKeyListener();
+        addKeyListener(mkl);
+    }
+
+    private void getCellGrid() {
 
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
-                cellGrid[x][y] = new JPanel();
+
                 cellGrid[x][y].add(getCellsFromWorldMap()[x][y]);
             }
         }
-        return cellGrid;
+        //return cellGrid;
     }
+
+    private void initCellGrid(){
+        for (int x = 0; x < rows; x++) {
+            for (int y = 0; y < cols; y++) {
+                cellGrid[x][y] = new JPanel();
+
+            }
+        }
+
+    }
+
+
 
     private void placeMenuBar() {
         JMenuBar jmb = new JMenuBar();
@@ -131,15 +140,13 @@ public class View extends JFrame implements ActionListener {
     }
 
 
-    private JPanel createContent() {
+    private void createContent() {
 
         createGlobeMap();
         createControlPanel();
         createTextPanel();
         createMapPanel();
-        worldMapPanel = createWorldMap();
-
-        return worldMapPanel;
+        createWorldMap();
     }
 
     private void createGlobeMap() {
@@ -148,11 +155,12 @@ public class View extends JFrame implements ActionListener {
 
     private JPanel createWorldMap() {
         worldMapPanelContents = new WorldMap(MapType.VISIBLE);
-        worldMapPanel.add(worldMapPanelContents.getMap());
+        worldMap.add(worldMapPanelContents.getMap());
+        worldMap.setLayout(new GridLayout(rows, cols));
         placeMapLabels();
-        worldMapPanel.setVisible(true);
-        worldMapPanel.repaint();
-        return worldMapPanel;
+        worldMap.setVisible(true);
+        worldMap.repaint();
+        return worldMap;
     }
 
     private void createTextPanel() {
@@ -163,7 +171,6 @@ public class View extends JFrame implements ActionListener {
     private void createControlPanel() {
         control.setLayout(new GridLayout(2, 1));
         control.add(globeMap);
-
         createDataBoard();
         control.add(dataBoard);
         control.repaint();
@@ -180,11 +187,11 @@ public class View extends JFrame implements ActionListener {
     }
 
     private void createMapPanel() {
-        worldMapPanel.setPreferredSize(
+        worldMap.setPreferredSize(
                 new Dimension(
                         cols * cellSize + 10,
                         rows * cellSize + 10));
-        worldMapPanel.setVisible(true);
+        worldMap.setVisible(true);
     }
 
     private void createMap() {
@@ -212,14 +219,15 @@ public class View extends JFrame implements ActionListener {
     private void placeCursorOnPanel(Location location) {
 
         JPanel p = cellGrid[location.x][location.y];
-        JLabel c = defineCursor();
-        removeAndAdd(p, c);
+        JLabel c = defineCursor(CENTRE);
+        replace(p, c);
         showMap();
 
     }
-    private JLabel defineCursor() {
+    private JLabel defineCursor(Location l) {
         JLabel c = new JLabel();
-        JLabel contents = getCellsFromWorldMap()[CENTRE.getX()][CENTRE.getY()];
+        JLabel contents = (JLabel)
+                (cellGrid[l.getX()][l.getY()]).getComponent(0);
         c.setOpaque(true);
         c.setText(contents.getText());
         c.setForeground(Color.red);
@@ -242,18 +250,17 @@ public class View extends JFrame implements ActionListener {
 
         c.setVisible(true);
         //c.setBorder(javax.swing.BorderFactory.createEmptyBorder());
-        removeAndAdd(
-                WorldMap.panelHolderGrid
-                        [aftermove.getX()]
-                        [aftermove.getY()],
-                c);
+        JPanel p = WorldMap.panelHolderGrid
+                [aftermove.getX()]
+                [aftermove.getY()];
+        replace( p , c);
         showMap();
 
     }
     private void placeLabel(Location location, LandType type) {
         JLabel c = getLabelBy(type);
         JPanel p = cellGrid[location.x][location.y];
-        removeAndAdd(p, c);
+        replace(p, c);
         showMap();
 
     }
@@ -298,7 +305,7 @@ public class View extends JFrame implements ActionListener {
         JLabel label = new JLabel();
         label.setOpaque(true);
         label.setBackground(new Color(34,139,34));
-        label.setForeground(Color.blue);
+        label.setForeground(Color.cyan);
         label.setText("~");
         label.setPreferredSize(new Dimension(cellSize, cellSize));
         return label;
@@ -343,7 +350,7 @@ public class View extends JFrame implements ActionListener {
         }
     }
 
-    private void removeAndAdd(JPanel jPanel, JLabel c) {
+    private void replace(JPanel jPanel, JLabel c) {
         jPanel.removeAll();
         jPanel.add(c);
     }
@@ -361,9 +368,9 @@ public class View extends JFrame implements ActionListener {
     private void addCellsToPanel() {
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
-                worldMapPanel.add(cellGrid[x][y]);
-                worldMapPanel.revalidate();
-                worldMapPanel.repaint();
+                worldMap.add(cellGrid[x][y]);
+                worldMap.revalidate();
+                worldMap.repaint();
             }
         }
     }
