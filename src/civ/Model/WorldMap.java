@@ -43,6 +43,7 @@ public class WorldMap {
                 map.setFocusTraversalKeysEnabled(false);
                 defineLabels();
                 defineGrid();
+                setAttributesForAllLabels();
                 generateMap();
                 map.repaint();
 
@@ -53,7 +54,7 @@ public class WorldMap {
 
     }
 
-    private void setAttributesForAll() {
+    private void setAttributesForAllLabels() {
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < columns; y++) {
                 setAttributesFor(x,y);
@@ -136,7 +137,7 @@ public class WorldMap {
     private void generateMap(){
         //System.out.println("Generating seaworld");
         JPanel[][] a = getContentsPanelsForGrid();
-        setAttributesForAll();
+
         addToGrid(a);
     }
 

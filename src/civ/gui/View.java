@@ -26,7 +26,6 @@ public class View extends JFrame implements ActionListener {
     public JPanel control = new JPanel();
     public JPanel globeMap = new JPanel();
     public JPanel dataBoard = new JPanel();
-    //TODO:should a controller supply the data actually
     public JPanel worldMap = new JPanel();
 
     char[][] map =
@@ -42,7 +41,7 @@ public class View extends JFrame implements ActionListener {
     private JLabel[][] visibleGrid = new JLabel[rows][cols];
     public JPanel[][] cellGrid = new JPanel[rows][cols];
     private JLabel temporaryContents;
-    private Dimension cellDimension;
+    private Dimension cellDimension = new Dimension(cellSize, cellSize);
 
     public View() {
         setupView();
@@ -57,11 +56,12 @@ public class View extends JFrame implements ActionListener {
         getVisibleGridFromGridLabels();
         testLabelsAll("1st");
         makeCellGrid();
-        placeMapLabels();
+        placeLabels();
         addCellsToPanel();
 
         testLabelsAll("2nd");
         //
+        System.out.println(location.x +" "+location.y);
         placeCursorOnPanelAt(CENTRE);
         placeContentToView();
         makeCellGrid();
@@ -112,10 +112,7 @@ public class View extends JFrame implements ActionListener {
             for (int y = 0; y < cols; y++) {
                 visibleGrid[x][y] = gridLabels[x][y];
                 visibleGrid[x][y].setVisible(true);
-                this.visibleGrid[x][y].setPreferredSize(
-                        new Dimension(
-                                cellSize,
-                                cellSize));
+                this.visibleGrid[x][y].setPreferredSize(cellDimension);
             }
         }
     }
@@ -123,6 +120,7 @@ public class View extends JFrame implements ActionListener {
     private void makeCellGrid() {
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
+                cellGrid[x][y].setLayout(new GridLayout(1,1));
                 cellGrid[x][y].add(visibleGrid[x][y]);
                 cellGrid[x][y].setVisible(true);
             }
@@ -206,6 +204,12 @@ public class View extends JFrame implements ActionListener {
         jmiSocial.addActionListener(this);
         jmiInterior.addActionListener(this);
         jmiForeignAffairs.addActionListener(this);
+        jmiDefence.addActionListener(this);
+
+        jmiFinancial.addActionListener(this);
+        jmiSocial.addActionListener(this);
+        jmiInterior.addActionListener(this);
+        jmiForeignAffairs.addActionListener(this);
 
 
         jmiExit.addActionListener(this);
@@ -236,10 +240,9 @@ public class View extends JFrame implements ActionListener {
     }
 
     private JPanel createWorldMap() {
-        worldMapPanelContents = new WorldMap(MapType.VISIBLE);
-        worldMap.add(worldMapPanelContents.getMap());
+
         worldMap.setLayout(new GridLayout(rows, cols));
-        placeMapLabels();
+        worldMap.setSize(320,240);
         worldMap.setVisible(true);
         worldMap.repaint();
         return worldMap;
@@ -289,6 +292,8 @@ public class View extends JFrame implements ActionListener {
                         "GPL3";
                 textArea.setText(about);
                 break;
+            default:
+                textArea.setText(command);
         }
     }
 
@@ -303,7 +308,7 @@ public class View extends JFrame implements ActionListener {
     }
     private void placeCursorTo(Location l) {
         JLabel c = new JLabel();
-        temporaryContents = visibleGrid[l.x][l.y];
+        temporaryContents = gridLabels[l.x][l.y];
         c.setOpaque(true);
         c.setText(temporaryContents.getText());
         c.setForeground(Color.red);
@@ -315,12 +320,13 @@ public class View extends JFrame implements ActionListener {
     }
     private void placeOldLabelBackTo(Location previous) {
         JLabel c = new JLabel();
-        //JLabel contents = gridLabels[previous.x][previous.y];
+
         c.setOpaque(true);
         c.setText(temporaryContents.getText());
         c.setForeground(temporaryContents.getForeground());
         c.setBackground(temporaryContents.getBackground());
         c.setPreferredSize(temporaryContents.getPreferredSize());
+
         c.setVisible(true);
         JPanel p = cellGrid[previous.x][previous.y];
         replaceVisible( previous , c);
@@ -335,19 +341,13 @@ public class View extends JFrame implements ActionListener {
                 selectPanelFillings(x, y);
             }
         }
-
     }
 
     private void selectPanelFillings(int x, int y) {
-        switch(panelComponentCount(cellGrid[x][y])){
-            case 0:
-                cellGrid[x][y].add(visibleGrid[x][y]);
-                break;
-            default:
 
-                cellGrid[x][y] = new JPanel();
-                cellGrid[x][y].add(visibleGrid[x][y]);
-        }
+        cellGrid[x][y] = new JPanel();
+        cellGrid[x][y].setLayout(new GridLayout(1,1));
+        cellGrid[x][y].add(visibleGrid[x][y],0);
         setVisible(cellGrid[x][y]);
     }
 
@@ -368,15 +368,18 @@ public class View extends JFrame implements ActionListener {
 
     }
 
-    private void placeLabel(Location location) {
-        JLabel c = visibleGrid[location.x][location.y];
-        cellDimension = new Dimension(cellSize, cellSize);
+    private void placeLabel(JLabel c, Location location) {
+
+
         c.setSize(cellDimension);
-        JPanel p = cellGrid[location.x][location.y];
-        p.setSize(cellDimension);
-        p.setVisible(true);
-        replace(p, c);
-        worldMap.add(p,location.x,location.y);
+        JPanel cell = cellGrid[location.x][location.y];
+        cell.setLayout(new GridLayout(1,1));
+        cell.setSize(cellDimension);
+        cell.add(c);
+        cell.setVisible(true);
+        replaceLabelOnCell(cell, c);
+        //TODO:One problem is the empty panel?
+        worldMap.add(cell,location.x,location.y);
         showMap();
     }
 
@@ -413,7 +416,7 @@ public class View extends JFrame implements ActionListener {
         label.setBackground(Color.green);
         label.setForeground(new Color(34,139,34));
         label.setText("♠");
-        label.setPreferredSize(new Dimension(cellSize, cellSize));
+        label.setPreferredSize(cellDimension);
         return label;
 
     }private JLabel riverLabel() {
@@ -436,6 +439,7 @@ public class View extends JFrame implements ActionListener {
         return label;
 
     }
+
     private JLabel desertLabel() {
         JLabel label = new JLabel();
         label.setOpaque(true);
@@ -444,8 +448,8 @@ public class View extends JFrame implements ActionListener {
         label.setText("~");
         label.setPreferredSize(cellDimension);
         return label;
-
     }
+
     private JLabel seaLabel() {
         JLabel label = new JLabel();
         label.setOpaque(true);
@@ -455,19 +459,22 @@ public class View extends JFrame implements ActionListener {
         label.setPreferredSize(cellDimension);
         return label;
     }
-    private void placeMapLabels(){
+
+    private void placeLabels(){
         Location l;
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
                 l = new Location(x,y);
-                placeLabel(l);
+                JLabel cellLabel = visibleGrid[location.x][location.y];
+                placeLabel(cellLabel, l);
             }
         }
     }
 
-    private void replace(JPanel jPanel, JLabel c) {
-        jPanel.removeAll();
+    private void replaceLabelOnCell(JPanel jPanel, JLabel c) {
+        jPanel.remove(0);
         jPanel.add(c);
+        //return jPanel;
     }
 
     private JLabel[][] getCellLabelsFromWorldMap() {
@@ -475,27 +482,26 @@ public class View extends JFrame implements ActionListener {
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
                 gridLabels[x][y] = WorldMap.mapCells[x][y];
-                //debug lable:
-                // 1 sinine rida
                 localMapCells[x][y] = gridLabels[x][y];
-
             }
         }
         return localMapCells;
     }
 
-    private boolean isLabel(JLabel jLabel) {
+    private boolean isLabel(Object jLabel) {
         return (jLabel instanceof JLabel);
     }
 
     private void addCellsToPanel() {
+        JPanel p;
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
-
-                worldMap.add(visibleGrid[x][y]);
-                showMap();
+                p = cellGrid[x][y];
+                p.add(visibleGrid[x][y]);
+                worldMap.add(p,location.x,location.y);
             }
         }
+        showMap();
     }
 
     public class MyKeyListener implements KeyListener {
@@ -520,41 +526,33 @@ public class View extends JFrame implements ActionListener {
                 switch (e.getKeyCode()) {
 
                     case 37:
-                        aftermove = previous.movement(DirectionType.NORTH);
-                        System.out.println("location:"+previous.x +", "+
-                                previous.y +"::"+aftermove.x + ", " +
-                                aftermove.y);
+                        aftermove = previous.movement(DirectionType.SOUTH);
+                        testLocationPrint(aftermove, previous);
                         placeOldLabelBackTo(previous);
                         placeCursorOnPanelAt(aftermove);
-                        location = aftermove;
+                        replaceWorldMap(aftermove);
                         break;
                     case 39:
-                        aftermove = previous.movement(DirectionType.SOUTH);
-                        System.out.println("location:"+previous.x +", "+
-                                previous.y +"::"+aftermove.x + ", " +
-                                aftermove.y);
+                        aftermove = previous.movement(DirectionType.NORTH);
+                        testLocationPrint(aftermove, previous);
                         placeOldLabelBackTo( previous);
                         placeCursorOnPanelAt(aftermove);
-                        location = aftermove;
+                        replaceWorldMap(aftermove);
                         break;
                     case 38:
-                        aftermove = previous.movement(DirectionType.WEST);
-                        System.out.println("location:"+previous.x +", "+
-                                previous.y +"::"+aftermove.x + ", " +
-                                aftermove.y);
+                        aftermove = previous.movement(DirectionType.EAST);
+                        testLocationPrint(aftermove, previous);
                         placeOldLabelBackTo( previous);
                         placeCursorOnPanelAt(aftermove);
-                        location = aftermove;
+                        replaceWorldMap(aftermove);
 
                         break;
                     case 40:
-                        aftermove = previous.movement(DirectionType.EAST);
-                        System.out.println("location:"+previous.x +", "+
-                                previous.y +"::"+aftermove.x + ", " +
-                                aftermove.y);
+                        aftermove = previous.movement(DirectionType.WEST);
+                        testLocationPrint(aftermove, previous);
                         placeOldLabelBackTo(previous);
                         placeCursorOnPanelAt(aftermove);
-                        location = aftermove;
+                        replaceWorldMap(aftermove);
 
                         break;
 
@@ -563,6 +561,22 @@ public class View extends JFrame implements ActionListener {
                 System.out.println(aiobe +"movement went out");
             }
         }
+
+        private void replaceWorldMap(Location aftermove) {
+            worldMap.removeAll();
+            makeCellGrid();
+            placeLabels();
+            createWorldMap();
+            addCellsToPanel();
+            worldMap.setVisible(true);
+            location = aftermove;
+        }
+    }
+
+    private void testLocationPrint(Location aftermove, Location previous) {
+        System.out.println("location:"+previous.x +", "+
+                previous.y +"::"+aftermove.x + ", " +
+                aftermove.y);
     }
 
     private boolean isbothEqual(Location location, Location aftermove) {

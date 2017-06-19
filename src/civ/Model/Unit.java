@@ -15,7 +15,6 @@ import java.util.HashMap;
 public class Unit {
     private Location location;
     public ID identification = new ID();
-    private String ownerNation;
     private String commandingNation;
     private String homeCity;
     //acquired properties
@@ -39,11 +38,7 @@ public class Unit {
     public static boolean teach;
     public static boolean farm;
     public static boolean explore;
-    //
-    private int food;
     public final int foodUse = 1;
-    private int cost;
-    private int morale;
 
 
     private HashMap<Player, Integer> natives;
@@ -81,7 +76,7 @@ public class Unit {
         Civilization.totalUnitCount++;
 
         Player current = Civilization.getCurrentPlayer();
-        ownerNation = current.nationName;
+        String ownerNation = current.nationName;
         identification.type = unitType.name();
         identification.name = ownerNation + identification.type + Integer.toString(identification.id);
 
@@ -100,9 +95,9 @@ public class Unit {
 
                 setSkills();
                 foundCity = true;
-                food = 1;
-                cost = 0;
-                morale = 1 + Data.scapegoatingEffect;
+                int food = 1;
+                int cost = 0;
+                int morale = 1 + Data.scapegoatingEffect;
 
             break;
 

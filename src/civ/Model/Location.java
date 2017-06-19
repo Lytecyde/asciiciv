@@ -34,7 +34,6 @@ public class Location {
                 history[1].x = history[0].x;
                 history[1].y = isLegalYDecrease()?history[0].y - 1:history[0].y;
                 return history[1];
-
             case EAST:
                 history[1].x = isLegalXIncrease()?history[0].x + 1:history[0].x;
                 history[1].y = history[0].y;
@@ -48,7 +47,7 @@ public class Location {
                 history[1].y = history[0].y;
                 return history[1];
             default:
-                return history[1];
+                return history[0];
         }
 
     }
@@ -69,7 +68,7 @@ public class Location {
     }
 
     private boolean isLegalXIncrease() {
-        return this.x < View.rows - 1;
+        return this.x < View.rows -1;
     }
 
     private boolean isLegalYDecrease() {
@@ -77,7 +76,7 @@ public class Location {
     }
 
     private boolean isLegalYIncrease() {
-        return this.y < View.cols -1 ;
+        return this.y < View.cols  -1;
     }
 
 }
