@@ -38,12 +38,12 @@ public class WorldMap {
                 mapCells = new JLabel[rows][columns];
                 panelHolderGrid = new JPanel[rows][columns];
                 map.setLayout(new GridLayout(rows, columns));
-                map.setPreferredSize(new Dimension(480, 480));
+                map.setPreferredSize(new Dimension(360, 240));
                 map.setVisible(true);
+                map.setFocusTraversalKeysEnabled(false);
                 defineLabels();
                 defineGrid();
                 generateMap();
-                map.setFocusTraversalKeysEnabled(false);
                 map.repaint();
 
                 break;
@@ -67,7 +67,7 @@ public class WorldMap {
                 try {
                     this.mapCells[x][y] = new JLabel();
                 }catch(ArrayIndexOutOfBoundsException e){
-
+                    System.out.println("Wrong mapCells at location");
                 }
             }
         }
@@ -96,7 +96,10 @@ public class WorldMap {
         }
     }
 
+    private void createMap() {
+        //code for the asciimap goes here
 
+    }
 
     private JPanel[][] getContentsPanelsForGrid() {
         for (int x = 0; x < rows; x++) {
