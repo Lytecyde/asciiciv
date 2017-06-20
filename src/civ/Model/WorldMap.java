@@ -114,6 +114,10 @@ public class WorldMap {
     private void setPanelWithCell(int x, int y) {
         JLabel mc = this.mapCells[x][y];
         try {
+
+            mc.setBackground(Color.blue);
+            mc.setForeground(Color.cyan);
+            mc.setText("~");
             this.panelHolderGrid[x][y].add(mc);
             this.panelHolderGrid[x][y].setVisible(true);
             this.panelHolderGrid[x][y].repaint();
@@ -135,7 +139,9 @@ public class WorldMap {
     }
 
     private void generateMap(){
-        //System.out.println("Generating seaworld");
+
+
+
         JPanel[][] a = getContentsPanelsForGrid();
 
         addToGrid(a);

@@ -24,6 +24,8 @@ public class Player {
     public Corporations corporations = new Corporations();
     public int happiness;
     public int education;
+    public int tax;
+
 
     public Player(){
         System.out.println("LOG: player created as default");

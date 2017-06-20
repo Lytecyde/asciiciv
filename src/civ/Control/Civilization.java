@@ -19,8 +19,10 @@ public class Civilization {
     public static int worldPeaceScore;
     private static int turnCount;
     public static int totalUnitCount;
+
+    public static int year = 4000;
     public static void main(String[] args) {
-        System.out.println("msg: civ main");
+        //System.out.println("msg: civ main");
         new Civilization();
         gameSetup();
         boardGUI();
@@ -75,8 +77,8 @@ public class Civilization {
         endTurn();
     }
 
-    private static void ministries(Player player) {
-        currentPlayer = player;
+    private static void ministries(Player currentplayer) {
+
         //events
 
         //money/gold

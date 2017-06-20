@@ -16,6 +16,7 @@ import static javax.swing.BorderFactory.createBevelBorder;
  * Created by miku on 30/05/2017.
  */
 public class View extends JFrame implements ActionListener {
+
     final Location CENTRE = new Location(11, 7);
     Location location = CENTRE;
 
@@ -32,7 +33,8 @@ public class View extends JFrame implements ActionListener {
             new char[Civilization.gameMapSizeX][Civilization.gameMapSizeY];
     public static final int cols = 24;
     public static final int rows = 16;
-    private final int cellSize = 15;
+
+    public static final int cellSize =15;
     private static WorldMap worldMapPanelContents = new WorldMap(
             MapType.VISIBLE);
     private JLabel cursor;
@@ -200,6 +202,11 @@ public class View extends JFrame implements ActionListener {
         jmiClose.addActionListener(this);
         jmiSave.addActionListener(this);
 
+        jmiOperate.addActionListener(this);
+        jmiHeal.addActionListener(this);
+        jmiVigil.addActionListener(this);
+        jmiFortify.addActionListener(this);
+
         jmiFinancial.addActionListener(this);
         jmiSocial.addActionListener(this);
         jmiInterior.addActionListener(this);
@@ -210,7 +217,7 @@ public class View extends JFrame implements ActionListener {
         jmiSocial.addActionListener(this);
         jmiInterior.addActionListener(this);
         jmiForeignAffairs.addActionListener(this);
-
+        jmiDefence.addActionListener(this);
 
         jmiExit.addActionListener(this);
         jmiAbout.addActionListener(this);
@@ -261,11 +268,17 @@ public class View extends JFrame implements ActionListener {
     }
 
     private void createDataBoard() {
-        dataBoard.setLayout(new GridLayout(2,1));
+        dataBoard.setLayout(new GridLayout(4,1));
         JLabel funds = new JLabel("Funds: " +
                 Civilization.currentPlayer.funds);
         JLabel pollution = new JLabel("Pollution: " +
                 Civilization.currentPlayer.pollution);
+        JLabel tax = new JLabel("Taxrate: " +
+                Civilization.currentPlayer.tax);
+        JLabel year = new JLabel("Year: " +
+                Civilization.year);
+        dataBoard.add(year);
+        dataBoard.add(tax);
         dataBoard.add(funds);
         dataBoard.add(pollution);
     }
@@ -389,76 +402,7 @@ public class View extends JFrame implements ActionListener {
         worldMap.repaint();
     }
 
-    private JLabel getLabelBy(LandType type) {
-        JLabel c;
-        switch(type){
-            case SEA:
-                return seaLabel();
 
-            case LAND:
-                return landLabel();
-
-            case MOUNTAIN:
-                return mountainLabel();
-
-            case DESERT:
-                return desertLabel();
-                
-            default:
-                return seaLabel();
-        }
-        //return c;
-    }
-
-    private JLabel landLabel() {
-        JLabel label = new JLabel();
-        label.setOpaque(true);
-        label.setBackground(Color.green);
-        label.setForeground(new Color(34,139,34));
-        label.setText("♠");
-        label.setPreferredSize(cellDimension);
-        return label;
-
-    }private JLabel riverLabel() {
-        JLabel label = new JLabel();
-        label.setOpaque(true);
-        label.setBackground(new Color(34,139,34));
-        label.setForeground(Color.cyan);
-        label.setText("~");
-        label.setPreferredSize(cellDimension);
-        return label;
-
-    }
-    private JLabel mountainLabel() {
-        JLabel label = new JLabel();
-        label.setOpaque(true);
-        label.setBackground(Color.green);
-        label.setForeground(Color.white);
-        label.setText("M");
-        label.setPreferredSize(cellDimension);
-        return label;
-
-    }
-
-    private JLabel desertLabel() {
-        JLabel label = new JLabel();
-        label.setOpaque(true);
-        label.setBackground(Color.yellow);
-        label.setForeground(Color.orange);
-        label.setText("~");
-        label.setPreferredSize(cellDimension);
-        return label;
-    }
-
-    private JLabel seaLabel() {
-        JLabel label = new JLabel();
-        label.setOpaque(true);
-        label.setForeground(Color.black);
-        label.setBackground(Color.cyan);
-        label.setText("~");
-        label.setPreferredSize(cellDimension);
-        return label;
-    }
 
     private void placeLabels(){
         Location l;
