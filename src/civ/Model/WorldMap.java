@@ -1,6 +1,7 @@
 package civ.Model;
 
 import civ.Control.Civilization;
+import civ.gui.LandLabel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,6 +27,7 @@ public class WorldMap {
     public static JPanel[][] panelHolderGrid;
 
     public static JLabel[][] mapCells;
+    private int landLabelMap[][] = new int[rows][columns];
 
     public WorldMap(){
 
@@ -33,6 +35,7 @@ public class WorldMap {
     }
 
     public WorldMap(MapType type){
+        generateLands();
         switch(type){
             case VISIBLE:
                 mapCells = new JLabel[rows][columns];
@@ -52,6 +55,18 @@ public class WorldMap {
 
         }
 
+    }
+
+    private void generateLands(){
+        for (int x = 0; x < rows; x++) {
+            for (int y = 0; y < columns; y++) {
+
+                landLabelMap[x][y] =
+                        (int)(Math.random()*LandType.values().length);
+                System.out.println("lands of the map" + landLabelMap[x][y]);
+
+            }
+        }
     }
 
     private void setAttributesForAllLabels() {
@@ -113,11 +128,14 @@ public class WorldMap {
 
     private void setPanelWithCell(int x, int y) {
         JLabel mc = this.mapCells[x][y];
+        int map = landLabelMap[x][y];
+        LandType landtype =  LandType.values()[landLabelMap[x][y]];
+        JLabel mapland = (new LandLabel()).getLabelBy(landtype);
         try {
 
-            mc.setBackground(Color.blue);
-            mc.setForeground(Color.cyan);
-            mc.setText("~");
+            mc.setBackground(mapland.getBackground());
+            mc.setForeground(mapland.getForeground());
+            mc.setText(mapland.getText());
             this.panelHolderGrid[x][y].add(mc);
             this.panelHolderGrid[x][y].setVisible(true);
             this.panelHolderGrid[x][y].repaint();

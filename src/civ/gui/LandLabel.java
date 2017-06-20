@@ -7,15 +7,15 @@ import java.awt.*;
 import java.io.Serializable;
 
 public class LandLabel implements Serializable {
-    private final View view;
+
     private final Dimension cellDimension = new Dimension(
             View.cellSize,
             View.cellSize);
-    public LandLabel(View view) {
-        this.view = view;
+    public LandLabel() {
+
     }
 
-    private JLabel getLabelBy(LandType type) {
+    public JLabel getLabelBy(LandType type) {
         JLabel c;
         switch (type) {
             case SEA:
