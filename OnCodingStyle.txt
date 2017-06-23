@@ -1,0 +1,9 @@
+I am currently influenced by Clean Code by 'Uncle Bob' Robert C. Martin so this is a project primarily for investigating that
+and developing myself in this style. 
+Also many thanks to the webinars of Kevlin Henney, for Style and Formatting. 
+Jules May for ifless programming advice, -- this has really created a fundamental change in my thinking, very grateful for that.
+Also my personal discovery is that while ifless is always possible,  switchless is often possible and always desirable,  would 
+use less code overall I think. And brevity is my highest aim, as long as fine granularity is not compromised.
+This project will be rewritten at a later time on the basis of TDD once I have mastered the three 
+Finally, I am also considering making this an exercise in Design by Coding. 
+This code has bugs and it is not perfectly clean, just an experiment in coding and full-cycle product design.
