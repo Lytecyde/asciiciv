@@ -59,7 +59,7 @@ public class View extends JFrame implements ActionListener {
         testLabelsAll("1st");
         fillCellGrid();
         placeLabels();
-        addCellsToPanel();
+        createCells();
 
         testLabelsAll("2nd");
         //
@@ -326,6 +326,15 @@ public class View extends JFrame implements ActionListener {
         visibleGrid[l.x][l.y] = c;
     }
     public void placeOldLabelBackTo(Location previous) {
+        JLabel c = getPreviousLabel();
+
+        replaceVisible( previous , c);
+        fillCellGrid();
+        showMap();
+        //TODO:destruct temporaryContents as null
+    }
+
+    private JLabel getPreviousLabel() {
         JLabel c = new JLabel();
 
         c.setOpaque(true);
@@ -333,13 +342,8 @@ public class View extends JFrame implements ActionListener {
         c.setForeground(temporaryContents.getForeground());
         c.setBackground(temporaryContents.getBackground());
         c.setPreferredSize(temporaryContents.getPreferredSize());
-
         c.setVisible(true);
-        JPanel p = cellGrid[previous.x][previous.y];
-        replaceVisible( previous , c);
-        fillCellGrid();
-        showMap();
-
+        return c;
     }
 
     private void fillCellGrid() {
@@ -355,7 +359,7 @@ public class View extends JFrame implements ActionListener {
 
         defineCellGrid(x, y);
 
-        cellGrid[x][y].add(visibleGrid[x][y],0);
+        cellGrid[x][y].add(visibleGrid[x][y]);
         setVisible(cellGrid[x][y]);
 
     }
@@ -436,17 +440,51 @@ public class View extends JFrame implements ActionListener {
 
 
 
-    protected void addCellsToPanel() {
+    protected void createCells() {
         JPanel p;
+        Location l;
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
-                p = cellGrid[x][y];
-                p.setLayout(new GridLayout(1,1));
-                p.add(visibleGrid[x][y],0);
-                worldMap.add(p,location.x,location.y);
-                showMap();
+                testCountComponentsOfCell(x, y);
+                p = getCell(x, y);
+                l= new Location(x,y);
+                addCellToWorldMap(p, l);
             }
         }
+
+    }
+
+    private void testCountComponentsOfCell(int x, int y) {
+        System.out.println("componentlength at xy "+
+                x+
+                ","+
+                "y"+
+                y +
+                cellGrid[x][y].getComponents().length);
+        final int SINGLE_COMPONENT = 1;
+        assert cellGrid[x][y].getComponents().length <= SINGLE_COMPONENT;
+        String exceptionMessage;
+        exceptionMessage = "Exception!!!!!!!!!";
+        exceptionMessage =
+                cellGrid[x][y].getComponents().length <= SINGLE_COMPONENT ?
+                        exceptionMessage :
+                        "";
+        System.out.print(exceptionMessage);
+    }
+
+    private JPanel getCell(int x, int y) {
+        JPanel p;
+        p = cellGrid[x][y];
+        p.setLayout(new GridLayout(1,1));
+        p.add(visibleGrid[x][y]);
+        return p;
+    }
+
+    protected void addCellToWorldMap(JPanel p, Location loc) {
+
+                worldMap.add(p,loc.x,loc.y);
+                showMap();
+
 
     }
     private class MyKeyListener implements KeyListener {
@@ -527,7 +565,7 @@ public class View extends JFrame implements ActionListener {
         fillCellGrid();
         placeLabels();
         worldMap = createWorldMap();
-        addCellsToPanel();
+        createCells();
         worldMap.setVisible(true);
 
     }
