@@ -6,11 +6,36 @@ import java.util.LinkedList;
 
 /**
  * Created by miku on 31/05/2017.
- * my first polymorphic 'switch'
+ *
  */
 public class Endings {
 
+    public Endings(){
+        Conditional conditional =  new Conditional();
+        boolean[] victoryConditions = conditional.listOfVictoryConditions;
+        String endOfGameMessage = conditional.isVictory(victoryConditions) ?
+               "Great work! Your civilization has stood the tests of time " +
+                       "and achieved the dreams of the many. May these steps " +
+                       "be just the first ones in a journey to the heavens " +
+                       "and beyond!" :
+                "One more turn?";
+        System.out.println(endOfGameMessage);
+    }
+
     public class Conditional {
+        private boolean[] listOfVictoryConditions = {
+                isReversedAging(),
+                isArtilectBuilt(),
+                isEnvironmentalist(),
+                isHappy(),
+                isTradeSupremacy(),
+                isProsperity(),
+                isSpaceRace(),
+                isEducation(),
+                isEnlightenment()
+
+        };
+
         public boolean isReversedAging(){
             return Civilization.currentPlayer.advances.acquired.contains(
                     (Object) "Reversed Aging");
@@ -47,11 +72,14 @@ public class Endings {
                     (Object) "Artificial Intelligence");
         }
         public boolean isHappy(){
-            return Civilization.currentPlayer.happiness == Civilization.currentPlayer.population &&
-                Civilization.currentPlayer.population  > sumOfOtherPopulations();
+            return (Civilization.currentPlayer.happiness ==
+                    Civilization.currentPlayer.population)
+            &&
+                    (Civilization.currentPlayer.population  >
+                        countOtherPopulations());
         }
 
-        private int sumOfOtherPopulations() {
+        private int countOtherPopulations() {
             LinkedList<Player> otherPlayers = groupOtherPlayersList();
             int sum = 0;
             for(Player p:otherPlayers) sum = sum + p.population;
@@ -74,7 +102,10 @@ public class Endings {
             int otherCorporationsCount = 0;
             boolean isForeignCorporation[] = new boolean[otherPlayers.size()];
 
-            for(Player p : otherPlayers) isForeignCorporation[++otherCorporationsCount] = isOtherCorporationsExist(p);
+            for(Player p : otherPlayers) {
+                isForeignCorporation[
+                        ++otherCorporationsCount] = isOtherCorporationsExist(p);
+            }
             return isForeignCorporation;
         }
 
@@ -87,23 +118,12 @@ public class Endings {
         }
 
 
+
         private boolean isOtherCorporationsExist(Player p) {
             return p.corporations.list.size() >= 0;
         }
 
         public Conditional(){
-            boolean[] listOfVictoryConditions = {
-                    isReversedAging(),
-                    isArtilectBuilt(),
-                    isEnvironmentalist(),
-                    isHappy(),
-                    isTradeSupremacy(),
-                    isProsperity(),
-                    isSpaceRace(),
-                    isEducation(),
-                    isEnlightenment()
-
-            };
         }
 
         public boolean isVictory(boolean[] listOfVictoryConditions){

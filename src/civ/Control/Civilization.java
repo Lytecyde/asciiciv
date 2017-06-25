@@ -1,9 +1,10 @@
 package civ.Control;
 
 import civ.Model.Data;
-import civ.Model.EndOfGame;
 import civ.gui.Setup;
 import civ.gui.View;
+
+import static civ.Control.Policies.*;
 
 /**
  * Created by miku on 30/05/2017.
@@ -55,32 +56,30 @@ public class Civilization {
     }
 
     private static void roundLoop() {
-
-        for(Player player: RoundTable.listOfPlayers) gameTurn(player);
-
+        for(Player player: RoundTable.listOfPlayers) {
+            gameTurn(player);
+            checkAllEndings();
+        }
     }
 
     private static void endCondition() {
 
     }
 
-    private static EndOfGame findCondition() {
-        //TODO
-        return new EndOfGame();
+    private static void checkAllEndings() {
+         new Endings();
+
     }
 
     private static void gameTurn(Player player) {
+        //events
         ministries(player);
         unitLeadership(player);
         cityManagement(player);
-        endCondition();
-        endTurn();
+
     }
 
     private static void ministries(Player currentplayer) {
-
-        //events
-
         //money/gold
         financial(currentPlayer);
         //culture
@@ -105,27 +104,7 @@ public class Civilization {
 
     }
 
-    private static void social(Player currentPlayer) {
-
-    }
-
-    private static void interior(Player currentPlayer) {
-
-    }
-
-    private static void science(Player currentPlayer) {
-
-    }
-
-    private static void cultural(Player currentPlayer) {
-
-    }
-
-    private static void financial(Player player) {
-        adjustFunds(player.incomePerTurn);
-    }
-
-    private static void adjustFunds(int incomePerTurn) {
+    static void adjustFunds(int incomePerTurn) {
         Civilization.currentPlayer.funds += incomePerTurn;
     }
 }

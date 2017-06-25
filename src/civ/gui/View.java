@@ -464,11 +464,11 @@ public class View extends JFrame implements ActionListener {
         final int SINGLE_COMPONENT = 1;
         assert cellGrid[x][y].getComponents().length <= SINGLE_COMPONENT;
         String exceptionMessage;
-        exceptionMessage = "Exception!!!!!!!!!";
+        exceptionMessage = "Exception!";
         exceptionMessage =
                 cellGrid[x][y].getComponents().length <= SINGLE_COMPONENT ?
-                        exceptionMessage :
-                        "";
+                        "":
+                        exceptionMessage;
         System.out.print(exceptionMessage);
     }
 
@@ -481,12 +481,10 @@ public class View extends JFrame implements ActionListener {
     }
 
     protected void addCellToWorldMap(JPanel p, Location loc) {
-
-                worldMap.add(p,loc.x,loc.y);
-                showMap();
-
-
+        worldMap.add(p,loc.x,loc.y);
+        showMap();
     }
+
     private class MyKeyListener implements KeyListener {
 
         @Override
@@ -514,26 +512,26 @@ public class View extends JFrame implements ActionListener {
             try {
                 switch (e.getKeyCode()) {
 
-                    case 37:
+                    case 39:
                         aftermove = previous.movement(DirectionType.SOUTH);
                         testLocationPrint(aftermove, previous);
                         replaceLabelThenMap(aftermove, previous);
                         setLoc(aftermove);
                         break;
-                    case 39:
+                    case 37:
                         aftermove = previous.movement(DirectionType.NORTH);
-                        testLocationPrint(aftermove, previous);
-                        replaceLabelThenMap(aftermove, previous);
-                        setLoc(aftermove);
-                        break;
-                    case 38:
-                        aftermove = previous.movement(DirectionType.EAST);
                         testLocationPrint(aftermove, previous);
                         replaceLabelThenMap(aftermove, previous);
                         setLoc(aftermove);
                         break;
                     case 40:
                         aftermove = previous.movement(DirectionType.WEST);
+                        testLocationPrint(aftermove, previous);
+                        replaceLabelThenMap(aftermove, previous);
+                        setLoc(aftermove);
+                        break;
+                    case 38:
+                        aftermove = previous.movement(DirectionType.EAST);
                         testLocationPrint(aftermove, previous);
                         replaceLabelThenMap(aftermove, previous);
                         setLoc(aftermove);
