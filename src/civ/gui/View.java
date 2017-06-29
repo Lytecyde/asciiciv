@@ -34,7 +34,7 @@ public class View extends JFrame implements ActionListener {
     public static final int cols = 24;
     public static final int rows = 16;
 
-    public static final int cellSize =15;
+    public static final int cellSize = 15;
     private static WorldMap worldMapPanelContents = new WorldMap(
             MapType.VISIBLE);
     private JLabel cursor;
@@ -50,25 +50,25 @@ public class View extends JFrame implements ActionListener {
         placeMenuBar();
         initCellGrid();
         initLabels();
-        testLabelsAll("0th");
+        //testLabelsAll("0th");
         makeGridLabels();
 
         //
         createContent();
         getVisibleGridFromGridLabels();
-        testLabelsAll("1st");
+        //testLabelsAll("1st");
         fillCellGrid();
         placeLabels();
         createCells();
 
-        testLabelsAll("2nd");
+        //testLabelsAll("2nd");
         //
-        System.out.println(location.x +" "+location.y);
+
         placeCursorOnPanelAt(CENTRE);
         placeContentToView();
         fillCellGrid();
 
-        testLabelsAll("3rd");
+        //testLabelsAll("3rd");
         setVisible(true);
         pack();
         repaint();
@@ -146,33 +146,33 @@ public class View extends JFrame implements ActionListener {
 
 
     private void placeMenuBar() {
-        JMenuBar jmb = new JMenuBar();
+        JMenuBar menuBar = new JMenuBar();
 
-        JMenu jmFile = new JMenu("File");
-        JMenuItem jmiOpen = new JMenuItem("Open");
-        JMenuItem jmiClose = new JMenuItem("Close");
-        JMenuItem jmiSave = new JMenuItem("Save");
-        JMenuItem jmiExit = new JMenuItem("Exit");
+        JMenu file = new JMenu("File");
+        JMenuItem open = new JMenuItem("Open");
+        JMenuItem close = new JMenuItem("Close");
+        JMenuItem save = new JMenuItem("Save");
+        JMenuItem exit = new JMenuItem("Exit");
 
-        jmFile.add(jmiOpen);
-        jmFile.add(jmiClose);
-        jmFile.add(jmiSave);
-        jmFile.addSeparator();
-        jmFile.add(jmiExit);
-        jmb.add(jmFile);
+        file.add(open);
+        file.add(close);
+        file.add(save);
+        file.addSeparator();
+        file.add(exit);
+        menuBar.add(file);
 
         //orders, ministrydata, ministry orders?, advances
-        JMenu jmOrders = new JMenu("Orders");
-        JMenuItem jmiOperate = new JMenuItem("Operate");
-        JMenuItem jmiHeal = new JMenuItem("Heal");
-        JMenuItem jmiVigil = new JMenuItem("Vigil");
-        JMenuItem jmiFortify = new JMenuItem("Fortify");
+        JMenu orders = new JMenu("Orders");
+        JMenuItem operate = new JMenuItem("Operate");
+        JMenuItem heal = new JMenuItem("Heal");
+        JMenuItem vigil = new JMenuItem("Vigil");
+        JMenuItem fortify = new JMenuItem("Fortify");
 
-        jmOrders.add(jmiOperate);
-        jmOrders.add(jmiHeal);
-        jmOrders.add(jmiVigil);
-        jmOrders.add(jmiFortify);
-        jmb.add(jmOrders);
+        orders.add(operate);
+        orders.add(heal);
+        orders.add(vigil);
+        orders.add(fortify);
+        menuBar.add(orders);
 
         JMenu jmMinistries = new JMenu("Ministries");
         JMenuItem jmiFinancial = new JMenuItem("Financial");
@@ -186,21 +186,38 @@ public class View extends JFrame implements ActionListener {
         jmMinistries.add(jmiInterior);
         jmMinistries.add(jmiForeignAffairs);
         jmMinistries.add(jmiDefence);
-        jmb.add(jmMinistries);
+        menuBar.add(jmMinistries);
 
         JMenu jmHelp = new JMenu("Help");
         JMenuItem jmiAbout = new JMenuItem("About");
         jmHelp.add(jmiAbout);
-        jmb.add(jmHelp);
+        menuBar.add(jmHelp);
 
-        jmiOpen.addActionListener(this);
-        jmiClose.addActionListener(this);
-        jmiSave.addActionListener(this);
+        JMenu data = new JMenu("Data");
+        JMenuItem wonders = new JMenuItem("Wonders of the World");
+        JMenuItem topCities = new JMenuItem("Top Cities");
+        JMenuItem demographics = new JMenuItem("Demographics");
+        JMenuItem progress = new JMenuItem("Progress chart");
+        JMenuItem international = new JMenuItem("Affairs");
+        JMenuItem cityList = new JMenuItem("My cities");
 
-        jmiOperate.addActionListener(this);
-        jmiHeal.addActionListener(this);
-        jmiVigil.addActionListener(this);
-        jmiFortify.addActionListener(this);
+        data.add(wonders);
+        data.add(topCities);
+        data.add(demographics);
+        data.add(progress);
+        data.add(international);
+        data.add(cityList);
+        menuBar.add(data);
+
+
+        open.addActionListener(this);
+        close.addActionListener(this);
+        save.addActionListener(this);
+
+        operate.addActionListener(this);
+        heal.addActionListener(this);
+        vigil.addActionListener(this);
+        fortify.addActionListener(this);
 
         jmiFinancial.addActionListener(this);
         jmiSocial.addActionListener(this);
@@ -214,10 +231,12 @@ public class View extends JFrame implements ActionListener {
         jmiForeignAffairs.addActionListener(this);
         jmiDefence.addActionListener(this);
 
-        jmiExit.addActionListener(this);
+        exit.addActionListener(this);
         jmiAbout.addActionListener(this);
 
-        this.setJMenuBar(jmb);
+        
+
+        this.setJMenuBar(menuBar);
     }
 
     private void placeContentToView() {
@@ -513,28 +532,16 @@ public class View extends JFrame implements ActionListener {
                 switch (e.getKeyCode()) {
 
                     case 39:
-                        aftermove = previous.movement(DirectionType.SOUTH);
-                        testLocationPrint(aftermove, previous);
-                        replaceLabelThenMap(aftermove, previous);
-                        setLoc(aftermove);
+                        move(previous, DirectionType.SOUTH);
                         break;
                     case 37:
-                        aftermove = previous.movement(DirectionType.NORTH);
-                        testLocationPrint(aftermove, previous);
-                        replaceLabelThenMap(aftermove, previous);
-                        setLoc(aftermove);
+                        move(previous, DirectionType.NORTH);
                         break;
                     case 40:
-                        aftermove = previous.movement(DirectionType.WEST);
-                        testLocationPrint(aftermove, previous);
-                        replaceLabelThenMap(aftermove, previous);
-                        setLoc(aftermove);
+                        move(previous, DirectionType.WEST);
                         break;
                     case 38:
-                        aftermove = previous.movement(DirectionType.EAST);
-                        testLocationPrint(aftermove, previous);
-                        replaceLabelThenMap(aftermove, previous);
-                        setLoc(aftermove);
+                        move(previous, DirectionType.EAST);
                         break;
                     default:
 
@@ -544,7 +551,16 @@ public class View extends JFrame implements ActionListener {
             }
         }
 
-        private void replaceLabelThenMap(Location aftermove, Location previous) {
+        private void move(Location previous, DirectionType direction) {
+            Location aftermove;
+            aftermove = previous.movement(direction);
+            testLocationPrint(aftermove, previous);
+            replaceLabelThenMap(aftermove, previous);
+            setLoc(aftermove);
+        }
+
+        private void replaceLabelThenMap(Location aftermove,
+                                         Location previous) {
             placeOldLabelBackTo(previous);
             placeCursorOnPanelAt(aftermove);
             replaceWorldMap();
