@@ -328,4 +328,5 @@ public class Unit {
 
     public boolean isWorking() { return working; }
 
+    public boolean isVeteran() {return veteran;}
 }

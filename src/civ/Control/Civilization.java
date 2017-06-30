@@ -21,10 +21,12 @@ public class Civilization {
     private static int turnCount;
     public static int totalUnitCount;
 
-    public static int year = 4000;
+    public static int year = 0;
     public static void main(String[] args) {
         //System.out.println("msg: civ main");
+        new Data();
         new Civilization();
+
         gameSetup();
         boardGUI();
         roundLoop();
@@ -51,8 +53,15 @@ public class Civilization {
     }
 
     private static void startingPlayerSetup() {
-        players = new RoundTable(3);
-        currentPlayer = players.listOfPlayers.getFirst();
+        try {
+            players = new RoundTable(3);
+            assert players.listOfPlayers.isEmpty() == false;
+            currentPlayer = players.listOfPlayers.getFirst();
+        }catch(NullPointerException e){
+            System.out.println("Here we are! too many players created or null");
+        }
+
+
     }
 
     private static void roundLoop() {

@@ -1,6 +1,7 @@
 package civ.gui;
 
 import civ.Control.Civilization;
+import civ.Control.Player;
 import civ.Model.*;
 
 import javax.swing.*;
@@ -10,6 +11,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import static civ.Control.Civilization.currentPlayer;
 import static javax.swing.BorderFactory.createBevelBorder;
 
 /**
@@ -27,6 +29,7 @@ public class View extends JFrame implements ActionListener {
     public JPanel control = new JPanel();
     public JPanel globeMap = new JPanel();
     public JPanel dataBoard = new JPanel();
+    public JPanel unitBoard = new JPanel();
     public JPanel worldMap = new JPanel();
 
     char[][] map =
@@ -44,6 +47,9 @@ public class View extends JFrame implements ActionListener {
     public JPanel[][] cellGrid = new JPanel[rows][cols];
     private JLabel temporaryContents;
     private Dimension cellDimension = new Dimension(cellSize, cellSize);
+    public static int currentUnitIndex = 0;
+    private JButton endTurn = new JButton("End this Turn.");
+    private JButton nextUnit;
 
     public View() {
         setupView();
@@ -234,7 +240,7 @@ public class View extends JFrame implements ActionListener {
         exit.addActionListener(this);
         jmiAbout.addActionListener(this);
 
-        
+
 
         this.setJMenuBar(menuBar);
     }
@@ -249,16 +255,14 @@ public class View extends JFrame implements ActionListener {
 
     private void createContent() {
 
-        createGlobeMap();
+        worldMapPanelContents.createGlobeMap();
         createControlPanel();
         createTextPanel();
         createMapPanel();
         createWorldMap();
     }
 
-    private void createGlobeMap() {
-        //TODO:minimap
-    }
+
 
     protected JPanel createWorldMap() {
 
@@ -274,27 +278,54 @@ public class View extends JFrame implements ActionListener {
     }
 
     private void createControlPanel() {
-        control.setLayout(new GridLayout(2, 1));
+        control.setLayout(new GridLayout(4, 1));
+        createGlobeMap();
         control.add(globeMap);
         createDataBoard();
         control.add(dataBoard);
+        createUnitBoard();
+        control.add(unitBoard);
+        EndListener endListener = new EndListener();
+        endTurn.addActionListener(endListener);
+        control.add(endTurn);
+
         control.repaint();
+    }
+
+    private void createUnitBoard() {
+        unitBoard.setLayout(new GridLayout(4,1));
+        Unit current = currentPlayer.units.list.get
+                (currentUnitIndex);
+        JLabel unitType = new JLabel(current.getType());
+        unitBoard.add(unitType);
+        String veteranText = current.isVeteran() ? "Veteran":"Rookie";
+        JLabel veteran = new JLabel(veteranText);
+        unitBoard.add(veteran);
+        nextUnit = new JButton("Next Unit");
+        UnitSwitchListener unitSwitchListener =  new UnitSwitchListener();
+        nextUnit.addActionListener(unitSwitchListener);
+        unitBoard.add(nextUnit);
+
+    }
+
+    private void createGlobeMap() {
     }
 
     private void createDataBoard() {
         dataBoard.setLayout(new GridLayout(4,1));
         JLabel funds = new JLabel("Funds: " +
-                Civilization.currentPlayer.funds);
+                currentPlayer.funds);
         JLabel pollution = new JLabel("Pollution: " +
-                Civilization.currentPlayer.pollution);
+                currentPlayer.pollution);
         JLabel tax = new JLabel("Taxrate: " +
-                Civilization.currentPlayer.tax);
+                currentPlayer.tax);
         JLabel year = new JLabel("Year: " +
                 Civilization.year);
         dataBoard.add(year);
         dataBoard.add(tax);
         dataBoard.add(funds);
         dataBoard.add(pollution);
+
     }
 
     private void createMapPanel() {
@@ -355,7 +386,6 @@ public class View extends JFrame implements ActionListener {
 
     private JLabel getPreviousLabel() {
         JLabel c = new JLabel();
-
         c.setOpaque(true);
         c.setText(temporaryContents.getText());
         c.setForeground(temporaryContents.getForeground());

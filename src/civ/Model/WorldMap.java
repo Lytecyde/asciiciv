@@ -32,6 +32,7 @@ public class WorldMap {
     public WorldMap(){
 
 
+
     }
 
     public WorldMap(MapType type){
@@ -55,6 +56,17 @@ public class WorldMap {
 
         }
 
+    }
+
+    public void createGlobeMap() {
+        //TODO:minimap
+        //create tectonic plates
+        //set directions for each plate
+        //simulate plate movement
+        //generate continents
+        //map mountains
+        //add glaciers
+        // add deserts
     }
 
     private void generateLands(){

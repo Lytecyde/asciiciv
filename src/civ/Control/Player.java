@@ -13,19 +13,20 @@ public class Player {
     ID identification = new ID();
     int population;
     int incomePerTurn;
-    public int funds =100;
-    //static int percentage = 100;
+    public int funds = 100;
+
     public int unitCount;
+    //Lists
     public Units units;
     Advances advances = new Advances();
-    public int pollution = 0;
-    boolean rocketBuilt = false;
     public Cities cities = new Cities();
     public Corporations corporations = new Corporations();
+    //Values
     public int happiness;
     public int education;
     public int tax;
-
+    public int pollution = 0;
+    boolean rocketBuilt = false;
 
     public Player(){
         System.out.println("LOG: player created as default");
@@ -40,6 +41,14 @@ public class Player {
     }
     public Player(String nationName){
         this.nationName = nationName;
+        createSetupUnits();
+    }
+    private void createSetupUnits(){
+        Unit firstTribe = new Unit(UnitType.SETTLER);
+        units.list.add(firstTribe);
+        //TODO for use later:
+        //Unit firstWarrior = new Unit(UnitType.WARRIOR);
+        //units.list.add(firstWarrior);
     }
 
 }
