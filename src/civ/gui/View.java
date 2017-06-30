@@ -205,14 +205,14 @@ public class View extends JFrame implements ActionListener {
         JMenuItem demographics = new JMenuItem("Demographics");
         JMenuItem progress = new JMenuItem("Progress chart");
         JMenuItem international = new JMenuItem("Affairs");
-        JMenuItem cityList = new JMenuItem("My cities");
+
 
         data.add(wonders);
         data.add(topCities);
         data.add(demographics);
         data.add(progress);
         data.add(international);
-        data.add(cityList);
+
         menuBar.add(data);
 
 
@@ -231,11 +231,11 @@ public class View extends JFrame implements ActionListener {
         jmiForeignAffairs.addActionListener(this);
         jmiDefence.addActionListener(this);
 
-        jmiFinancial.addActionListener(this);
-        jmiSocial.addActionListener(this);
-        jmiInterior.addActionListener(this);
-        jmiForeignAffairs.addActionListener(this);
-        jmiDefence.addActionListener(this);
+        wonders.addActionListener(this);
+        topCities.addActionListener(this);
+        demographics.addActionListener(this);
+        progress.addActionListener(this);
+        international.addActionListener(this);
 
         exit.addActionListener(this);
         jmiAbout.addActionListener(this);

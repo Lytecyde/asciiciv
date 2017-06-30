@@ -6,5 +6,6 @@ package civ.Model;
 public enum WorldSizeType {
     SMALL,
     NORMAL,
-    LARGE
+    LARGE,
+    HUGE
 }

@@ -18,6 +18,7 @@ public enum ResourceTypes {
     Spices,
     Music,
     Blueprints,
+    Formulae,
     Sculptures,
     Plays,
     Devices,
