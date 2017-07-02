@@ -41,7 +41,7 @@ public class Unit {
     public final int foodUse = 1;
 
 
-    private HashMap<Player, Integer> natives;
+
     private boolean working;
 
     private void initialiseProperties(){
@@ -74,11 +74,17 @@ public class Unit {
 
         identification.id = Civilization.totalUnitCount;
         Civilization.totalUnitCount++;
-
-        Player current = Civilization.getCurrentPlayer();
-        String ownerNation = current.nationName;
+        System.out.println("unitCount:" + Civilization.totalUnitCount);
+        Player current = Data.Turn.currentPlayer;
+        String s = current == null ? "current player variable is null":"full ";
+        //String ownerNation = current.nationName;
+        System.out.println("ownerNation"+
+                //ownerNation +
+                s);
         identification.type = unitType.name();
-        identification.name = ownerNation + identification.type + Integer.toString(identification.id);
+        identification.fullName = //ownerNation +
+                identification.type +
+                Integer.toString(identification.id);
 
         switch(unitType){
             case SETTLER:

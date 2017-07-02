@@ -2,26 +2,27 @@ package civ.Control;
 
 import civ.Model.Data;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.*;
 
 /**
  * Created by miku on 30/05/2017.
  */
 public class RoundTable {
-    public static LinkedList<Player> listOfPlayers = new LinkedList<>();
+    public LinkedList<Player> listOfPlayers = new LinkedList<>();
     private int currentNation = 0;
-    //public static int numberOfPlayers;
-    public LinkedList<String> listOfNations;
+    public LinkedList<String> listOfNations = new LinkedList<>();
     private int countPlayersMade = 0;
 
     public RoundTable(int numberOfPlayers){
-        //this.numberOfPlayers = numberOfPlayers;
         generateListOfAllNations();
         generateListOfPlayers(numberOfPlayers);
 
+    }
+
+    private void generateListOfAllNations() {
+        listOfNations = new LinkedList<>();
+        List list = new ArrayList<String>(Arrays.asList(Data.Nation.names));
+        listOfNations.addAll(list);
     }
 
     private void generateListOfPlayers(int numberOfPlayers) {
@@ -29,11 +30,25 @@ public class RoundTable {
         for (countPlayersMade = 0;
              countPlayersMade < numberOfPlayers;
              countPlayersMade++) {
-            currentNation = pickRandomNationFrom(listOfNations);
+            currentNation = !listOfNations.isEmpty()? pickRandomNationFrom
+                    (listOfNations):countPlayersMade;
+            Civilization.currentPlayer = new Player(
+                    Data.Nation.names[currentNation]);
             takeFromNationsListAddToPlayers(currentNation);
         }
 
         System.out.println("playersmade: " + countPlayersMade);
+    }
+
+    private int pickRandomNationFrom(LinkedList<String> listOfNations) {
+
+        do {
+            currentNation = (int)(
+                    (listOfNations.size() -1) * Math.random());
+            System.out.println("" +currentNation);
+        }while(!isInBoundsNationCode());
+        System.out.println("Nation created is :" + currentNation);
+        return currentNation;
     }
 
     private void takeFromNationsListAddToPlayers(int currentNation) {
@@ -43,96 +58,16 @@ public class RoundTable {
 
     }
 
-    private void generateListOfAllNations() {
-        listOfNations = new LinkedList<>();
-        Collection list = new Collection() {
-            @Override
-            public int size() {
-                return 0;
-            }
-
-            @Override
-            public boolean isEmpty() {
-                return false;
-            }
-
-            @Override
-            public boolean contains(Object o) {
-                return false;
-            }
-
-            @Override
-            public Iterator iterator() {
-                return null;
-            }
-
-            @Override
-            public Object[] toArray() {
-                return new Object[0];
-            }
-
-            @Override
-            public Object[] toArray(Object[] a) {
-                return new Object[0];
-            }
-
-            @Override
-            public boolean add(Object o) {
-                return false;
-            }
-
-            @Override
-            public boolean remove(Object o) {
-                return false;
-            }
-
-            @Override
-            public boolean containsAll(Collection c) {
-                return false;
-            }
-
-            @Override
-            public boolean addAll(Collection c) {
-                return false;
-            }
-
-            @Override
-            public boolean removeAll(Collection c) {
-                return false;
-            }
-
-            @Override
-            public boolean retainAll(Collection c) {
-                return false;
-            }
-
-            @Override
-            public void clear() {
-
-            }
-        };
-        Collections.addAll(list, Data.Nation.names);
-        listOfNations.addAll(list);
-
-    }
-
     private void addPlayerToListByCode(int currentNation) {
-        Player p = new Player(listOfNations.get(currentNation));
+        String nationName = listOfNations.get(currentNation);
+        System.out.print("nation is named " + nationName);
+        createAndStorePlayer(nationName);
+    }
+
+    private void createAndStorePlayer(String nationName) {
+        Player p = new Player(nationName);
         listOfPlayers.add(p);
-    }
-
-    private int pickRandomNationFrom(LinkedList<String> listOfNations) {
-        do {
-            currentNation = (int)(
-                    (listOfNations.size() -1) * Math.random());
-            System.out.println(currentNation);
-        }while(!isInBoundsNationCode());
-        System.out.println("Nation created is :" + currentNation);
-        return currentNation;
-    }
-
-    private boolean isInBoundsNationCode() {
-        return currentNation >= 0 &&  currentNation < listOfNations.size();
+        Data.listOfPlayers.add(p);
     }
 
     private void removeNation(int currentNation) {
@@ -143,11 +78,19 @@ public class RoundTable {
         }
         catch(NullPointerException e){
             System.out.println(e + " TRYING TO REMOVE FROM EMPTY list");
-            }
+        }
         catch(IndexOutOfBoundsException e){
             System.out.println(e + " Trying to remove froma a false location" );
         }
 
     }
+
+
+
+    private boolean isInBoundsNationCode() {
+        return currentNation >= 0 &&  currentNation < listOfNations.size();
+    }
+
+
 
 }

@@ -1,5 +1,7 @@
 package civ.Model;
 
+import civ.Control.Player;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -10,8 +12,9 @@ import java.util.LinkedList;
 public class Data {
 
     public static LinkedList<String> nations = new LinkedList<>();
-
     public static int numberOfArrowKeyPresses = 0;
+    public static LinkedList<Player> listOfPlayers = new LinkedList<>();
+    public static int numberOfPlayers = 0;
     public Data() {
         generateNationsList();
     }
@@ -22,11 +25,17 @@ public class Data {
 
     public static final int scapegoatingEffect = 1;
 
+    
 
     public class Map {
         int normalXmax = 90;
         int normalYmax = 52;
     }
+
+    public static class Turn {
+        public static Player currentPlayer;
+    }
+
     public static class Nation{
 
         public static String[] names = {

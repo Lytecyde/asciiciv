@@ -294,13 +294,15 @@ public class View extends JFrame implements ActionListener {
 
     private void createUnitBoard() {
         unitBoard.setLayout(new GridLayout(4,1));
-        Unit current = currentPlayer.units.list.get
+        //TODO: get the current working in every file from the start
+
+        /*Unit current = Data.Turn.currentPlayer.units.list.get
                 (currentUnitIndex);
         JLabel unitType = new JLabel(current.getType());
         unitBoard.add(unitType);
         String veteranText = current.isVeteran() ? "Veteran":"Rookie";
         JLabel veteran = new JLabel(veteranText);
-        unitBoard.add(veteran);
+        unitBoard.add(veteran);*/
         nextUnit = new JButton("Next Unit");
         UnitSwitchListener unitSwitchListener =  new UnitSwitchListener();
         nextUnit.addActionListener(unitSwitchListener);
@@ -350,6 +352,9 @@ public class View extends JFrame implements ActionListener {
                         "GPL3";
                 textArea.setText(about);
                 break;
+            case "Exit":
+                //save game
+                System.exit(0);
             default:
                 textArea.setText(command);
         }
@@ -363,6 +368,7 @@ public class View extends JFrame implements ActionListener {
         showMap();
 
     }
+
     private void placeCursorTo(Location l) {
         JLabel c = new JLabel();
         temporaryContents = gridLabels[l.x][l.y];
@@ -375,6 +381,7 @@ public class View extends JFrame implements ActionListener {
         cursor = c;
         visibleGrid[l.x][l.y] = c;
     }
+
     public void placeOldLabelBackTo(Location previous) {
         JLabel c = getPreviousLabel();
 

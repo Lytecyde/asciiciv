@@ -2,8 +2,6 @@ package civ.Control;
 
 import civ.Model.*;
 
-import java.util.HashMap;
-
 /**
  * Created by miku on 30/05/2017.
  */
@@ -29,26 +27,25 @@ public class Player {
     boolean rocketBuilt = false;
 
     public Player(){
-        System.out.println("LOG: player created as default");
+
+        nationName = "Romans";
         units = new Units();
         unitCount = units.list.size();
-        identification.name  = "Cesar";
-        nationName = "Romans";
+        identification.fullName = "Cesar";
+
         identification.id = 0;
         population = 2 ;
         incomePerTurn = 2;
         education = 0;
     }
+
     public Player(String nationName){
+        new Player();
         this.nationName = nationName;
-        createSetupUnits();
+        identification.fullName = "Mik";
+        identification.id = identification.id++;
     }
-    private void createSetupUnits(){
-        Unit firstTribe = new Unit(UnitType.SETTLER);
-        units.list.add(firstTribe);
-        //TODO for use later:
-        //Unit firstWarrior = new Unit(UnitType.WARRIOR);
-        //units.list.add(firstWarrior);
-    }
+
+
 
 }

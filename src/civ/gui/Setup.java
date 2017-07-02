@@ -1,6 +1,7 @@
 package civ.gui;
 
 import civ.Control.Civilization;
+import civ.Model.Data;
 
 import javax.swing.*;
 
@@ -12,15 +13,13 @@ import javax.swing.JDialog;
  */
 public class Setup {
     public Setup() {
-
         sizeDialogue();
-
+        playersDialogue();
     }
 
 
     private void sizeDialogue() {
         JDialog.setDefaultLookAndFeelDecorated(true);
-        System.out.println("Log 2: dialogue");
         Object[] selectionValues = {"SMALL", "NORMAL", "LARGE", "HUGE"};
         String initialSelection = "NORMAL";
         String question = Questions.message[0];
@@ -28,11 +27,28 @@ public class Setup {
                 JOptionPane.showInputDialog(
                 null,
                  question ,
-                "Setup", QUESTION_MESSAGE,
+                "Setup 1", QUESTION_MESSAGE,
                 null,
                 selectionValues,
                 initialSelection);
         defineMapSize((String) selection);
+
+    }
+    private void playersDialogue() {
+        JDialog.setDefaultLookAndFeelDecorated(true);
+
+        Object[] selectionValues = {"3", "4", "5", "6", "7"};
+        String initialSelection = "3";
+        String question = Questions.message[1];
+        Object selection =
+                JOptionPane.showInputDialog(
+                null,
+                 question ,
+                "Setup 2", QUESTION_MESSAGE,
+                null,
+                selectionValues,
+                initialSelection);
+        defineNumberOfPlayers((String) selection);
 
     }
 
@@ -67,9 +83,15 @@ public class Setup {
         Civilization.gameMapSizeY);
     }
 
+    private void defineNumberOfPlayers(String numberOfPlayers){
+         Data.numberOfPlayers = Integer.parseInt(numberOfPlayers);
+    }
+
     public static class Questions {
         static String[] message = {
-                "What size of a world would you like?"
+                "What size of a world would you like?",
+                "How many civilizations are there?",
+                "How competent are you?"
         };
     }
 }

@@ -1,21 +1,20 @@
 package civ.Model;
 
-import civ.Control.Civilization;
-
 import java.util.LinkedList;
 
 /**
  * Created by miku on 30/05/2017.
  */
 public class Units {
-    public static LinkedList<Unit> list = new LinkedList<>();
-    Unit activeUnit = new Unit(UnitType.SETTLER);
+    public  LinkedList<Unit> list = new LinkedList<>();
+    Unit activeUnit;
+
     public Units(){
-        populateStartList();
+        populateUnitsListAtStart();
         activeUnit = list.getFirst();
     }
 
-    public static int sumOfUnit(UnitType unitType) {
+    public int countUnitsOfType(UnitType unitType) {
 
         int count = 0;
         for(Unit u:list) {
@@ -25,7 +24,7 @@ public class Units {
         return count;
     }
 
-    private void populateStartList() {
+    private void populateUnitsListAtStart() {
         Unit unit = new Unit(UnitType.SETTLER);
         list.add(unit);
         unit = new Unit(UnitType.WARRIOR);

@@ -2,7 +2,9 @@ package civ.Control;
 
 import civ.Model.*;
 
-import java.util.LinkedList;
+import java.util.*;
+
+import static civ.Control.Civilization.*;
 
 /**
  * Created by miku on 31/05/2017.
@@ -37,13 +39,13 @@ public class Endings {
         };
 
         public boolean isReversedAging(){
-            return Civilization.currentPlayer.advances.acquired.contains(
+            return currentPlayer.advances.acquired.contains(
                     (Object) "Reversed Aging");
         }
         public boolean isEnvironmentalist(){
-            return Civilization.worldGreenLevel > 0 ;
+            return worldGreenLevel > 0 ;
         }
-        public boolean isSpaceRace() { return Civilization.currentPlayer.rocketBuilt; }
+        public boolean isSpaceRace() { return currentPlayer.rocketBuilt; }
         public boolean isTradeSupremacy() {
             LinkedList<Player> otherPlayers = groupOtherPlayersList();
             boolean[] isForeignCorporation = findForeignCorporations(otherPlayers);
@@ -52,30 +54,37 @@ public class Endings {
         }
         private boolean isMajorityOfCorporations() {
             int halfOfPotentialCorporations = ResourceTypes.values().length/2;
-            return Civilization.currentPlayer.corporations.list.size() >= halfOfPotentialCorporations;
+            return currentPlayer.corporations.list.size() >=
+                    halfOfPotentialCorporations;
         }
 
         private LinkedList<Player> groupOtherPlayersList() {
-            LinkedList<Player> otherPlayers = Civilization.players.listOfPlayers;
-            otherPlayers.remove(Civilization.currentPlayer);
+
+            LinkedList<Player> otherPlayers= new LinkedList();
+            String err = !this.getList().isEmpty()?"AOK list full":"list empty";
+            System.out.println(err);
+            otherPlayers.addAll(this.getList());
+            otherPlayers.remove(currentPlayer);
             return otherPlayers;
         }
 
+        public LinkedList<Player> getList(){return Data.listOfPlayers;}
+
         public boolean isProsperity(){
             int loadsOfMoneyFactor = 100;
-            return Civilization.currentPlayer.funds >
-                (Civilization.currentPlayer.population * loadsOfMoneyFactor);
+            return currentPlayer.funds >
+                (currentPlayer.population * loadsOfMoneyFactor);
         }
 
         public boolean isArtilectBuilt(){
-            return Civilization.currentPlayer.advances.acquired.contains(
+            return currentPlayer.advances.acquired.contains(
                     (Object) "Artificial Intelligence");
         }
         public boolean isHappy(){
-            return (Civilization.currentPlayer.happiness ==
-                    Civilization.currentPlayer.population)
+            return (currentPlayer.happiness ==
+                    currentPlayer.population)
             &&
-                    (Civilization.currentPlayer.population  >
+                    (currentPlayer.population  >
                         countOtherPopulations());
         }
 
@@ -87,7 +96,7 @@ public class Endings {
         }
 
         public boolean isEducation(){
-            return Civilization.currentPlayer.education > sumOfOtherEducated();
+            return currentPlayer.education > sumOfOtherEducated();
         }
 
         private int sumOfOtherEducated() {
@@ -104,7 +113,7 @@ public class Endings {
 
             for(Player p : otherPlayers) {
                 isForeignCorporation[
-                        ++otherCorporationsCount] = isOtherCorporationsExist(p);
+                        otherCorporationsCount++] = isOtherCorporationsExist(p);
             }
             return isForeignCorporation;
         }
@@ -131,12 +140,13 @@ public class Endings {
         }
 
         public boolean isEnlightenment() {
-            return Civilization.currentPlayer.population < sumOfPreachers();
+            return currentPlayer.population < sumOfPreachers();
 
         }
 
         private int sumOfPreachers() {
-            return Units.sumOfUnit(UnitType.MONK);
+            Units u = new Units();
+            return u.countUnitsOfType(UnitType.MONK);
         }
 
 

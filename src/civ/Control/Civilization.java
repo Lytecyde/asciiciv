@@ -4,30 +4,36 @@ import civ.Model.Data;
 import civ.gui.Setup;
 import civ.gui.View;
 
+import java.util.LinkedList;
+
 import static civ.Control.Policies.*;
 
 /**
  * Created by miku on 30/05/2017.
  */
 public class Civilization {
-    static RoundTable players;
+
     private static Data gameData =  new Data();
     public static String type;
-    public static Player currentPlayer;
+    public static Player currentPlayer = new Player();
     public static int gameMapSizeX;
     public static int gameMapSizeY;
     public static int worldGreenLevel;
     public static int worldPeaceScore;
     private static int turnCount;
     public static int totalUnitCount;
-
+    public static LinkedList<Player> listOfPlayers;
+    public static int numberOfPlayers;
     public static int year = 0;
     public static void main(String[] args) {
         //System.out.println("msg: civ main");
         new Data();
-        new Civilization();
-
-        gameSetup();
+        new Setup();
+        System.out.println("nofplayers " + numberOfPlayers);
+        numberOfPlayers =  Data.numberOfPlayers;
+        System.out.println("nofplayers " + numberOfPlayers);
+        new RoundTable(numberOfPlayers);
+        startingPlayerSetup();
         boardGUI();
         roundLoop();
     }
@@ -41,31 +47,23 @@ public class Civilization {
         return currentPlayer;
     }
 
+
+
     public Civilization(){
+
         turnCount =0;
         totalUnitCount =0;
     }
-    private static void gameSetup() {
-        System.out.println("msg: setup");
-        startingPlayerSetup();
-        new Setup();
 
-    }
 
     private static void startingPlayerSetup() {
-        try {
-            players = new RoundTable(3);
-            assert players.listOfPlayers.isEmpty() == false;
-            currentPlayer = players.listOfPlayers.getFirst();
-        }catch(NullPointerException e){
-            System.out.println("Here we are! too many players created or null");
-        }
-
-
+        listOfPlayers = new LinkedList<>();
+        listOfPlayers.addAll(Data.listOfPlayers);
+        currentPlayer = listOfPlayers.getFirst();
     }
 
     private static void roundLoop() {
-        for(Player player: RoundTable.listOfPlayers) {
+        for(Player player: Data.listOfPlayers) {
             gameTurn(player);
             checkAllEndings();
         }
