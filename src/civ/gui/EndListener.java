@@ -10,28 +10,72 @@ import java.awt.event.ActionListener;
  */
 public class EndListener implements ActionListener{
     int i =0;
+    View v;
     @Override
     public void actionPerformed(ActionEvent e) {
-        calculateTime();
         selectNextPlayer();
     }
-
+    public EndListener(View view){
+        v = view;
+    }
     private void selectNextPlayer() {
-        i = (i++) % Data.listOfPlayers.size();
+        i = isLastPlayer(i)?i++: returnToFirstPLayer();
+        i = i % Data.listOfPlayers.size();
         Data.Turn.currentPlayer = Data.listOfPlayers.get(i);
+    }
+
+    private int returnToFirstPLayer(){
+        calculateTime();
+        int firstPlayerIndex =0;
+        return firstPlayerIndex;
+    }
+    
+    private boolean isLastPlayer(int i ) {
+        return i == Data.listOfPlayers.size() - 1;
     }
 
     private void calculateTime() {
         int timeNow = civ.Control.Civilization.year;
         int timeDifference =
-                (timeNow < 3000) ? 20 :
-                    ((timeNow < 5000) ? 10 :
-                            ((timeNow < 5500) ? 5 :
-                                    ((timeNow < 5750) ? 2 :
-                                            ((timeNow < 5850) ? 1 : 1))));
-
+                isDuringPrimeAge(timeNow) ? 20 :
+                    (isDuringAntiquity(timeNow) ? 10 :
+                            (isDuringMiddleAges(timeNow) ? 5 :
+                                    (isDuringRenaissance(timeNow) ? 2 :
+                                            (isDuringEnlightenment(timeNow) ?
+                                                    1 : 1))));
         timeNow += timeDifference;
         civ.Control.Civilization.year = timeNow;
+        updateView(timeNow);
     }
+
+    private void updateView(int timeNow) {
+        v.setTitle(Data.Turn.currentPlayer.nationName);
+        v.year.setText("Year: " + timeNow);
+        v.updateUnitBoard();
+        v.showControl();
+        v.showMap();
+    }
+
+    private boolean isDuringEnlightenment(int timeNow) {
+        return timeNow < 5850;
+    }
+
+    private boolean isDuringRenaissance(int timeNow) {
+        return timeNow < 5750;
+    }
+
+    private boolean isDuringMiddleAges(int timeNow) {
+        return timeNow < 5500;
+    }
+
+    private boolean isDuringAntiquity(int timeNow) {
+        return timeNow < 4500;
+    }
+
+    private boolean isDuringPrimeAge(int timeNow) {
+        return timeNow < 3000;
+    }
+
+
 }
 

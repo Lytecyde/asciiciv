@@ -1,6 +1,7 @@
 package civ.Model;
 
 import civ.Control.Player;
+import civ.Control.RoundTable;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -13,7 +14,7 @@ public class Data {
 
     public static LinkedList<String> nations = new LinkedList<>();
     public static int numberOfArrowKeyPresses = 0;
-    public static LinkedList<Player> listOfPlayers = new LinkedList<>();
+    public static LinkedList<Player> listOfPlayers = new LinkedList<Player>();
     public static int numberOfPlayers = 0;
     public Data() {
         generateNationsList();

@@ -1,5 +1,7 @@
 package civ.Model;
 
+import civ.Control.Player;
+
 import java.util.LinkedList;
 
 /**
@@ -7,11 +9,15 @@ import java.util.LinkedList;
  */
 public class Units {
     public  LinkedList<Unit> list = new LinkedList<>();
-    Unit activeUnit;
 
+
+    public Units(Player player){
+        populateUnitsListAtStart(player);
+
+    }
     public Units(){
         populateUnitsListAtStart();
-        activeUnit = list.getFirst();
+
     }
 
     public int countUnitsOfType(UnitType unitType) {
@@ -30,6 +36,18 @@ public class Units {
         unit = new Unit(UnitType.WARRIOR);
         list.add(unit);
 
+    }
+
+    private void populateUnitsListAtStart(Player player) {
+        Unit unit = new Unit(UnitType.SETTLER, player);
+        list.add(unit);
+        unit = new Unit(UnitType.WARRIOR, player);
+        list.add(unit);
+
+    }
+
+    public LinkedList<Unit> getList(){
+        return list;
     }
 
 }

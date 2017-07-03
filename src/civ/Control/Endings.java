@@ -145,7 +145,7 @@ public class Endings {
         }
 
         private int sumOfPreachers() {
-            Units u = new Units();
+            Units u = new Units(currentPlayer);
             return u.countUnitsOfType(UnitType.MONK);
         }
 

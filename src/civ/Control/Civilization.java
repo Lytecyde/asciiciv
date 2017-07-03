@@ -29,18 +29,21 @@ public class Civilization {
         //System.out.println("msg: civ main");
         new Data();
         new Setup();
-        System.out.println("nofplayers " + numberOfPlayers);
+
         numberOfPlayers =  Data.numberOfPlayers;
-        System.out.println("nofplayers " + numberOfPlayers);
-        new RoundTable(numberOfPlayers);
+
+        RoundTable r = new RoundTable(numberOfPlayers);
         startingPlayerSetup();
-        boardGUI();
+        numberOfPlayers =  Data.listOfPlayers.size();
+        System.out.println("listof players in Data member count " +
+                numberOfPlayers);
+        View v = new View();
+        Data.listOfPlayers.addAll(r.listOfPlayers);
+        v.updateUnitBoard();
         roundLoop();
     }
 
-    private static void boardGUI() {
-        new View();
-    }
+
 
 
     public static Player getCurrentPlayer() {

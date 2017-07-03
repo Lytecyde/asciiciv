@@ -8,9 +8,9 @@ import java.util.*;
  * Created by miku on 30/05/2017.
  */
 public class RoundTable {
-    public LinkedList<Player> listOfPlayers = new LinkedList<>();
+    public LinkedList<Player> listOfPlayers = new LinkedList<Player>();
     private int currentNation = 0;
-    public LinkedList<String> listOfNations = new LinkedList<>();
+    public LinkedList<String> listOfNations = new LinkedList<String>();
     private int countPlayersMade = 0;
 
     public RoundTable(int numberOfPlayers){
@@ -36,8 +36,8 @@ public class RoundTable {
                     Data.Nation.names[currentNation]);
             takeFromNationsListAddToPlayers(currentNation);
         }
-
-        System.out.println("playersmade: " + countPlayersMade);
+        Data.Turn.currentPlayer = listOfPlayers.getFirst();
+        System.out.println("players made: " + countPlayersMade);
     }
 
     private int pickRandomNationFrom(LinkedList<String> listOfNations) {

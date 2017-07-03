@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.LinkedList;
 
 import static civ.Control.Civilization.currentPlayer;
 import static javax.swing.BorderFactory.createBevelBorder;
@@ -50,6 +51,10 @@ public class View extends JFrame implements ActionListener {
     public static int currentUnitIndex = 0;
     private JButton endTurn = new JButton("End this Turn.");
     private JButton nextUnit;
+
+    public JLabel funds, pollution, tax, year;
+    private JLabel unitType;
+    private JLabel veteran;
 
     public View() {
         setupView();
@@ -109,6 +114,7 @@ public class View extends JFrame implements ActionListener {
         setLayout(new BorderLayout());
         MyKeyListener mkl = new MyKeyListener();
         addKeyListener(mkl);
+
     }
 
     private void makeGridLabels(){
@@ -144,7 +150,6 @@ public class View extends JFrame implements ActionListener {
             for (int y = 0; y < cols; y++) {
                 visibleGrid[x][y] = new JLabel();
                 gridLabels[x][y] = new JLabel();
-
             }
         }
     }
@@ -194,11 +199,6 @@ public class View extends JFrame implements ActionListener {
         jmMinistries.add(jmiDefence);
         menuBar.add(jmMinistries);
 
-        JMenu jmHelp = new JMenu("Help");
-        JMenuItem jmiAbout = new JMenuItem("About");
-        jmHelp.add(jmiAbout);
-        menuBar.add(jmHelp);
-
         JMenu data = new JMenu("Data");
         JMenuItem wonders = new JMenuItem("Wonders of the World");
         JMenuItem topCities = new JMenuItem("Top Cities");
@@ -206,14 +206,19 @@ public class View extends JFrame implements ActionListener {
         JMenuItem progress = new JMenuItem("Progress chart");
         JMenuItem international = new JMenuItem("Affairs");
 
-
         data.add(wonders);
         data.add(topCities);
         data.add(demographics);
         data.add(progress);
         data.add(international);
-
         menuBar.add(data);
+
+        JMenu jmHelp = new JMenu("Help");
+        JMenuItem jmiAbout = new JMenuItem("About");
+        jmHelp.add(jmiAbout);
+        menuBar.add(jmHelp);
+
+
 
 
         open.addActionListener(this);
@@ -252,25 +257,32 @@ public class View extends JFrame implements ActionListener {
         this.add(worldMap, BorderLayout.CENTER);
     }
 
-
     private void createContent() {
-
         worldMapPanelContents.createGlobeMap();
         createControlPanel();
         createTextPanel();
         createMapPanel();
         createWorldMap();
+        createGlobeMap();
     }
-
-
 
     protected JPanel createWorldMap() {
 
         worldMap.setLayout(new GridLayout(rows, cols));
-        worldMap.setSize(320,240);
+        worldMap.setSize(cols *15,rows *15);
         worldMap.setVisible(true);
+        worldMap.requestFocus(true);
         worldMap.repaint();
         return worldMap;
+    }
+
+    private JPanel createGlobeMap() {
+        globeMap.setBackground(Color.black);
+        globeMap.setLayout(new GridLayout(rows, cols));
+        globeMap.setSize(cols*4,rows*4);
+        globeMap.setVisible(true);
+        globeMap.repaint();
+        return globeMap;
     }
 
     private void createTextPanel() {
@@ -285,7 +297,7 @@ public class View extends JFrame implements ActionListener {
         control.add(dataBoard);
         createUnitBoard();
         control.add(unitBoard);
-        EndListener endListener = new EndListener();
+        EndListener endListener = new EndListener(this);
         endTurn.addActionListener(endListener);
         control.add(endTurn);
 
@@ -295,33 +307,41 @@ public class View extends JFrame implements ActionListener {
     private void createUnitBoard() {
         unitBoard.setLayout(new GridLayout(4,1));
         //TODO: get the current working in every file from the start
-
-        /*Unit current = Data.Turn.currentPlayer.units.list.get
-                (currentUnitIndex);
-        JLabel unitType = new JLabel(current.getType());
+        unitType = new JLabel("Unit ID : ");
+        veteran = new JLabel("Experience:");
         unitBoard.add(unitType);
-        String veteranText = current.isVeteran() ? "Veteran":"Rookie";
-        JLabel veteran = new JLabel(veteranText);
-        unitBoard.add(veteran);*/
+        unitBoard.add(veteran);
         nextUnit = new JButton("Next Unit");
-        UnitSwitchListener unitSwitchListener =  new UnitSwitchListener();
+        nextUnit.setFocusPainted(false);
+        UnitSwitchListener unitSwitchListener =  new UnitSwitchListener(this);
         nextUnit.addActionListener(unitSwitchListener);
         unitBoard.add(nextUnit);
 
     }
-
-    private void createGlobeMap() {
+    public void updateUnitBoard(){
+        unitBoard.removeAll();
+        createUnitBoard();
+        Player player = Data.Turn.currentPlayer;
+        LinkedList<Unit> playerForces = new LinkedList<Unit>();
+        playerForces.addAll(player.units.getList());
+        Unit current = playerForces.get(currentUnitIndex);
+        unitType.setText( current.getType());
+        unitBoard.add(unitType);
+        String veteranText = current.isVeteran() ? "Veteran":"Rookie";
+        veteran.setText(veteranText);
+        unitBoard.add(veteran);
     }
+
 
     private void createDataBoard() {
         dataBoard.setLayout(new GridLayout(4,1));
-        JLabel funds = new JLabel("Funds: " +
+        funds = new JLabel("Funds: " +
                 currentPlayer.funds);
-        JLabel pollution = new JLabel("Pollution: " +
+        pollution = new JLabel("Pollution: " +
                 currentPlayer.pollution);
-        JLabel tax = new JLabel("Taxrate: " +
+        tax = new JLabel("Taxrate: " +
                 currentPlayer.tax);
-        JLabel year = new JLabel("Year: " +
+        year = new JLabel("Year: " +
                 Civilization.year);
         dataBoard.add(year);
         dataBoard.add(tax);
@@ -412,9 +432,7 @@ public class View extends JFrame implements ActionListener {
     }
 
     private void fillCell(int x, int y) {
-
         defineCellGrid(x, y);
-
         cellGrid[x][y].add(visibleGrid[x][y]);
         setVisible(cellGrid[x][y]);
 
@@ -459,9 +477,17 @@ public class View extends JFrame implements ActionListener {
         showMap();
     }
 
-    private void showMap() {
+    public void showMap() {
         worldMap.revalidate();
         worldMap.repaint();
+    }
+
+    public void showControl(){
+        dataBoard.revalidate();
+        dataBoard.repaint();
+
+        control.revalidate();
+        control.repaint();
     }
 
 
@@ -471,7 +497,6 @@ public class View extends JFrame implements ActionListener {
             for (int y = 0; y < cols; y++) {
                 l = new Location(x,y);
                 JLabel cellLabel = visibleGrid[l.x][l.y];//TODO:was location
-
                 placeLabel(cellLabel, l);
             }
         }
@@ -560,7 +585,7 @@ public class View extends JFrame implements ActionListener {
                     location.getX(),
                     location.getY()
             );
-            System.out.println("" +
+            System.out.println("Keypressed" +
                     Data.numberOfArrowKeyPresses +
                     " : " +
                     e.getKeyCode());
@@ -604,14 +629,12 @@ public class View extends JFrame implements ActionListener {
         }
     }
 
+    void setLoc(Location aftermove){ this.location = aftermove; }
 
-    void setLoc(Location aftermove) {
-        this.location = aftermove;
-    }
 
     private void replaceWorldMap() {
         worldMap.removeAll();
-        //TODO: define cellGrid
+        //TODO: define cellGrid as JPanel with JLabel
         initCellGrid();
         fillCellGrid();
         placeLabels();
@@ -626,9 +649,6 @@ public class View extends JFrame implements ActionListener {
                 previous.y +"::"+aftermove.x + ", " +
                 aftermove.y);
     }
-
-
-
 
 }
 

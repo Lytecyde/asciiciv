@@ -29,21 +29,22 @@ public class Player {
     public Player(){
 
         nationName = "Romans";
-        units = new Units();
-        unitCount = units.list.size();
         identification.fullName = "Cesar";
-
         identification.id = 0;
         population = 2 ;
         incomePerTurn = 2;
         education = 0;
+        units = new Units();
+        unitCount = units.list.size();
     }
 
     public Player(String nationName){
-        new Player();
+
         this.nationName = nationName;
-        identification.fullName = "Mik";
+        identification.fullName = "Mik Seljamaa :)";
         identification.id = identification.id++;
+        units = new Units(this);
+        unitCount = units.list.size();
     }
 
 
