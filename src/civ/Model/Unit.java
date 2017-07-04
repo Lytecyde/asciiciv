@@ -40,7 +40,7 @@ public class Unit {
     public static boolean explore;
     public final int foodUse = 1;
 
-
+    public static char chit = 254;
 
     private boolean working;
 
@@ -297,7 +297,7 @@ public class Unit {
         identification.fullName = ownerNation +
                 identification.type +
                 Integer.toString(identification.id);
-
+        initialiseProperties();
         switch(unitType){
             case SETTLER:
                 int power = 1;
@@ -310,7 +310,7 @@ public class Unit {
                 infected = false;
                 naval = false;
                 airborne = false;
-
+                chit = Data.landChit;
                 setSkills();
                 foundCity = true;
                 int food = 1;
@@ -330,7 +330,7 @@ public class Unit {
                 infected = false;
                 naval = false;
                 airborne = false;
-
+                chit = Data.landChit;
                 setSkills();
                 build= true;
 
@@ -367,7 +367,7 @@ public class Unit {
                 infected = false;
                 naval = false;
                 airborne = false;
-
+                chit = Data.landChit;
                 setSkills();
                 farm = true;
 
@@ -386,7 +386,7 @@ public class Unit {
                 infected = false;
                 naval = false;
                 airborne = false;
-
+                chit = Data.landChit;
                 setSkills();
                 preach = true;
 
@@ -405,7 +405,7 @@ public class Unit {
                 infected = false;
                 naval = false;
                 airborne = false;
-
+                chit = Data.landChit;
                 setSkills();
                 teach = true;
 
@@ -424,7 +424,7 @@ public class Unit {
                 infected = false;
                 naval = false;
                 airborne = false;
-
+                chit = Data.landChit;
                 setSkills();
                 trade = true;
 
@@ -443,7 +443,7 @@ public class Unit {
                 infected = false;
                 naval = false;
                 airborne = false;
-
+                chit = Data.landChit;
                 setSkills();
                 explore = true;
 
@@ -462,7 +462,7 @@ public class Unit {
                 infected = false;
                 naval = false;
                 airborne = false;
-
+                chit = Data.landChit;
                 setSkills();
                 create = true;
 
@@ -481,7 +481,7 @@ public class Unit {
                 infected = false;
                 naval = false;
                 airborne = false;
-
+                chit = Data.landChit;
                 setSkills();
                 diplomacy = true;
 
@@ -547,4 +547,6 @@ public class Unit {
     public boolean isWorking() { return working; }
 
     public boolean isVeteran() {return veteran;}
+
+
 }

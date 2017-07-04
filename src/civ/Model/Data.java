@@ -12,6 +12,9 @@ import java.util.LinkedList;
  */
 public class Data {
 
+    public final static Location CENTRE = new Location(11, 7);
+    public static final int rows = 16;
+    public static final int cols = 24;
     public static LinkedList<String> nations = new LinkedList<>();
     public static int numberOfArrowKeyPresses = 0;
     public static LinkedList<Player> listOfPlayers = new LinkedList<Player>();
@@ -19,6 +22,12 @@ public class Data {
     public Data() {
         generateNationsList();
     }
+
+    public final static char landChit = '■';
+
+    public final static char seaChit = '±';
+
+    public final static char airChit = 16;
 
     private void generateNationsList() {
          Collections.addAll(nations, Nation.names);
@@ -28,9 +37,10 @@ public class Data {
 
     
 
-    public class Map {
-        int normalXmax = 90;
-        int normalYmax = 52;
+    public static class Map {
+
+        final static int normalXmax = 90;
+        final static int  normalYmax = 52;
     }
 
     public static class Turn {

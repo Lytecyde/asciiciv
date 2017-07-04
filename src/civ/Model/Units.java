@@ -50,4 +50,8 @@ public class Units {
         return list;
     }
 
+    public Location getStartLocation(Player player){
+        return Data.CENTRE;//TODO get potential locations from roundtable
+    }
+
 }

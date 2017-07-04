@@ -70,7 +70,7 @@ public class WorldMap {
 
     public void createGlobeMap() {
         //TODO:minimap
-
+        //make minimap from the existing map
     }
 
     private void generateLands(){
@@ -173,9 +173,6 @@ public class WorldMap {
     }
 
     private void generateMap(){
-
-
-
         JPanel[][] a = getContentsPanelsForGrid();
 
         addToGrid(a);
@@ -185,6 +182,8 @@ public class WorldMap {
         return map;
     }
 
-
+    public JLabel[][] getMapCells(){
+        return mapCells;
+    }
 }
 

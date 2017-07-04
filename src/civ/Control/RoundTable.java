@@ -1,6 +1,7 @@
 package civ.Control;
 
 import civ.Model.Data;
+import civ.Model.Location;
 
 import java.util.*;
 
@@ -77,15 +78,13 @@ public class RoundTable {
             listOfNations.remove(n);
         }
         catch(NullPointerException e){
-            System.out.println(e + " TRYING TO REMOVE FROM EMPTY list");
+            System.out.println(e + " TRYING TO REMOVE FROM AN EMPTY list");
         }
         catch(IndexOutOfBoundsException e){
             System.out.println(e + " Trying to remove froma a false location" );
         }
 
     }
-
-
 
     private boolean isInBoundsNationCode() {
         return currentNation >= 0 &&  currentNation < listOfNations.size();

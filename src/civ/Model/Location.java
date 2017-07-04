@@ -1,7 +1,5 @@
 package civ.Model;
 
-import civ.gui.View;
-
 /**
  * Created by miku on 31/05/2017.
  */
@@ -68,7 +66,7 @@ public class Location {
     }
 
     private boolean isLegalXIncrease() {
-        return this.x < View.rows -1;
+        return this.x < Data.rows -1;
     }
 
     private boolean isLegalYDecrease() {
@@ -76,7 +74,7 @@ public class Location {
     }
 
     private boolean isLegalYIncrease() {
-        return this.y < View.cols  -1;
+        return this.y < Data.cols  -1;
     }
 
 }

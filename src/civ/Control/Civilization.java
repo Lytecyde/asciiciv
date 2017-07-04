@@ -18,7 +18,7 @@ public class Civilization {
     public static Player currentPlayer = new Player();
     public static int gameMapSizeX;
     public static int gameMapSizeY;
-    public static int worldGreenLevel;
+    public static int worldGreenLevel;      //pollution
     public static int worldPeaceScore;
     private static int turnCount;
     public static int totalUnitCount;
