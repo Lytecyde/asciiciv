@@ -65,7 +65,7 @@ public class View extends JFrame implements ActionListener {
         makeGridLabels();
 
         //
-        createContent();
+        createContentDefinitions();
         getVisibleGridFromGridLabels();
         //testLabelsAll("1st");
         fillCellGrid();
@@ -78,40 +78,19 @@ public class View extends JFrame implements ActionListener {
         placeCursorOnPanelAt(CENTRE);
         placeContentToView();
         fillCellGrid();
-
+        replaceWorldMap();
+        worldMap.requestFocus();
         //testLabelsAll("3rd");
         setVisible(true);
         pack();
         repaint();
     }
 
-    private void testLabelsAll(String s) {
-        System.out.println(s+"test");
-        for (int x = 0; x < rows; x++) {
-            for (int y = 0; y < cols; y++) {
-                testLabel(x, y);
-            }
-        }
-    }
-
-    private void testLabel(int x, int y) {
-        System.out.println(x + "," + y + visibleGrid[x][y].getText()
-                + visibleGrid[x][y].getSize().height
-        );
-
-        System.out.println(x +
-                "," +
-                y +
-                gridLabels[x][y].getText()
-
-        );
-    }
-
-
     private void setupView() {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setPreferredSize(new Dimension(640, 640));
         setLayout(new BorderLayout());
+        setFocusable(true);
         MyKeyListener mkl = new MyKeyListener();
         addKeyListener(mkl);
 
@@ -135,8 +114,6 @@ public class View extends JFrame implements ActionListener {
         }
     }
 
-
-
     private void initCellGrid(){
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
@@ -153,8 +130,6 @@ public class View extends JFrame implements ActionListener {
             }
         }
     }
-
-
 
     private void placeMenuBar() {
         JMenuBar menuBar = new JMenuBar();
@@ -257,8 +232,8 @@ public class View extends JFrame implements ActionListener {
         this.add(worldMap, BorderLayout.CENTER);
     }
 
-    private void createContent() {
-        worldMapPanelContents.createGlobeMap();
+    private void createContentDefinitions() {
+        worldMapPanelContents.createWorld();
         createControlPanel();
         createTextPanel();
         createMapPanel();
@@ -267,11 +242,9 @@ public class View extends JFrame implements ActionListener {
     }
 
     protected JPanel createWorldMap() {
-
         worldMap.setLayout(new GridLayout(rows, cols));
         worldMap.setSize(cols *15,rows *15);
         worldMap.setVisible(true);
-        worldMap.requestFocus(true);
         worldMap.repaint();
         return worldMap;
     }
@@ -313,7 +286,7 @@ public class View extends JFrame implements ActionListener {
         unitBoard.add(veteran);
         nextUnit = new JButton("Next Unit");
         nextUnit.setFocusPainted(false);
-        UnitSwitchListener unitSwitchListener =  new UnitSwitchListener(this);
+        UnitSwitchListener unitSwitchListener = new UnitSwitchListener(this);
         nextUnit.addActionListener(unitSwitchListener);
         unitBoard.add(nextUnit);
 
@@ -398,6 +371,8 @@ public class View extends JFrame implements ActionListener {
         c.setBackground(Color.white);
         c.setPreferredSize(temporaryContents.getPreferredSize());
         c.setVisible(true);
+        c.setFocusable(true);
+        c.requestFocus();
         cursor = c;
         visibleGrid[l.x][l.y] = c;
     }
@@ -518,8 +493,6 @@ public class View extends JFrame implements ActionListener {
         }
         return localMapCells;
     }
-
-
 
     protected void createCells() {
         JPanel p;
@@ -649,6 +622,26 @@ public class View extends JFrame implements ActionListener {
                 previous.y +"::"+aftermove.x + ", " +
                 aftermove.y);
     }
+    private void testLabelsAll(String s) {
+        System.out.println(s+"test");
+        for (int x = 0; x < rows; x++) {
+            for (int y = 0; y < cols; y++) {
+                testLabel(x, y);
+            }
+        }
+    }
 
+    private void testLabel(int x, int y) {
+        System.out.println(x + "," + y + visibleGrid[x][y].getText()
+                + visibleGrid[x][y].getSize().height
+        );
+
+        System.out.println(x +
+                "," +
+                y +
+                gridLabels[x][y].getText()
+
+        );
+    }
 }
 

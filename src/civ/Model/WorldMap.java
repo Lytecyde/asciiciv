@@ -58,8 +58,7 @@ public class WorldMap {
 
     }
 
-    public void createGlobeMap() {
-        //TODO:minimap
+    public void createWorld(){
         //create tectonic plates
         //set directions for each plate
         //simulate plate movement
@@ -67,6 +66,11 @@ public class WorldMap {
         //map mountains
         //add glaciers
         // add deserts
+    }
+
+    public void createGlobeMap() {
+        //TODO:minimap
+
     }
 
     private void generateLands(){

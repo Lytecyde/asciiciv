@@ -29,35 +29,30 @@ public class Civilization {
         //System.out.println("msg: civ main");
         new Data();
         new Setup();
-
         numberOfPlayers =  Data.numberOfPlayers;
-
         RoundTable r = new RoundTable(numberOfPlayers);
         startingPlayerSetup();
-        numberOfPlayers =  Data.listOfPlayers.size();
-        System.out.println("listof players in Data member count " +
-                numberOfPlayers);
+        testPlayerCount();
         View v = new View();
         Data.listOfPlayers.addAll(r.listOfPlayers);
         v.updateUnitBoard();
         roundLoop();
     }
 
-
-
+    private static void testPlayerCount() {
+        numberOfPlayers =  Data.listOfPlayers.size();
+        System.out.println("listof players in Data member count " +
+                numberOfPlayers);
+    }
 
     public static Player getCurrentPlayer() {
         return currentPlayer;
     }
 
-
-
     public Civilization(){
-
         turnCount =0;
         totalUnitCount =0;
     }
-
 
     private static void startingPlayerSetup() {
         listOfPlayers = new LinkedList<>();
@@ -72,9 +67,7 @@ public class Civilization {
         }
     }
 
-    private static void endCondition() {
 
-    }
 
     private static void checkAllEndings() {
          new Endings();

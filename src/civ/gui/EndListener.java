@@ -14,6 +14,7 @@ public class EndListener implements ActionListener{
     @Override
     public void actionPerformed(ActionEvent e) {
         selectNextPlayer();
+        v.worldMap.requestFocus();
     }
     public EndListener(View view){
         v = view;
@@ -29,7 +30,7 @@ public class EndListener implements ActionListener{
         int firstPlayerIndex =0;
         return firstPlayerIndex;
     }
-    
+
     private boolean isLastPlayer(int i ) {
         return i == Data.listOfPlayers.size() - 1;
     }
@@ -54,6 +55,7 @@ public class EndListener implements ActionListener{
         v.updateUnitBoard();
         v.showControl();
         v.showMap();
+
     }
 
     private boolean isDuringEnlightenment(int timeNow) {
