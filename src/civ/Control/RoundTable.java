@@ -33,8 +33,6 @@ public class RoundTable {
              countPlayersMade++) {
             currentNation = !listOfNations.isEmpty()? pickRandomNationFrom
                     (listOfNations):countPlayersMade;
-            Civilization.currentPlayer = new Player(
-                    Data.Nation.names[currentNation]);
             takeFromNationsListAddToPlayers(currentNation);
         }
         Data.Turn.currentPlayer = listOfPlayers.getFirst();

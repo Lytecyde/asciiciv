@@ -26,7 +26,7 @@ public class View extends JFrame implements ActionListener {
 
     Location location = Data.CENTRE;
 
-    JTextArea textArea = new JTextArea(5, 60);
+    JTextArea textArea = new JTextArea(5, 52);
     int x;
     int y;
     JPanel text = new JPanel();
@@ -51,6 +51,7 @@ public class View extends JFrame implements ActionListener {
     private Dimension cellDimension = new Dimension(cellSize, cellSize);
     public static int currentUnitIndex = 0;
     private JButton endTurn = new JButton("End this Turn.");
+    private JButton switchPlayer = new JButton("next player");
     private JButton nextUnit;
 
     public JLabel funds, pollution, tax, year;//for databoard
@@ -321,7 +322,6 @@ public class View extends JFrame implements ActionListener {
 
     private void createUnitBoard() {
         unitBoard.setLayout(new GridLayout(4,1));
-        //TODO: get the current working in every file from the start
         unitType = new JLabel("Unit ID : ");
         veteran = new JLabel("Experience:");
         unitBoard.add(unitType);
@@ -340,7 +340,10 @@ public class View extends JFrame implements ActionListener {
         LinkedList<Unit> playerForces = new LinkedList<Unit>();
         playerForces.addAll(player.units.getList());
         Unit current = playerForces.get(currentUnitIndex);
-        unitType.setText( current.getType());
+        unitType.setText( current.getType() +
+                player.nationName +
+                currentUnitIndex
+        );
         unitBoard.add(unitType);
         String veteranText = current.isVeteran() ? "Veteran":"Rookie";
         veteran.setText(veteranText);
@@ -452,7 +455,6 @@ public class View extends JFrame implements ActionListener {
         defineCellGrid(x, y);
         cellGrid[x][y].add(visibleGrid[x][y]);
         setVisible(cellGrid[x][y]);
-
     }
 
     private void defineCellGrid(int x, int y) {
@@ -590,7 +592,8 @@ public class View extends JFrame implements ActionListener {
         public void keyReleased(KeyEvent e) {
 
         }
-
+        final int UPDATE = 1;
+        final int NONE = 0;
         @Override
         public void keyPressed(KeyEvent e) {
             Location aftermove;
@@ -618,6 +621,8 @@ public class View extends JFrame implements ActionListener {
                     case 38:
                         move(previous, DirectionType.EAST);
                         break;
+                    case KeyEvent.VK_SPACE:
+                        //activate unit on location
                     default:
 
                 }
@@ -629,9 +634,47 @@ public class View extends JFrame implements ActionListener {
         private void move(Location previous, DirectionType direction) {
             Location aftermove;
             aftermove = previous.movement(direction);
-            testLocationPrint(aftermove, previous);
             replaceLabelThenMap(aftermove, previous);
             setLocation(aftermove);
+            checkForUnit(aftermove);
+        }
+
+        private void checkForUnit(Location l) {
+            boolean presentUnit = isLandUnitPresent(visibleGrid[l.x][l.y]);
+
+            int i = getResponse(l);
+            boolean updated = presentUnit ? selectUpdateResponseForUnitBoard(i):
+                    false;
+        }
+
+        private int getResponse(Location l) {
+            int i = 0;
+            for(Unit u: currentPlayer.units.list){
+                //TODO on 7/7/17
+                i = u.location.equals(l)?UPDATE:NONE;
+
+            }
+            return i;
+        }
+
+        private boolean selectUpdateResponseForUnitBoard(int i) {
+
+            boolean b = false;
+            switch (i){
+                case NONE:
+                    unitBoard.removeAll();
+                    b = false;
+                    break;
+                case UPDATE:
+                    updateUnitBoard();
+                    b= true;
+                    break;
+            }
+            return b;
+        }
+
+        private boolean isLandUnitPresent(JLabel jLabel) {
+            return jLabel.getText().equals(String.valueOf(Data.landChit));
         }
 
         private void replaceLabelThenMap(Location aftermove,

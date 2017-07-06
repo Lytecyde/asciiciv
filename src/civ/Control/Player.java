@@ -47,10 +47,11 @@ public class Player {
 
         this.nationName = nationName;
         identification.fullName = "Mik Seljamaa :)";
-        identification.id = identification.id++;
+        identification.id = ID.getNextID();
+        System.out.println("ID" + nationName + identification.id);
         units = new Units(this);
         unitCount = units.list.size();
-        colors= Data.colors[identification.id];
+        colors = Data.colors[identification.id];
     }
 
 

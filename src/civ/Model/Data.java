@@ -13,7 +13,7 @@ import java.util.LinkedList;
  */
 public class Data {
 
-    public final static Location CENTRE = new Location(11, 7);
+    public final static Location CENTRE = new Location(8, 12 );
     public static final int rows = 16;
     public static final int cols = 24;
     public static LinkedList<String> nations = new LinkedList<>();
@@ -27,7 +27,7 @@ public class Data {
             Color.magenta,
             Color.gray,
             Color.red,
-            new Color(0,0,128),
+            new Color(0,0,180),
             new Color(128,0,253)
     };
 
@@ -35,7 +35,7 @@ public class Data {
         generateNationsList();
     }
 
-    public final static char landChit = '■';
+    public final static char landChit = '▓';
 
     public final static char seaChit = '±';
 
