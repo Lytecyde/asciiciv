@@ -34,10 +34,17 @@ public class Civilization {
         startingPlayerSetup();
         testPlayerCount();
         Data.listOfPlayers.addAll(r.listOfPlayers);
+        testPlayerColors();
         View v = new View();
         v.updateUnitBoard();
 
         roundLoop();
+    }
+
+    private static void testPlayerColors(){
+        for(Player p: Data.listOfPlayers){
+            System.out.println(p.nationName + p.colors.toString());
+        }
     }
 
     private static void testPlayerCount() {
@@ -51,7 +58,7 @@ public class Civilization {
     }
 
     public Civilization(){
-        turnCount =0;
+        turnCount = 0;
         totalUnitCount =0;
     }
 

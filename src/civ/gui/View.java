@@ -541,13 +541,11 @@ public class View extends JFrame implements ActionListener {
         Location l;
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
-                testCountComponentsOfCell(x, y);
                 p = getCell(x, y);
                 l= new Location(x,y);
                 addCellToWorldMap(p, l);
             }
         }
-
     }
 
     private void testCountComponentsOfCell(int x, int y) {
@@ -736,5 +734,6 @@ public class View extends JFrame implements ActionListener {
 
         );
     }
+
 }
 

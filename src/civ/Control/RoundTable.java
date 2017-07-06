@@ -44,8 +44,8 @@ public class RoundTable {
     private int pickRandomNationFrom(LinkedList<String> listOfNations) {
 
         do {
-            currentNation = (int)(
-                    (listOfNations.size() -1) * Math.random());
+            Random random =  new Random();
+            currentNation = random.nextInt(listOfNations.size());
             System.out.println("" +currentNation);
         }while(!isInBoundsNationCode());
         System.out.println("Nation created is :" + currentNation);
