@@ -2,6 +2,7 @@ package civ.gui;
 
 import civ.Control.Civilization;
 import civ.Control.Player;
+import civ.Control.RoundTable;
 import civ.Model.*;
 
 import javax.swing.*;
@@ -14,6 +15,8 @@ import java.util.LinkedList;
 import java.util.Random;
 
 import static civ.Control.Civilization.currentPlayer;
+import static civ.Model.Data.cols;
+import static civ.Model.Data.rows;
 import static javax.swing.BorderFactory.createBevelBorder;
 
 /**
@@ -41,18 +44,20 @@ public class View extends JFrame implements ActionListener {
             MapType.VISIBLE);
     private JLabel cursor;
     private static JLabel label;
-    private final JLabel[][] gridLabels = new JLabel[Data.rows][Data.cols];
-    private JLabel[][] visibleGrid = new JLabel[Data.rows][Data.cols];
-    public JPanel[][] cellGrid = new JPanel[Data.rows][Data.cols];
+    private final JLabel[][] gridLabels = new JLabel[rows][cols];
+    private JLabel[][] visibleGrid = new JLabel[rows][cols];
+    public JPanel[][] cellGrid = new JPanel[rows][cols];
     private JLabel temporaryContents;
     private Dimension cellDimension = new Dimension(cellSize, cellSize);
     public static int currentUnitIndex = 0;
     private JButton endTurn = new JButton("End this Turn.");
     private JButton nextUnit;
 
-    public JLabel funds, pollution, tax, year;
-    private JLabel unitType;
-    private JLabel veteran;
+    public JLabel funds, pollution, tax, year;//for databoard
+    private JLabel unitType, veteran; //for unit
+
+    public LinkedList<Location> promisedLands = new LinkedList<Location>();
+    private LinkedList<Location> startingSpots;
 
     public View() {
         setupView();
@@ -69,16 +74,15 @@ public class View extends JFrame implements ActionListener {
         fillCellGrid();
         placeLabels();
         createCells();
-
         //testLabelsAll("2nd");
-        //
 
         placeCursorOnPanelAt(Data.CENTRE);
         placeContentToView();
         fillCellGrid();
+        makeStartingLocations();
+        placeUnits();
         replaceWorldMap();
         worldMap.requestFocus();
-
 
         //units placement
 
@@ -88,10 +92,36 @@ public class View extends JFrame implements ActionListener {
         repaint();
     }
 
-    private void setupAllUnitsForMap(){
-
+    public void placeUnits() {
+        placeLandUnits();
+        //placeSeaUnits();
+        //placeAirUnits();
+        //placeSatellites();
     }
 
+    private void placeAirUnits() {
+        char sign = Data.airChit;
+        paintUnitSign(sign);
+    }
+
+    private void placeSeaUnits() {
+        char sign = Data.seaChit;
+        paintUnitSign(sign);
+    }
+
+    private void placeLandUnits() {
+        char sign = Data.landChit;
+        paintUnitSign(sign);
+    }
+
+    private void paintUnitSign(char sign) {
+        for(Player p : Data.listOfPlayers){
+            Location l = p.startingSpot;
+            String signStr = Character.toString(sign);
+            visibleGrid[l.x][l.y].setText(signStr);
+            visibleGrid[l.x][l.y].setForeground(p.colors);
+        }
+    }
 
 
     public void updateUnitsOnMap(){
@@ -109,16 +139,16 @@ public class View extends JFrame implements ActionListener {
     }
 
     private void makeGridLabels(){
-        for (int x = 0; x < Data.rows; x++) {
-            for (int y = 0; y < Data.cols; y++) {
+        for (int x = 0; x < rows; x++) {
+            for (int y = 0; y < cols; y++) {
                 gridLabels[x][y] = getCellLabelsFromWorldMap()[x][y];
             }
         }
     }
 
     private void getVisibleGridFromGridLabels() {
-        for (int x = 0; x < Data.rows; x++) {
-            for (int y = 0; y < Data.cols; y++) {
+        for (int x = 0; x < rows; x++) {
+            for (int y = 0; y < cols; y++) {
                 visibleGrid[x][y] = gridLabels[x][y];
                 visibleGrid[x][y].setVisible(true);
                 this.visibleGrid[x][y].setPreferredSize(cellDimension);
@@ -127,16 +157,16 @@ public class View extends JFrame implements ActionListener {
     }
 
     private void initCellGrid(){
-        for (int x = 0; x < Data.rows; x++) {
-            for (int y = 0; y < Data.cols; y++) {
+        for (int x = 0; x < rows; x++) {
+            for (int y = 0; y < cols; y++) {
                 cellGrid[x][y] = new JPanel();
             }
         }
     }
 
     private void initLabels(){
-        for (int x = 0; x < Data.rows; x++) {
-            for (int y = 0; y < Data.cols; y++) {
+        for (int x = 0; x < rows; x++) {
+            for (int y = 0; y < cols; y++) {
                 visibleGrid[x][y] = new JLabel();
                 gridLabels[x][y] = new JLabel();
             }
@@ -254,8 +284,8 @@ public class View extends JFrame implements ActionListener {
     }
 
     protected JPanel createWorldMap() {
-        worldMap.setLayout(new GridLayout(Data.rows, Data.cols));
-        worldMap.setSize(Data.cols *15, Data.rows *15);
+        worldMap.setLayout(new GridLayout(rows, cols));
+        worldMap.setSize(cols *15, rows *15);
         worldMap.setVisible(true);
         worldMap.repaint();
         return worldMap;
@@ -263,8 +293,8 @@ public class View extends JFrame implements ActionListener {
 
     private JPanel createGlobeMap() {
         globeMap.setBackground(Color.black);
-        globeMap.setLayout(new GridLayout(Data.rows, Data.cols));
-        globeMap.setSize(Data.cols*4, Data.rows*4);
+        globeMap.setLayout(new GridLayout(rows, cols));
+        globeMap.setSize(cols*4, rows*4);
         globeMap.setVisible(true);
         globeMap.repaint();
         return globeMap;
@@ -338,8 +368,8 @@ public class View extends JFrame implements ActionListener {
     private void createMapPanel() {
         worldMap.setPreferredSize(
                 new Dimension(
-                        Data.cols * cellSize + 10,
-                        Data.rows * cellSize + 10));
+                        cols * cellSize + 10,
+                        rows * cellSize + 10));
         worldMap.setVisible(true);
     }
 
@@ -410,8 +440,8 @@ public class View extends JFrame implements ActionListener {
     }
 
     private void fillCellGrid() {
-        for (int x = 0; x < Data.rows; x++) {
-            for (int y = 0; y < Data.cols; y++) {
+        for (int x = 0; x < rows; x++) {
+            for (int y = 0; y < cols; y++) {
                 fillCell(x, y);
                 showMap();
             }
@@ -480,8 +510,8 @@ public class View extends JFrame implements ActionListener {
 
     protected void placeLabels(){
         Location l;
-        for (int x = 0; x < Data.rows; x++) {
-            for (int y = 0; y < Data.cols; y++) {
+        for (int x = 0; x < rows; x++) {
+            for (int y = 0; y < cols; y++) {
                 l = new Location(x,y);
                 JLabel cellLabel = visibleGrid[l.x][l.y];//TODO:was location
                 placeLabel(cellLabel, l);
@@ -496,9 +526,9 @@ public class View extends JFrame implements ActionListener {
     }
 
     private JLabel[][] getCellLabelsFromWorldMap() {
-        JLabel[][] localMapCells = new JLabel[Data.rows][Data.cols];
-        for (int x = 0; x < Data.rows; x++) {
-            for (int y = 0; y < Data.cols; y++) {
+        JLabel[][] localMapCells = new JLabel[rows][cols];
+        for (int x = 0; x < rows; x++) {
+            for (int y = 0; y < cols; y++) {
                 gridLabels[x][y] = WorldMap.mapCells[x][y];
                 localMapCells[x][y] = gridLabels[x][y];
             }
@@ -509,8 +539,8 @@ public class View extends JFrame implements ActionListener {
     protected void createCells() {
         JPanel p;
         Location l;
-        for (int x = 0; x < Data.rows; x++) {
-            for (int y = 0; y < Data.cols; y++) {
+        for (int x = 0; x < rows; x++) {
+            for (int y = 0; y < cols; y++) {
                 testCountComponentsOfCell(x, y);
                 p = getCell(x, y);
                 l= new Location(x,y);
@@ -603,7 +633,7 @@ public class View extends JFrame implements ActionListener {
             aftermove = previous.movement(direction);
             testLocationPrint(aftermove, previous);
             replaceLabelThenMap(aftermove, previous);
-            setLoc(aftermove);
+            setLocation(aftermove);
         }
 
         private void replaceLabelThenMap(Location aftermove,
@@ -614,12 +644,12 @@ public class View extends JFrame implements ActionListener {
         }
     }
 
-    void setLoc(Location aftermove){ this.location = aftermove; }
+    void setLocation(Location aftermove){ this.location = aftermove; }
 
 
     private void replaceWorldMap() {
         worldMap.removeAll();
-        //TODO: define cellGrid as JPanel with JLabel
+        //TODO: refactorisation define cellGrid as JPanel with JLabel
         initCellGrid();
         fillCellGrid();
         placeLabels();
@@ -628,11 +658,11 @@ public class View extends JFrame implements ActionListener {
         worldMap.setVisible(true);
 
     }
-
+    //LOCATION
     public LinkedList<Location> getLandLocations(){
         LinkedList<Location> startingPoints = new LinkedList<Location>();
-        for (int x = 0; x < Data.cols; x++) {
-            for (int y = 0; y < Data.rows; y++) {
+        for (int x = 0; x < rows; x++) {
+            for (int y = 0; y < cols; y++) {
                 boolean startingPointAdded = isLand(x, y)
                         ?startingPoints.add(new
                         Location(x,y)):false;
@@ -649,30 +679,36 @@ public class View extends JFrame implements ActionListener {
 
     public Location pickStartingLocation(){
         Random randomised = new Random();
-        LinkedList<Location> allLands = getLandLocations();
+        LinkedList<Location> allLands = getRemainingLandLocations();
         Location start = allLands.get(randomised.nextInt(allLands.size()));
+        setRemainingLandLocations(start);
         return start;
     }
 
-    public LinkedList<Location> getPotentialLocations(){
-        LinkedList<Location> startingSpots = new LinkedList<Location>();
+    private void setRemainingLandLocations(Location start) {
+        promisedLands.remove(start);
+    }
+
+    private LinkedList<Location> getRemainingLandLocations() {
+        return promisedLands;
+    }
+
+    public LinkedList<Location> makeStartingLocations(){
+        startingSpots = new LinkedList<Location>();
+        promisedLands.addAll(getLandLocations());
         for(Player player: Data.listOfPlayers) {
             Location start = pickStartingLocation();
+            player.startingSpot = start;
             startingSpots.add(start);
         }
         return startingSpots;
     }
-
-    public LinkedList<Location> promisedLands = getLandLocations();
-    public LinkedList<Location> makePotentialLocations(Location removable){
-        //init a linkedlist
-        
-        //TODO remove all adjacent spots too
-        //make the
-        promisedLands.remove(removable);
-        return promisedLands;
+    public LinkedList<Location> getStartingLocations(){
+        return startingSpots;
     }
 
+    //LOCATION
+    //tests
     private void testLocationPrint(Location aftermove, Location previous) {
         System.out.println("location:"+previous.x +", "+
                 previous.y +"::"+aftermove.x + ", " +
@@ -681,8 +717,8 @@ public class View extends JFrame implements ActionListener {
 
     private void testLabelsAll(String s) {
         System.out.println(s+"test");
-        for (int x = 0; x < Data.rows; x++) {
-            for (int y = 0; y < Data.cols; y++) {
+        for (int x = 0; x < rows; x++) {
+            for (int y = 0; y < cols; y++) {
                 testLabel(x, y);
             }
         }

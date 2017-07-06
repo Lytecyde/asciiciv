@@ -3,6 +3,7 @@ package civ.Model;
 import civ.Control.Player;
 import civ.Control.RoundTable;
 
+import java.awt.*;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -19,6 +20,17 @@ public class Data {
     public static int numberOfArrowKeyPresses = 0;
     public static LinkedList<Player> listOfPlayers = new LinkedList<Player>();
     public static int numberOfPlayers = 0;
+    public static Color[] colors = {
+            Color.black,
+            Color.orange,
+            Color.pink,
+            Color.magenta,
+            Color.gray,
+            Color.red,
+            new Color(0,0,128),
+            new Color(128,0,253)
+    };
+
     public Data() {
         generateNationsList();
     }

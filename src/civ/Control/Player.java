@@ -2,6 +2,8 @@ package civ.Control;
 
 import civ.Model.*;
 
+import java.awt.*;
+
 /**
  * Created by miku on 30/05/2017.
  */
@@ -25,6 +27,8 @@ public class Player {
     public int tax;
     public int pollution = 0;
     boolean rocketBuilt = false;
+    public Location startingSpot;
+    public Color colors;
 
     public Player(){
 
@@ -36,6 +40,7 @@ public class Player {
         education = 0;
         units = new Units();
         unitCount = units.list.size();
+        colors = Color.WHITE;
     }
 
     public Player(String nationName){
@@ -45,6 +50,7 @@ public class Player {
         identification.id = identification.id++;
         units = new Units(this);
         unitCount = units.list.size();
+        colors= Data.colors[identification.id];
     }
 
 

@@ -33,9 +33,10 @@ public class Civilization {
         RoundTable r = new RoundTable(numberOfPlayers);
         startingPlayerSetup();
         testPlayerCount();
-        View v = new View();
         Data.listOfPlayers.addAll(r.listOfPlayers);
+        View v = new View();
         v.updateUnitBoard();
+
         roundLoop();
     }
 
