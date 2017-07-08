@@ -10,9 +10,9 @@ import java.awt.event.ActionListener;
  * Created by miku on 29/06/2017.
  */
 public class UnitSwitchListener implements ActionListener{
-    View view;
-    public UnitSwitchListener(View v){
-        view = v;
+    View v;
+    public UnitSwitchListener(View view){
+        v= view;
     }
 
     @Override
@@ -20,7 +20,9 @@ public class UnitSwitchListener implements ActionListener{
         View.currentUnitIndex = View.currentUnitIndex <
                 Civilization.currentPlayer.unitCount -1 ?
                 ++View.currentUnitIndex:0;
-        view.updateUnitBoard();
+        v.updateUnitBoard();
+        v.switchPlayer.setFocusPainted(false);
+        v.requestFocus();
     }
 
 }

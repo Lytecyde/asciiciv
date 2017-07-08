@@ -29,6 +29,9 @@ public class PlayerSwitchListener implements ActionListener {
         Data.Turn.currentPlayer = nextPlayer;
         Data.Turn.currentPlayerIndex =
                 Civilization.listOfPlayers.indexOf(nextPlayer);
-
+        v.emptyUnitBoard();
+        v.updateUnitBoardWith(Civilization.currentPlayer.units.list);
+        v.switchPlayer.setFocusPainted(false);
+        v.requestFocus();
     }
 }

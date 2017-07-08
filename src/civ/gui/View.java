@@ -43,7 +43,7 @@ public class View extends JFrame implements ActionListener {
     public static final int cellSize = 15;
     private static WorldMap worldMapPanelContents = new WorldMap(
             MapType.VISIBLE);
-    private JLabel cursor;
+    public JLabel cursor;
     private static JLabel label;
     private final JLabel[][] gridLabels = new JLabel[rows][cols];
     private JLabel[][] visibleGrid = new JLabel[rows][cols];
@@ -51,8 +51,8 @@ public class View extends JFrame implements ActionListener {
     private JLabel temporaryContents;
     private Dimension cellDimension = new Dimension(cellSize, cellSize);
     public static int currentUnitIndex = 0;
-    private JButton endTurn = new JButton("End this Turn.");
-    private JButton switchPlayer = new JButton("Next player");
+    public JButton endTurn = new JButton("End this Turn.");
+    public JButton switchPlayer = new JButton("Next player");
     private JButton nextUnit;
 
     public JLabel funds, pollution, tax, year;//for databoard
@@ -471,7 +471,6 @@ public class View extends JFrame implements ActionListener {
 
 
     private void replaceVisible(Location previous, JLabel c) {
-
         visibleGrid[previous.x][previous.y] = c;
         visibleGrid[previous.x][previous.y].setText(c.getText());
         visibleGrid[previous.x][previous.y].setForeground(c.getForeground());
@@ -678,35 +677,10 @@ public class View extends JFrame implements ActionListener {
 
         }
 
-        private boolean updateUnitBoardWith(LinkedList<Unit> unitsAtLocation) {
-            unitBoard.removeAll();
-            createUnitBoard();
-            try {
-                while(!unitsAtLocation.isEmpty()) {
-                    Unit current = unitsAtLocation.getFirst();
-                    unitType.setText(current.getType() +
-                            current.ownerNation +
-                            current.identification.id
-                    );
-                    unitBoard.add(unitType);
-                    String veteranText = current.isVeteran() ?
-                            "Veteran" :
-                            "Rookie";
-                    veteran.setText(veteranText);
-                    break;
-                }
-            }catch(NullPointerException npe){
-                System.err.println("hey" + npe);
-            }
-            unitBoard.add(veteran);
-            return !unitsAtLocation.isEmpty();
-        }
 
 
-        private boolean emptyUnitBoard() {
-            unitBoard.removeAll();
-            return false;
-        }
+
+
 
         private boolean isLandUnitPresent(JLabel jLabel) {
             return jLabel.getText().equals(String.valueOf(Data.landChit));
@@ -722,6 +696,34 @@ public class View extends JFrame implements ActionListener {
 
     void setLocation(Location aftermove){ this.location = aftermove; }
 
+    public boolean updateUnitBoardWith(LinkedList<Unit> unitsAtLocation) {
+        unitBoard.removeAll();
+        createUnitBoard();
+        try {
+            while(!unitsAtLocation.isEmpty()) {
+                Unit current = unitsAtLocation.getFirst();
+                unitType.setText(current.getType() +
+                        current.ownerNation +
+                        current.identification.id
+                );
+                unitBoard.add(unitType);
+                String veteranText = current.isVeteran() ?
+                        "Veteran" :
+                        "Rookie";
+                veteran.setText(veteranText);
+                break;
+            }
+        }catch(NullPointerException npe){
+            System.err.println("hey" + npe);
+        }
+        unitBoard.add(veteran);
+        return !unitsAtLocation.isEmpty();
+    }
+
+    public boolean emptyUnitBoard() {
+        unitBoard.removeAll();
+        return false;
+    }
 
     private void replaceWorldMap() {
         worldMap.removeAll();

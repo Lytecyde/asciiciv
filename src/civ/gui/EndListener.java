@@ -14,7 +14,8 @@ public class EndListener implements ActionListener{
     @Override
     public void actionPerformed(ActionEvent e) {
         selectNextPlayer();
-        v.worldMap.requestFocus();
+        v.endTurn.setFocusPainted(false);
+        v.requestFocus();
     }
     public EndListener(View view){
         v = view;

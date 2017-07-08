@@ -23,11 +23,11 @@ public class Data {
     public static Color[] colors = {
             Color.black,
             Color.orange,
-            Color.pink,
-            Color.magenta,
+            new Color(201,133,63),
+            new Color(200,0,253),
             Color.gray,
             Color.red,
-            new Color(0,0,180),
+            new Color(0,0,200),
             new Color(128,0,253)
     };
     public static String competency;
