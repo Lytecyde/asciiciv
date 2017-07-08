@@ -25,19 +25,19 @@ public class Civilization {
     public static LinkedList<Player> listOfPlayers;
     public static int numberOfPlayers;
     public static int year = 0;
+    private static RoundTable r;
     public static void main(String[] args) {
         //System.out.println("msg: civ main");
         new Data();
         new Setup();
         numberOfPlayers =  Data.numberOfPlayers;
-        RoundTable r = new RoundTable(numberOfPlayers);
+        r = new RoundTable(numberOfPlayers);
         startingPlayerSetup();
         testPlayerCount();
         Data.listOfPlayers.addAll(r.listOfPlayers);
         testPlayerColors();
         View v = new View();
         v.updateUnitBoard();
-
         roundLoop();
     }
 
@@ -59,7 +59,7 @@ public class Civilization {
 
     public Civilization(){
         turnCount = 0;
-        totalUnitCount =0;
+        totalUnitCount = 0;
     }
 
     private static void startingPlayerSetup() {
@@ -75,19 +75,15 @@ public class Civilization {
         }
     }
 
-
-
     private static void checkAllEndings() {
          new Endings();
-
     }
 
     private static void gameTurn(Player player) {
-        //events
+        //events.Calamities, events.Jubilees
         ministries(player);
         unitLeadership(player);
         cityManagement(player);
-
     }
 
     private static void ministries(Player currentplayer) {
@@ -117,5 +113,16 @@ public class Civilization {
 
     static void adjustFunds(int incomePerTurn) {
         Civilization.currentPlayer.funds += incomePerTurn;
+    }
+
+    public static Player getNext(Player current){
+        int nextIndex =1;
+        while(!r.listOfPlayers.isEmpty()) {
+            int currentIndex = r.listOfPlayers.indexOf(current);
+            nextIndex = currentIndex + 1;
+            nextIndex = nextIndex % listOfPlayers.size();
+            break;
+        }
+        return listOfPlayers.get(nextIndex);
     }
 }

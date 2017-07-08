@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.Random;
 
 import static civ.Control.Civilization.currentPlayer;
+import static civ.Control.Civilization.listOfPlayers;
 import static civ.Model.Data.cols;
 import static civ.Model.Data.rows;
 import static javax.swing.BorderFactory.createBevelBorder;
@@ -51,43 +52,39 @@ public class View extends JFrame implements ActionListener {
     private Dimension cellDimension = new Dimension(cellSize, cellSize);
     public static int currentUnitIndex = 0;
     private JButton endTurn = new JButton("End this Turn.");
-    private JButton switchPlayer = new JButton("next player");
+    private JButton switchPlayer = new JButton("Next player");
     private JButton nextUnit;
 
     public JLabel funds, pollution, tax, year;//for databoard
     private JLabel unitType, veteran; //for unit
 
     public LinkedList<Location> promisedLands = new LinkedList<Location>();
-    private LinkedList<Location> startingSpots;
+    private LinkedList<Location> startingSpots;//might be better as a hashmap!!
 
     public View() {
+        //preparations
         setupView();
         placeMenuBar();
         initCellGrid();
         initLabels();
-        //testLabelsAll("0th");
         makeGridLabels();
 
-        //
+        //makeContents
         createContentDefinitions();
         getVisibleGridFromGridLabels();
-        //testLabelsAll("1st");
         fillCellGrid();
         placeLabels();
         createCells();
-        //testLabelsAll("2nd");
 
+        //placeAllContent
         placeCursorOnPanelAt(Data.CENTRE);
         placeContentToView();
         fillCellGrid();
-        makeStartingLocations();
+        startingSpots = makeStartingLocations();
         placeUnits();
         replaceWorldMap();
         worldMap.requestFocus();
 
-        //units placement
-
-        //testLabelsAll("3rd");
         setVisible(true);
         pack();
         repaint();
@@ -97,7 +94,7 @@ public class View extends JFrame implements ActionListener {
         placeLandUnits();
         //placeSeaUnits();
         //placeAirUnits();
-        //placeSatellites();
+        //TODO:placeSatellites();
     }
 
     private void placeAirUnits() {
@@ -306,17 +303,19 @@ public class View extends JFrame implements ActionListener {
     }
 
     private void createControlPanel() {
-        control.setLayout(new GridLayout(4, 1));
+        control.setLayout(new GridLayout(5, 1));
         createGlobeMap();
         control.add(globeMap);
         createDataBoard();
         control.add(dataBoard);
         createUnitBoard();
         control.add(unitBoard);
+        PlayerSwitchListener psl = new PlayerSwitchListener(this);
+        switchPlayer.addActionListener(psl);
         EndListener endListener = new EndListener(this);
         endTurn.addActionListener(endListener);
         control.add(endTurn);
-
+        control.add(switchPlayer);
         control.repaint();
     }
 
@@ -333,7 +332,7 @@ public class View extends JFrame implements ActionListener {
         unitBoard.add(nextUnit);
 
     }
-    public void updateUnitBoard(){
+    public void  updateUnitBoard(){
         unitBoard.removeAll();
         createUnitBoard();
         Player player = Data.Turn.currentPlayer;
@@ -348,6 +347,7 @@ public class View extends JFrame implements ActionListener {
         String veteranText = current.isVeteran() ? "Veteran":"Rookie";
         veteran.setText(veteranText);
         unitBoard.add(veteran);
+
     }
 
 
@@ -602,7 +602,7 @@ public class View extends JFrame implements ActionListener {
                     location.getY()
             );
             System.out.println("Keypressed" +
-                    Data.numberOfArrowKeyPresses +
+                    Data.numberOfArrowKeyPresses++ +
                     " : " +
                     e.getKeyCode());
 
@@ -641,36 +641,71 @@ public class View extends JFrame implements ActionListener {
 
         private void checkForUnit(Location l) {
             boolean presentUnit = isLandUnitPresent(visibleGrid[l.x][l.y]);
-
-            int i = getResponse(l);
-            boolean updated = presentUnit ? selectUpdateResponseForUnitBoard(i):
-                    false;
+            while(presentUnit) {
+                getResponse(l);
+                break;
+            }
         }
 
-        private int getResponse(Location l) {
-            int i = 0;
-            for(Unit u: currentPlayer.units.list){
-                //TODO on 7/7/17
-                i = u.location.equals(l)?UPDATE:NONE;
+        //CHECK IF THERE ARE ANY UNITS IF SO update the unitboard
+        private boolean getResponse(Location l) {
+            LinkedList<Unit> unitsAtLocation = new LinkedList<Unit>();
 
+            for(Player p: Data.listOfPlayers){
+                while(!p.units.list.isEmpty()){
+                    for(Unit u:p.units.list){
+                        System.out.println(p.nationName + "  " + u.getType());
+                        try {
+                            while(u.location != null) {
+                                while (u.location.x == l.x &&
+                                        u.location.y == l.y) {
+                                    unitsAtLocation.add(u);
+                                    break;
+                                }
+                                break;
+                            }
+                        }catch(NullPointerException npe){
+                            System.err.print(npe);
+                        }
+                    }
+                    break;
+                }
             }
-            return i;
+            boolean updated = isLandUnitPresent(visibleGrid[l.x][l.y]) ?
+                    updateUnitBoardWith(unitsAtLocation):
+                    emptyUnitBoard();
+            return updated;
+
         }
 
-        private boolean selectUpdateResponseForUnitBoard(int i) {
-
-            boolean b = false;
-            switch (i){
-                case NONE:
-                    unitBoard.removeAll();
-                    b = false;
+        private boolean updateUnitBoardWith(LinkedList<Unit> unitsAtLocation) {
+            unitBoard.removeAll();
+            createUnitBoard();
+            try {
+                while(!unitsAtLocation.isEmpty()) {
+                    Unit current = unitsAtLocation.getFirst();
+                    unitType.setText(current.getType() +
+                            current.ownerNation +
+                            current.identification.id
+                    );
+                    unitBoard.add(unitType);
+                    String veteranText = current.isVeteran() ?
+                            "Veteran" :
+                            "Rookie";
+                    veteran.setText(veteranText);
                     break;
-                case UPDATE:
-                    updateUnitBoard();
-                    b= true;
-                    break;
+                }
+            }catch(NullPointerException npe){
+                System.err.println("hey" + npe);
             }
-            return b;
+            unitBoard.add(veteran);
+            return !unitsAtLocation.isEmpty();
+        }
+
+
+        private boolean emptyUnitBoard() {
+            unitBoard.removeAll();
+            return false;
         }
 
         private boolean isLandUnitPresent(JLabel jLabel) {

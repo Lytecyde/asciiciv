@@ -13,10 +13,11 @@ import java.util.HashMap;
  * Created by miku on 30/05/2017.
  */
 public class Unit {
+    public String ownerNation;
     public Location location;
     public ID identification = new ID();
-    private String commandingNation;
-    private String homeCity;
+    public String commandingNation;
+    public String homeCity;
     //acquired properties
     private boolean veteran;
     private boolean mechanised;
@@ -290,7 +291,7 @@ public class Unit {
         identification.id = Civilization.totalUnitCount;
         Civilization.totalUnitCount++;
 
-        String ownerNation = current.nationName;
+        ownerNation = current.nationName;
 
         identification.type = unitType.name();
         identification.fullName = ownerNation +

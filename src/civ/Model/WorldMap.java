@@ -148,7 +148,6 @@ public class WorldMap {
         LandType landtype =  LandType.values()[landLabelMap[x][y]];
         JLabel mapland = (new LandLabel()).getLabelBy(landtype);
         try {
-
             mc.setBackground(mapland.getBackground());
             mc.setForeground(mapland.getForeground());
             mc.setText(mapland.getText());
@@ -157,8 +156,8 @@ public class WorldMap {
             this.panelHolderGrid[x][y].repaint();
         }
         catch(NullPointerException e){
-                System.out.println(e);
-            }
+            //System.out.println(e);
+        }
     }
 
     public static void addToGrid( JPanel[][] a){

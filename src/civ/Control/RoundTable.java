@@ -20,6 +20,8 @@ public class RoundTable {
 
     }
 
+
+
     private void generateListOfAllNations() {
         listOfNations = new LinkedList<>();
         List list = new ArrayList<String>(Arrays.asList(Data.Nation.names));
@@ -31,8 +33,9 @@ public class RoundTable {
         for (countPlayersMade = 0;
              countPlayersMade < numberOfPlayers;
              countPlayersMade++) {
-            currentNation = !listOfNations.isEmpty()? pickRandomNationFrom
-                    (listOfNations):countPlayersMade;
+            currentNation = !listOfNations.isEmpty()?
+                    pickRandomNationFrom(listOfNations):
+                    countPlayersMade;
             takeFromNationsListAddToPlayers(currentNation);
         }
         Data.Turn.currentPlayer = listOfPlayers.getFirst();

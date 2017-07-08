@@ -30,6 +30,8 @@ public class Data {
             new Color(0,0,180),
             new Color(128,0,253)
     };
+    public static String competency;
+    public static String firstPlayerName;
 
     public Data() {
         generateNationsList();
@@ -57,6 +59,7 @@ public class Data {
 
     public static class Turn {
         public static Player currentPlayer;
+        public static int currentPlayerIndex;
     }
 
     public static class Nation{

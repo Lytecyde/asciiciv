@@ -15,6 +15,7 @@ public class Setup {
     public Setup() {
         sizeDialogue();
         playersDialogue();
+        nameDialogue();
     }
 
 
@@ -50,6 +51,42 @@ public class Setup {
                 initialSelection);
         defineNumberOfPlayers((String) selection);
 
+    }
+
+    private void competencyDialogue(){
+        JDialog.setDefaultLookAndFeelDecorated(true);
+
+        Object[] selectionValues = {"Chieftain", "Leader", "King", "Emperor",
+                "Deity"};
+        String initialSelection = "Leader";
+        String question = Questions.message[2];
+        Object selection =
+                JOptionPane.showInputDialog(
+                        null,
+                        question ,
+                        "Setup 3", QUESTION_MESSAGE,
+                        null,
+                        selectionValues,
+                        initialSelection);
+        defineCompetency((String) selection);
+    }
+
+    private void defineCompetency(String selection) {
+        Data.competency = selection;
+    }
+
+    private void nameDialogue(){
+        JDialog.setDefaultLookAndFeelDecorated(true);
+
+        String question = Questions.message[3];
+        String name = JOptionPane.showInputDialog(
+                        null,
+                        question );
+        defineName(name);
+    }
+
+    private void defineName(String name) {
+        Data.firstPlayerName = name;
     }
 
     private void defineMapSize(String selection) {
@@ -91,7 +128,8 @@ public class Setup {
         static String[] message = {
                 "What size of a world would you like?",
                 "How many civilizations are there?",
-                "How competent are you?"
+                "How competent are you?",
+                "What is your name?"
         };
     }
 }
