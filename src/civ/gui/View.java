@@ -49,6 +49,7 @@ public class View extends JFrame implements ActionListener {
     public JButton switchPlayer = new JButton("Next player");
     public JButton nextUnit;
 
+
     public JLabel funds, pollution, tax, year;//for databoard
     private JLabel unitType, veteran; //for unit
     public Location cursorLocation;
@@ -117,7 +118,7 @@ public class View extends JFrame implements ActionListener {
 
 
     public void updateUnitsOnMap(){
-        //TODO going to move some units around!!!
+        //TODO going to moveCursor some units around!!!
     }
 
     private void setupView() {
@@ -421,11 +422,9 @@ public class View extends JFrame implements ActionListener {
 
     public void placeOldLabelBackTo(Location previous) {
         JLabel c = getPreviousLabel();
-
-        replaceVisible( previous , c);
+        replaceVisible(previous, c);
         fillCellGrid();
         showMap();
-        //TODO:destruct temporaryContents as null
     }
 
     private JLabel getPreviousLabel() {
@@ -477,8 +476,6 @@ public class View extends JFrame implements ActionListener {
     }
 
     private void placeLabel(JLabel c, Location location) {
-
-
         c.setSize(cellDimension);
         JPanel cell = cellGrid[location.x][location.y];
         cell.setLayout(new GridLayout(1,1));
@@ -593,38 +590,75 @@ public class View extends JFrame implements ActionListener {
         @Override
         public void keyPressed(KeyEvent e) {
             Location aftermove;
-            Location previous = cursorLocation; //was location
+            Location previous = cursorLocation;
             System.out.println("Keypressed" +
                     Data.numberOfArrowKeyPresses++ +
                     " : " +
                     e.getKeyCode());
 
             try {
-                switch (e.getKeyCode()) {
-
-                    case 39:
-                        move(previous, DirectionType.SOUTH);
-                        break;
-                    case 37:
-                        move(previous, DirectionType.NORTH);
-                        break;
-                    case 40:
-                        move(previous, DirectionType.WEST);
-                        break;
-                    case 38:
-                        move(previous, DirectionType.EAST);
-                        break;
-                    case KeyEvent.VK_SPACE:
-                        //activate unit on location
-                    default:
-
-                }
+                cursorMovements(e, previous);
+                unitMovements(e,previous);
             } catch (ArrayIndexOutOfBoundsException aiobe) {
                 System.out.println(aiobe + "movement went out");
             }
         }
 
-        private void move(Location previous, DirectionType direction) {
+        private void unitMovements(KeyEvent e, Location previous) {
+            switch (e.getKeyChar()) {
+                case 's':
+                    moveUnit(previous, DirectionType.SOUTH);
+                    break;
+                case 'w':
+                    moveUnit(previous, DirectionType.NORTH);
+                    break;
+                case 'a':
+                    moveUnit(previous, DirectionType.WEST);
+                    break;
+                case 'd':
+                    moveUnit(previous, DirectionType.EAST);
+                    break;
+                case 'n':
+                    nextUnit.doClick();
+                    break;
+                default:
+
+            }
+        }
+
+        private void moveUnit(Location previous, DirectionType direction) {
+            Location aftermove;
+            aftermove = previous.movement(direction);
+            Player currentPlayer = Data.Turn.currentPlayer;
+            LinkedList<Unit> ul = currentPlayer.units.list;
+            ul.get(currentUnitIndex).location = aftermove;
+            placeOldLabelBackTo(previous);
+            placeUnit(ul.get(currentUnitIndex));
+            replaceWorldMap();
+        }
+
+        private void cursorMovements(KeyEvent e, Location previous) {
+            switch (e.getKeyCode()) {
+                case 39:
+                    moveCursor(previous, DirectionType.SOUTH);
+                    break;
+                case 37:
+                    moveCursor(previous, DirectionType.NORTH);
+                    break;
+                case 40:
+                    moveCursor(previous, DirectionType.WEST);
+                    break;
+                case 38:
+                    moveCursor(previous, DirectionType.EAST);
+                    break;
+                case KeyEvent.VK_SPACE:
+                    //activate unit on location for movement
+                default:
+
+            }
+        }
+
+        private void moveCursor(Location previous, DirectionType direction) {
             Location aftermove;
             aftermove = previous.movement(direction);
             replaceLabelThenMap(aftermove, previous);
@@ -672,11 +706,6 @@ public class View extends JFrame implements ActionListener {
 
         }
 
-
-
-
-
-
         private boolean isLandUnitPresent(JLabel jLabel) {
             return jLabel.getText().equals(String.valueOf(Data.landChit));
         }
@@ -686,6 +715,21 @@ public class View extends JFrame implements ActionListener {
             placeOldLabelBackTo(previous);
             placeCursorOnPanelAt(aftermove);
             replaceWorldMap();
+        }
+    }
+
+    private void placeUnit(Unit unit) {
+        Location location = unit.location;
+        switch(unit.chit){
+            case Data.landChit:
+
+                visibleGrid[location.x][location.y].setText(
+                        Character.toString(unit.chit));
+                visibleGrid[location.x][location.y].setForeground(
+                        Data.Turn.currentPlayer.colors);
+                break;
+            default:
+
         }
     }
 
