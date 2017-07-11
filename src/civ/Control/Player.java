@@ -9,8 +9,8 @@ import java.awt.*;
  */
 
 public class Player {
-    public String nationName;
-    ID identification = new ID();
+
+    public ID identification = new ID();
     int population;
     int incomePerTurn;
     public int funds = 100;
@@ -29,31 +29,14 @@ public class Player {
     boolean rocketBuilt = false;
     public Location startingSpot;
     public Color colors;
+    public int unitIndex;
 
-    public Player(){
 
-        nationName = "Romans";
-        identification.fullName = "Cesar";
-        identification.id = 0;
-        population = 2 ;
-        incomePerTurn = 2;
-        education = 0;
-        units = new Units();
-        unitCount = units.list.size();
-        colors = Color.WHITE;
-    }
-
-    public Player(String nationName){
-
-        this.nationName = nationName;
-        identification.fullName = "Mik Seljamaa :)";
-        identification.id = ID.getNextID();
-        System.out.println("ID" + nationName + identification.id);
+    public Player(ID id){
+        colors = Data.colors[id.id];//
         units = new Units(this);
         unitCount = units.list.size();
-        colors = Data.colors[identification.id];
+        System.out.println("ID" + id.fullName + id.id + "power:" + unitCount);
     }
-
-
 
 }

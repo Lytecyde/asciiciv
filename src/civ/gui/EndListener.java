@@ -51,7 +51,7 @@ public class EndListener implements ActionListener{
     }
 
     private void updateView(int timeNow) {
-        v.setTitle(Data.Turn.currentPlayer.nationName);
+        v.setTitle(Data.Turn.currentPlayer.identification.fullName);
         v.year.setText("Year: " + timeNow);
         v.updateUnitBoard();
         v.showControl();

@@ -4,11 +4,6 @@ import civ.Control.Civilization;
 import civ.Control.Player;
 
 
-import java.util.HashMap;
-
-
-
-
 /**
  * Created by miku on 30/05/2017.
  */
@@ -73,6 +68,7 @@ public class Unit {
 
 
 
+    /*
     public Unit(UnitType unitType){
 
         identification.id = Civilization.totalUnitCount;
@@ -285,18 +281,19 @@ public class Unit {
                 break;
 
         }
-    }
-    public Unit(UnitType unitType, Player current){
+    }*/
 
-        identification.id = Civilization.totalUnitCount;
+
+
+    public Unit(UnitType unitType, Player currentPlayer){
+
+        identification.unitCode = Civilization.totalUnitCount;
         Civilization.totalUnitCount++;
-
-        ownerNation = current.nationName;
-
+        identification.id = currentPlayer.unitIndex++;
+        setNameAndLocation(currentPlayer);
+        System.out.println("unit made");
         identification.type = unitType.name();
-        identification.fullName = ownerNation +
-                identification.type +
-                Integer.toString(identification.id);
+        identification.fullName = ownerNation;
         initialiseProperties();
         switch(unitType){
             case SETTLER:
@@ -316,8 +313,7 @@ public class Unit {
                 int food = 1;
                 int cost = 0;
                 int morale = 1 + Data.scapegoatingEffect;
-
-            break;
+                break;
 
             case BUILDER:
                 power = 1;
@@ -494,6 +490,11 @@ public class Unit {
                 break;
 
         }
+    }
+
+    private void setNameAndLocation(Player currentPlayer) {
+        ownerNation = currentPlayer.identification.fullName;
+        location = currentPlayer.startingSpot;
     }
 
     public int getId() {

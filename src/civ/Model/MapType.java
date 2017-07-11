@@ -5,6 +5,6 @@ package civ.Model;
  */
 public enum MapType {
         WHOLE,
-        VISIBLE
+    MINIMAP, VISIBLE
 
 }

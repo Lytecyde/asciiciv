@@ -5,9 +5,13 @@ package civ.Model;
  */
 public class ID {
     public String fullName = "";
-    public static int id = 0;
+    public int id = 0;
     public String type = "";
-    public static int getNextID(){
-        return id++;
+    public int unitCode;
+
+    public void setID(String fullname, int id, String type) {
+        this.id = id;
+        this.fullName = fullname;
+        this.type = type;
     }
 }

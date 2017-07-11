@@ -14,15 +14,15 @@ import java.util.LinkedList;
 public class PlayerSwitchListener implements ActionListener {
 
     private View v;
-    private LinkedList<Player> players;
+
 
     public PlayerSwitchListener(View view){
         v = view;
     }
     @Override
     public void actionPerformed(ActionEvent e) {
-        Player nextPlayer = Civilization.getNext(Civilization.currentPlayer);
-        String playerNation = nextPlayer.nationName;
+        Player nextPlayer = Civilization.getNext(Data.Turn.currentPlayer);
+        String playerNation = nextPlayer.identification.fullName;
         v.setTitle(playerNation);
         System.out.println(playerNation);
         Civilization.currentPlayer = nextPlayer;

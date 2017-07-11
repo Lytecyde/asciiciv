@@ -2,7 +2,6 @@ package civ.gui;
 
 import civ.Control.Civilization;
 import civ.Control.Player;
-import civ.Control.RoundTable;
 import civ.Model.*;
 
 import javax.swing.*;
@@ -12,10 +11,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.LinkedList;
-import java.util.Random;
 
-import static civ.Control.Civilization.currentPlayer;
-import static civ.Control.Civilization.listOfPlayers;
 import static civ.Model.Data.cols;
 import static civ.Model.Data.rows;
 import static javax.swing.BorderFactory.createBevelBorder;
@@ -32,17 +28,15 @@ public class View extends JFrame implements ActionListener {
     int y;
     JPanel text = new JPanel();
     public JPanel control = new JPanel();
-    public JPanel globeMap = new JPanel();
+    public JPanel globeMapPanel = new JPanel();
     public JPanel dataBoard = new JPanel();
     public JPanel unitBoard = new JPanel();
-    public JPanel worldMap = new JPanel();
+    public JPanel worldMapPanel = new JPanel();
 
-    char[][] map =
-            new char[Civilization.gameMapSizeX][Civilization.gameMapSizeY];
+
 
     public static final int cellSize = 15;
-    private static WorldMap worldMapPanelContents = new WorldMap(
-            MapType.VISIBLE);
+    public static WorldMap worldMapPanelContents;
     public JLabel cursor;
     private static JLabel label;
     private final JLabel[][] gridLabels = new JLabel[rows][cols];
@@ -57,11 +51,11 @@ public class View extends JFrame implements ActionListener {
 
     public JLabel funds, pollution, tax, year;//for databoard
     private JLabel unitType, veteran; //for unit
+    public Location cursorLocation;
+    public View(){}
 
-    public LinkedList<Location> promisedLands = new LinkedList<Location>();
-    private LinkedList<Location> startingSpots;//might be better as a hashmap!!
-
-    public View() {
+    public View(WorldMap wm) {
+        worldMapPanelContents = wm;
         //preparations
         setupView();
         placeMenuBar();
@@ -80,10 +74,10 @@ public class View extends JFrame implements ActionListener {
         placeCursorOnPanelAt(Data.CENTRE);
         placeContentToView();
         fillCellGrid();
-        startingSpots = makeStartingLocations();
+
         placeUnits();
         replaceWorldMap();
-        worldMap.requestFocus();
+        worldMapPanel.requestFocus();
 
         setVisible(true);
         pack();
@@ -123,12 +117,12 @@ public class View extends JFrame implements ActionListener {
 
 
     public void updateUnitsOnMap(){
-
+        //TODO going to move some units around!!!
     }
 
     private void setupView() {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new Dimension(640, 640));
+        setPreferredSize(new Dimension(820, 640));
         setLayout(new BorderLayout());
         setFocusable(true);
         MyKeyListener mkl = new MyKeyListener();
@@ -269,7 +263,7 @@ public class View extends JFrame implements ActionListener {
         textArea.setEnabled(false);
         this.add(text, BorderLayout.SOUTH);
         this.add(control, BorderLayout.EAST);
-        this.add(worldMap, BorderLayout.CENTER);
+        this.add(worldMapPanel, BorderLayout.CENTER);
     }
 
     private void createContentDefinitions() {
@@ -282,20 +276,20 @@ public class View extends JFrame implements ActionListener {
     }
 
     protected JPanel createWorldMap() {
-        worldMap.setLayout(new GridLayout(rows, cols));
-        worldMap.setSize(cols *15, rows *15);
-        worldMap.setVisible(true);
-        worldMap.repaint();
-        return worldMap;
+        worldMapPanel.setLayout(new GridLayout(rows, cols));
+        worldMapPanel.setSize(cols *15, rows *15);
+        worldMapPanel.setVisible(true);
+        worldMapPanel.repaint();
+        return worldMapPanel;
     }
 
     private JPanel createGlobeMap() {
-        globeMap.setBackground(Color.black);
-        globeMap.setLayout(new GridLayout(rows, cols));
-        globeMap.setSize(cols*4, rows*4);
-        globeMap.setVisible(true);
-        globeMap.repaint();
-        return globeMap;
+        globeMapPanel.setBackground(Color.black);
+        globeMapPanel.setLayout(new GridLayout(rows, cols));
+        globeMapPanel.setSize(cols*4, rows*4);
+        globeMapPanel.setVisible(true);
+        globeMapPanel.repaint();
+        return globeMapPanel;
     }
 
     private void createTextPanel() {
@@ -305,7 +299,7 @@ public class View extends JFrame implements ActionListener {
     private void createControlPanel() {
         control.setLayout(new GridLayout(5, 1));
         createGlobeMap();
-        control.add(globeMap);
+        control.add(globeMapPanel);
         createDataBoard();
         control.add(dataBoard);
         createUnitBoard();
@@ -332,6 +326,7 @@ public class View extends JFrame implements ActionListener {
         unitBoard.add(nextUnit);
 
     }
+
     public void  updateUnitBoard(){
         unitBoard.removeAll();
         createUnitBoard();
@@ -340,7 +335,7 @@ public class View extends JFrame implements ActionListener {
         playerForces.addAll(player.units.getList());
         Unit current = playerForces.get(currentUnitIndex);
         unitType.setText( current.getType() +
-                player.nationName +
+                player.identification.fullName +
                 currentUnitIndex
         );
         unitBoard.add(unitType);
@@ -350,15 +345,14 @@ public class View extends JFrame implements ActionListener {
 
     }
 
-
     private void createDataBoard() {
         dataBoard.setLayout(new GridLayout(4,1));
         funds = new JLabel("Funds: " +
-                currentPlayer.funds);
+                Data.Turn.currentPlayer.funds);
         pollution = new JLabel("Pollution: " +
-                currentPlayer.pollution);
+                Data.Turn.currentPlayer.pollution);
         tax = new JLabel("Taxrate: " +
-                currentPlayer.tax);
+                Data.Turn.currentPlayer.tax);
         year = new JLabel("Year: " +
                 Civilization.year);
         dataBoard.add(year);
@@ -369,11 +363,11 @@ public class View extends JFrame implements ActionListener {
     }
 
     private void createMapPanel() {
-        worldMap.setPreferredSize(
+        worldMapPanel.setPreferredSize(
                 new Dimension(
                         cols * cellSize + 10,
                         rows * cellSize + 10));
-        worldMap.setVisible(true);
+        worldMapPanel.setVisible(true);
     }
 
 
@@ -400,6 +394,7 @@ public class View extends JFrame implements ActionListener {
 
 
     protected void placeCursorOnPanelAt(Location location) {
+        cursorLocation = location;
         placeCursorTo(location);
         replaceVisible(location, cursor);
         fillCellGrid();
@@ -470,7 +465,7 @@ public class View extends JFrame implements ActionListener {
 
 
 
-    private void replaceVisible(Location previous, JLabel c) {
+    public void replaceVisible(Location previous, JLabel c) {
         visibleGrid[previous.x][previous.y] = c;
         visibleGrid[previous.x][previous.y].setText(c.getText());
         visibleGrid[previous.x][previous.y].setForeground(c.getForeground());
@@ -490,14 +485,14 @@ public class View extends JFrame implements ActionListener {
         cell.setVisible(true);
         replaceLabelOnCell(cell, c);
 
-        worldMap.add(cell,location.y,location.x);
-        worldMap.setVisible(true);
+        worldMapPanel.add(cell,location.y,location.x);
+        worldMapPanel.setVisible(true);
         showMap();
     }
 
     public void showMap() {
-        worldMap.revalidate();
-        worldMap.repaint();
+        worldMapPanel.revalidate();
+        worldMapPanel.repaint();
     }
 
     public void showControl(){
@@ -576,7 +571,7 @@ public class View extends JFrame implements ActionListener {
     }
 
     protected void addCellToWorldMap(JPanel p, Location loc) {
-        worldMap.add(p,loc.x,loc.y);
+        worldMapPanel.add(p,loc.x,loc.y);
         showMap();
     }
 
@@ -653,7 +648,8 @@ public class View extends JFrame implements ActionListener {
             for(Player p: Data.listOfPlayers){
                 while(!p.units.list.isEmpty()){
                     for(Unit u:p.units.list){
-                        System.out.println(p.nationName + "  " + u.getType());
+                        System.out.println(p.identification.fullName + "  " + u
+                                .getType());
                         try {
                             while(u.location != null) {
                                 while (u.location.x == l.x &&
@@ -725,65 +721,17 @@ public class View extends JFrame implements ActionListener {
         return false;
     }
 
-    private void replaceWorldMap() {
-        worldMap.removeAll();
+    public void replaceWorldMap() {
+        worldMapPanel.removeAll();
         //TODO: refactorisation define cellGrid as JPanel with JLabel
         initCellGrid();
         fillCellGrid();
         placeLabels();
-        worldMap = createWorldMap();
+        worldMapPanel = createWorldMap();
         createCells();
-        worldMap.setVisible(true);
-
+        worldMapPanel.setVisible(true);
     }
     //LOCATION
-    public LinkedList<Location> getLandLocations(){
-        LinkedList<Location> startingPoints = new LinkedList<Location>();
-        for (int x = 0; x < rows; x++) {
-            for (int y = 0; y < cols; y++) {
-                boolean startingPointAdded = isLand(x, y)
-                        ?startingPoints.add(new
-                        Location(x,y)):false;
-            }
-        }
-        return startingPoints;
-
-    }
-
-    private boolean isLand(int x, int y) {
-        JLabel mapLabel = worldMapPanelContents.getMapCells()[x][y];
-        return !(mapLabel.getBackground() == Color.cyan);
-    }
-
-    public Location pickStartingLocation(){
-        Random randomised = new Random();
-        LinkedList<Location> allLands = getRemainingLandLocations();
-        Location start = allLands.get(randomised.nextInt(allLands.size()));
-        setRemainingLandLocations(start);
-        return start;
-    }
-
-    private void setRemainingLandLocations(Location start) {
-        promisedLands.remove(start);
-    }
-
-    private LinkedList<Location> getRemainingLandLocations() {
-        return promisedLands;
-    }
-
-    public LinkedList<Location> makeStartingLocations(){
-        startingSpots = new LinkedList<Location>();
-        promisedLands.addAll(getLandLocations());
-        for(Player player: Data.listOfPlayers) {
-            Location start = pickStartingLocation();
-            player.startingSpot = start;
-            startingSpots.add(start);
-        }
-        return startingSpots;
-    }
-    public LinkedList<Location> getStartingLocations(){
-        return startingSpots;
-    }
 
     //LOCATION
     //tests

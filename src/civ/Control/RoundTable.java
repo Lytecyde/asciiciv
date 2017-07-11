@@ -1,7 +1,7 @@
 package civ.Control;
 
 import civ.Model.Data;
-import civ.Model.Location;
+import civ.Model.ID;
 
 import java.util.*;
 
@@ -10,16 +10,19 @@ import java.util.*;
  */
 public class RoundTable {
     public LinkedList<Player> listOfPlayers = new LinkedList<Player>();
-    private int currentNation = 0;
+    private int currentNationIndex = 0;
     public LinkedList<String> listOfNations = new LinkedList<String>();
     private int countPlayersMade = 0;
 
     public RoundTable(int numberOfPlayers){
         generateListOfAllNations();
         generateListOfPlayers(numberOfPlayers);
-
+        saveToData(listOfPlayers);
     }
 
+    private void saveToData(LinkedList<Player> listOfPlayers) {
+        Data.listOfPlayers.addAll(listOfPlayers);
+    }
 
 
     private void generateListOfAllNations() {
@@ -33,24 +36,32 @@ public class RoundTable {
         for (countPlayersMade = 0;
              countPlayersMade < numberOfPlayers;
              countPlayersMade++) {
-            currentNation = !listOfNations.isEmpty()?
+            currentNationIndex = !listOfNations.isEmpty()?
                     pickRandomNationFrom(listOfNations):
                     countPlayersMade;
-            takeFromNationsListAddToPlayers(currentNation);
+            takeFromNationsListAddToPlayers(currentNationIndex);
         }
         Data.Turn.currentPlayer = listOfPlayers.getFirst();
-        System.out.println("players made: " + countPlayersMade);
     }
 
     private int pickRandomNationFrom(LinkedList<String> listOfNations) {
 
         do {
             Random random =  new Random();
-            currentNation = random.nextInt(listOfNations.size());
-            System.out.println("" +currentNation);
-        }while(!isInBoundsNationCode());
-        System.out.println("Nation created is :" + currentNation);
-        return currentNation;
+            currentNationIndex = random.nextInt(listOfNations.size());
+            System.out.println("" + currentNationIndex);
+        }while(isUnique(currentNationIndex));
+        System.out.println("Nation created is :" + currentNationIndex);
+        return currentNationIndex;
+    }
+
+    private boolean isUnique(int currentNation) {
+        boolean c = false;
+        for(Player p : listOfPlayers){
+            boolean equality = p.identification.id == currentNation;
+            c = c || equality;
+        }
+        return c;
     }
 
     private void takeFromNationsListAddToPlayers(int currentNation) {
@@ -67,9 +78,11 @@ public class RoundTable {
     }
 
     private void createAndStorePlayer(String nationName) {
-        Player p = new Player(nationName);
+        ID idforplayer = new ID();
+        idforplayer.setID(nationName, currentNationIndex,"peaceful");
+        Player p = new Player(idforplayer);
         listOfPlayers.add(p);
-        Data.listOfPlayers.add(p);
+
     }
 
     private void removeNation(int currentNation) {
@@ -84,13 +97,5 @@ public class RoundTable {
         catch(IndexOutOfBoundsException e){
             System.out.println(e + " Trying to remove froma a false location" );
         }
-
     }
-
-    private boolean isInBoundsNationCode() {
-        return currentNation >= 0 &&  currentNation < listOfNations.size();
-    }
-
-
-
 }

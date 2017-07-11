@@ -15,10 +15,7 @@ public class Units {
         populateUnitsListAtStart(player);
 
     }
-    public Units(){
-        populateUnitsListAtStart();
 
-    }
 
     public int countUnitsOfType(UnitType unitType) {
 
@@ -30,13 +27,7 @@ public class Units {
         return count;
     }
 
-    private void populateUnitsListAtStart() {
-        Unit unit = new Unit(UnitType.SETTLER);
-        list.add(unit);
-        unit = new Unit(UnitType.WARRIOR);
-        list.add(unit);
 
-    }
 
     private void populateUnitsListAtStart(Player player) {
         Unit unit = new Unit(UnitType.SETTLER, player);
@@ -46,12 +37,17 @@ public class Units {
 
     }
 
+    public void setID(Player player){
+        ID playerID = player.identification;
+        for(int i = 0;i < list.size();i++){
+            list.get(i).ownerNation = playerID.fullName;
+            list.get(i).location = player.startingSpot;
+        }
+    }
+
     public LinkedList<Unit> getList(){
         return list;
     }
 
-    public Location getStartLocation(Player player){
-        return Data.CENTRE;//TODO get potential locations from roundtable
-    }
 
 }

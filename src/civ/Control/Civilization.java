@@ -1,6 +1,6 @@
 package civ.Control;
 
-import civ.Model.Data;
+import civ.Model.*;
 import civ.gui.Setup;
 import civ.gui.View;
 
@@ -15,46 +15,38 @@ public class Civilization {
 
     private static Data gameData =  new Data();
     public static String type;
-    public static Player currentPlayer = new Player();
+    public static Player currentPlayer;
     public static int gameMapSizeX;
     public static int gameMapSizeY;
     public static int worldGreenLevel;      //pollution
     public static int worldPeaceScore;
     private static int turnCount;
     public static int totalUnitCount;
-    public static LinkedList<Player> listOfPlayers;
+    public static LinkedList<Player> listOfPlayers = new LinkedList<Player>();
     public static int numberOfPlayers;
     public static int year = 0;
+    public static StartingLocations startingLocations;
     private static RoundTable r;
+    private static WorldMap map;
     public static void main(String[] args) {
-        //System.out.println("msg: civ main");
+        //TODO MASHED : FIX THE ORDER things go
         new Data();
         new Setup();
+        makeMap();
+        //make players
         numberOfPlayers =  Data.numberOfPlayers;
         r = new RoundTable(numberOfPlayers);
-        startingPlayerSetup();
-        testPlayerCount();
-        Data.listOfPlayers.addAll(r.listOfPlayers);
+        listOfPlayers = r.listOfPlayers;
+        startingLocations = new StartingLocations(map, listOfPlayers);
+        clearListOfPlayers();
+        listOfPlayers = assignStartingSpots();
+        saveToData(listOfPlayers);
         testPlayerColors();
-        View v = new View();
+        allPlayersAllUnitsDataSet();
+        firstPlayerSetup();
+        View v = new View(map);
         v.updateUnitBoard();
         roundLoop();
-    }
-
-    private static void testPlayerColors(){
-        for(Player p: Data.listOfPlayers){
-            System.out.println(p.nationName + p.colors.toString());
-        }
-    }
-
-    private static void testPlayerCount() {
-        numberOfPlayers =  Data.listOfPlayers.size();
-        System.out.println("listof players in Data member count " +
-                numberOfPlayers);
-    }
-
-    public static Player getCurrentPlayer() {
-        return currentPlayer;
     }
 
     public Civilization(){
@@ -62,9 +54,65 @@ public class Civilization {
         totalUnitCount = 0;
     }
 
-    private static void startingPlayerSetup() {
-        listOfPlayers = new LinkedList<>();
-        listOfPlayers.addAll(Data.listOfPlayers);
+    public static void allPlayersAllUnitsDataSet(){
+        for(Player p: listOfPlayers){
+            p.units.setID(p);
+        }
+    }
+
+    private static void clearListOfPlayers() {
+        listOfPlayers = new LinkedList<Player>();
+        Data.listOfPlayers = new LinkedList<Player>();
+    }
+
+    private static void makeMap() {
+        map = new WorldMap(MapType.VISIBLE);
+    }
+
+    private static void saveToData(LinkedList<Player> listOfPlayers) {
+        Data.listOfPlayers.addAll(listOfPlayers);
+    }
+
+    private static LinkedList<Player> assignStartingSpots() {
+        int index = 0;
+        LinkedList<Player> lp = new LinkedList<Player>();
+        LinkedList<Location> listOfStartingspots = startingLocations
+                .getStartingspots();
+        for(Player p :r.listOfPlayers){
+            p.startingSpot = listOfStartingspots.get
+                    (index++);
+            lp.add(p);
+        }
+        return lp;
+    }
+
+    private static void testPlayerColors(){
+        for(Player p: Data.listOfPlayers){
+            System.out.println(p.identification.fullName +
+                    p.colors.toString() +
+                    p.startingSpot.x +
+                    "x  " +
+                    p.startingSpot.y +
+                    "y  "
+            );
+        }
+    }
+
+    private static void testPlayerCount() {
+        numberOfPlayers =  Data.listOfPlayers.size();
+        System.out.println("list of players in Data member count " +
+                numberOfPlayers);
+    }
+
+    public static Player getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+
+
+    private static void firstPlayerSetup() {
+        //listOfPlayers = new LinkedList<>();
+        //listOfPlayers.addAll(Data.listOfPlayers);
         currentPlayer = listOfPlayers.getFirst();
     }
 

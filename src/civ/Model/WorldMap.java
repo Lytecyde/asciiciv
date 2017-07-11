@@ -42,7 +42,8 @@ public class WorldMap {
                 mapCells = new JLabel[rows][columns];
                 panelHolderGrid = new JPanel[rows][columns];
                 map.setLayout(new GridLayout(rows, columns));
-                map.setPreferredSize(new Dimension(360, 240));
+                map.setPreferredSize(new Dimension(columns * labelSizeX,
+                        rows * labelSizeY));
                 map.setVisible(true);
                 map.setFocusTraversalKeysEnabled(false);
                 defineLabels();
@@ -50,6 +51,9 @@ public class WorldMap {
                 setAttributesForAllLabels();
                 generateMap();
                 map.repaint();
+
+                break;
+            case MINIMAP:
 
                 break;
             default:
@@ -74,12 +78,11 @@ public class WorldMap {
     }
 
     private void generateLands(){
+        System.out.println("making landTypeLbels");
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < columns; y++) {
-
                 landLabelMap[x][y] =
                         (int)(Math.random()*LandType.values().length);
-                System.out.println("lands of the map" + landLabelMap[x][y]);
 
             }
         }
