@@ -46,6 +46,7 @@ public class UnitSwitchListener implements ActionListener{
                     .units.list.get(View.currentUnitIndex).location;
             v.placeOldLabelBackTo(v.cursorLocation);
             v.placeCursorOnPanelAt(firstUnit);
+            v.cursorLocation = firstUnit;
             v.replaceWorldMap();
             break;
         }

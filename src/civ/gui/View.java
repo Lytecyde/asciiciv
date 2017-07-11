@@ -593,10 +593,7 @@ public class View extends JFrame implements ActionListener {
         @Override
         public void keyPressed(KeyEvent e) {
             Location aftermove;
-            Location previous = new Location(
-                    location.getX(),
-                    location.getY()
-            );
+            Location previous = cursorLocation; //was location
             System.out.println("Keypressed" +
                     Data.numberOfArrowKeyPresses++ +
                     " : " +

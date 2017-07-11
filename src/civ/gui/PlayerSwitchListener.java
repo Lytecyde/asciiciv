@@ -3,6 +3,7 @@ package civ.gui;
 import civ.Control.Civilization;
 import civ.Control.Player;
 import civ.Model.Data;
+import civ.Model.Unit;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -33,7 +34,8 @@ public class PlayerSwitchListener implements ActionListener {
     private void updateView(String playerNation) {
         v.setTitle(playerNation);
         v.emptyUnitBoard();
-        v.updateUnitBoardWith(Civilization.currentPlayer.units.list);
+        LinkedList<Unit> list = Civilization.currentPlayer.units.list;
+        v.updateUnitBoardWith(list);
         v.switchPlayer.setFocusPainted(false);
         v.nextUnit.doClick();
         v.requestFocus();
