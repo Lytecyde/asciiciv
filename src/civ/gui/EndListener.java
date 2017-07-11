@@ -15,6 +15,7 @@ public class EndListener implements ActionListener{
     public void actionPerformed(ActionEvent e) {
         selectNextPlayer();
         v.endTurn.setFocusPainted(false);
+        v.nextUnit.doClick();
         v.requestFocus();
     }
     public EndListener(View view){

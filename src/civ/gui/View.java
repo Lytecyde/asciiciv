@@ -47,7 +47,7 @@ public class View extends JFrame implements ActionListener {
     public static int currentUnitIndex = 0;
     public JButton endTurn = new JButton("End this Turn.");
     public JButton switchPlayer = new JButton("Next player");
-    private JButton nextUnit;
+    public JButton nextUnit;
 
     public JLabel funds, pollution, tax, year;//for databoard
     private JLabel unitType, veteran; //for unit
@@ -317,13 +317,15 @@ public class View extends JFrame implements ActionListener {
         unitBoard.setLayout(new GridLayout(4,1));
         unitType = new JLabel("Unit ID : ");
         veteran = new JLabel("Experience:");
-        unitBoard.add(unitType);
-        unitBoard.add(veteran);
         nextUnit = new JButton("Next Unit");
         nextUnit.setFocusPainted(false);
+        unitBoard.add(nextUnit);
+        unitBoard.add(unitType);
+        unitBoard.add(veteran);
+
         UnitSwitchListener unitSwitchListener = new UnitSwitchListener(this);
         nextUnit.addActionListener(unitSwitchListener);
-        unitBoard.add(nextUnit);
+
 
     }
 
