@@ -8,7 +8,7 @@ import civ.Control.Player;
  * Created by miku on 30/05/2017.
  */
 public class Unit {
-    public String ownerNation;
+    //public String ownerNation;
     public Location location;
     public ID identification = new ID();
     public String commandingNation;
@@ -68,222 +68,6 @@ public class Unit {
 
 
 
-    /*
-    public Unit(UnitType unitType){
-
-        identification.id = Civilization.totalUnitCount;
-        Civilization.totalUnitCount++;
-        System.out.println("unitCount:" + Civilization.totalUnitCount);
-        Player current = Data.Turn.currentPlayer;
-        String s = current == null ? "current player variable is null":"full ";
-        //String ownerNation = current.nationName;
-        System.out.println("ownerNation"+
-                //ownerNation +
-                s);
-        identification.type = unitType.name();
-        identification.fullName = //ownerNation +
-                identification.type +
-                Integer.toString(identification.id);
-
-        switch(unitType){
-            case SETTLER:
-                int power = 1;
-                int strength = 1;
-                int defence = 1;
-                int move = 1;
-
-                veteran = false;
-                mechanised = false;
-                infected = false;
-                naval = false;
-                airborne = false;
-
-                setSkills();
-                foundCity = true;
-                int food = 1;
-                int cost = 0;
-                int morale = 1 + Data.scapegoatingEffect;
-
-            break;
-
-            case BUILDER:
-                power = 1;
-                strength = 1;
-                defence = 1;
-                move = 1;
-
-                veteran = false;
-                mechanised = false;
-                infected = false;
-                naval = false;
-                airborne = false;
-
-                setSkills();
-                build= true;
-
-                food = 1;
-                cost = 1;
-                morale = 1;
-                break;
-            case WARRIOR:
-                power = 1;
-                strength = 2;
-                defence = 2;
-                move = 1;
-
-                veteran = false;
-                mechanised = false;
-                infected = false;
-                naval = false;
-                airborne = false;
-
-                setSkills();
-
-                food = 1;
-                cost = 1;
-                morale = 1;
-                break;
-            case FARMER:
-                power = 1;
-                strength = 1;
-                defence = 1;
-                move = 1;
-
-                veteran = false;
-                mechanised = false;
-                infected = false;
-                naval = false;
-                airborne = false;
-
-                setSkills();
-                farm = true;
-
-                food = 1;
-                cost = 1;
-                morale = 1;
-                break;
-            case MONK:
-                power = 1;
-                strength = 1;
-                defence = 1;
-                move = 1;
-
-                veteran = false;
-                mechanised = false;
-                infected = false;
-                naval = false;
-                airborne = false;
-
-                setSkills();
-                preach = true;
-
-                food = 1;
-                cost = 1;
-                morale = 1;
-                break;
-            case SCHOLAR:
-                power = 1;
-                strength = 1;
-                defence = 1;
-                move = 1;
-
-                veteran = false;
-                mechanised = false;
-                infected = false;
-                naval = false;
-                airborne = false;
-
-                setSkills();
-                teach = true;
-
-                food = 1;
-                cost = 1;
-                morale = 1;
-                break;
-            case TRADER:
-                power = 1;
-                strength = 1;
-                defence = 1;
-                move = 1;
-
-                veteran = false;
-                mechanised = false;
-                infected = false;
-                naval = false;
-                airborne = false;
-
-                setSkills();
-                trade = true;
-
-                food = 1;
-                cost = 1;
-                morale = 1;
-                break;
-            case EXPLORER:
-                power = 1;
-                strength = 1;
-                defence = 1;
-                move = 1;
-
-                veteran = false;
-                mechanised = false;
-                infected = false;
-                naval = false;
-                airborne = false;
-
-                setSkills();
-                explore = true;
-
-                food = 1;
-                cost = 1;
-                morale = 1;
-                break;
-            case ARTIST:
-                power = 1;
-                strength = 1;
-                defence = 1;
-                move = 1;
-
-                veteran = false;
-                mechanised = false;
-                infected = false;
-                naval = false;
-                airborne = false;
-
-                setSkills();
-                create = true;
-
-                food = 1;
-                cost = 1;
-                morale = 1;
-                break;
-            case DIPLOMAT:
-                power = 1;
-                strength = 1;
-                defence = 1;
-                move = 1;
-
-                veteran = false;
-                mechanised = false;
-                infected = false;
-                naval = false;
-                airborne = false;
-
-                setSkills();
-                diplomacy = true;
-
-                food = 1;
-                cost = 1;
-                morale = 1;
-                break;
-            default:
-
-                break;
-
-        }
-    }*/
-
-
 
     public Unit(UnitType unitType, Player currentPlayer){
 
@@ -291,9 +75,12 @@ public class Unit {
         Civilization.totalUnitCount++;
         identification.id = currentPlayer.unitIndex++;
         setNameAndLocation(currentPlayer);
-        System.out.println("unit made");
+
         identification.type = unitType.name();
-        identification.fullName = ownerNation;
+        identification.fullName = currentPlayer.identification.fullName;
+        System.out.println("unit made" +
+        identification.type +
+        identification.fullName);
         initialiseProperties();
         switch(unitType){
             case SETTLER:
@@ -493,7 +280,7 @@ public class Unit {
     }
 
     private void setNameAndLocation(Player currentPlayer) {
-        ownerNation = currentPlayer.identification.fullName;
+        identification.fullName = currentPlayer.identification.fullName;
         location = currentPlayer.startingSpot;
     }
 

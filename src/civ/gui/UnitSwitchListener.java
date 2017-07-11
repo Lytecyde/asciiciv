@@ -25,7 +25,7 @@ public class UnitSwitchListener implements ActionListener{
     public void actionPerformed(ActionEvent e) {
         Player currentPlayer = Data.Turn.currentPlayer;
         View.currentUnitIndex = ++View.currentUnitIndex%
-                (currentPlayer.unitCount -1);
+                (currentPlayer.unitCount );
         v.updateUnitBoard();
         v.switchPlayer.setFocusPainted(false);
         v.requestFocus();
@@ -34,15 +34,16 @@ public class UnitSwitchListener implements ActionListener{
                 currentPlayer.units.list != null
                 ){
             System.out.println("unitswitch" +
-                    currentPlayer.units.list.get(0).getType());
+                    currentPlayer.units.list.get(
+                            View.currentUnitIndex).getType());
             System.out.println("nation:" +
-                    currentPlayer.units.list.getFirst().ownerNation);
+                    currentPlayer.identification.fullName);
             break;
         }
         while(currentPlayer.units.list.getFirst().location != null ){
-            System.out.println("may be fine");
+            System.out.println("is fine");
             Location firstUnit = currentPlayer
-                    .units.list.getFirst().location;
+                    .units.list.get(View.currentUnitIndex).location;
             v.placeOldLabelBackTo(v.cursorLocation);
             v.placeCursorOnPanelAt(firstUnit);
             v.replaceWorldMap();

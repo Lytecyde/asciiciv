@@ -40,7 +40,7 @@ public class Units {
     public void setID(Player player){
         ID playerID = player.identification;
         for(int i = 0;i < list.size();i++){
-            list.get(i).ownerNation = playerID.fullName;
+            list.get(i).identification.fullName = playerID.fullName;
             list.get(i).location = player.startingSpot;
         }
     }

@@ -701,7 +701,7 @@ public class View extends JFrame implements ActionListener {
             while(!unitsAtLocation.isEmpty()) {
                 Unit current = unitsAtLocation.getFirst();
                 unitType.setText(current.getType() +
-                        current.ownerNation +
+                        current.identification.fullName +
                         current.identification.id
                 );
                 unitBoard.add(unitType);

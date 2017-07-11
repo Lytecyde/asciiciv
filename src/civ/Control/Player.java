@@ -33,6 +33,7 @@ public class Player {
 
 
     public Player(ID id){
+        identification = id;
         colors = Data.colors[id.id];//
         units = new Units(this);
         unitCount = units.list.size();

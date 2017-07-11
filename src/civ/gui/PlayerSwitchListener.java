@@ -15,7 +15,6 @@ public class PlayerSwitchListener implements ActionListener {
 
     private View v;
 
-
     public PlayerSwitchListener(View view){
         v = view;
     }
@@ -23,12 +22,16 @@ public class PlayerSwitchListener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         Player nextPlayer = Civilization.getNext(Data.Turn.currentPlayer);
         String playerNation = nextPlayer.identification.fullName;
-        v.setTitle(playerNation);
-        System.out.println(playerNation);
+        System.out.println("switched to player:" + playerNation);
         Civilization.currentPlayer = nextPlayer;
         Data.Turn.currentPlayer = nextPlayer;
         Data.Turn.currentPlayerIndex =
                 Civilization.listOfPlayers.indexOf(nextPlayer);
+        updateView(playerNation);
+    }
+
+    private void updateView(String playerNation) {
+        v.setTitle(playerNation);
         v.emptyUnitBoard();
         v.updateUnitBoardWith(Civilization.currentPlayer.units.list);
         v.switchPlayer.setFocusPainted(false);
