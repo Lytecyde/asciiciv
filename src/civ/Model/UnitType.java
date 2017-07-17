@@ -15,7 +15,8 @@ public enum UnitType {
     ARTIST(8),
     DIPLOMAT(9),
     DOCTOR(10),
-    JUDGE(11);
+    JUDGE(11),
+    NULL(12);
 
     private final int typeCode;
 

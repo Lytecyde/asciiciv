@@ -22,12 +22,12 @@ public class EndListener implements ActionListener{
         v = view;
     }
     private void selectNextPlayer() {
-        i = isLastPlayer(i)?i++: returnToFirstPLayer();
+        i = isLastPlayer(i)?i++: returnToFirstPlayer();
         i = i % Data.listOfPlayers.size();
         Data.Turn.currentPlayer = Data.listOfPlayers.get(i);
     }
 
-    private int returnToFirstPLayer(){
+    private int returnToFirstPlayer(){
         calculateTime();
         int firstPlayerIndex =0;
         return firstPlayerIndex;
@@ -54,7 +54,8 @@ public class EndListener implements ActionListener{
     private void updateView(int timeNow) {
         v.setTitle(Data.Turn.currentPlayer.identification.fullName);
         v.year.setText("Year: " + timeNow);
-        v.updateUnitBoard();
+        v.updateUnitBoardWithCurrentPlayerUnit();
+        v.replaceWorldMap();
         v.showControl();
         v.showMap();
 

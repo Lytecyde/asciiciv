@@ -20,6 +20,8 @@ public class Data {
     public static int numberOfArrowKeyPresses = 0;
     public static LinkedList<Player> listOfPlayers = new LinkedList<Player>();
     public static int numberOfPlayers = 0;
+    public static Unit NULLUNIT;
+
     public static Color[] colors = {
             Color.black,
             Color.orange,
@@ -37,11 +39,86 @@ public class Data {
         generateNationsList();
     }
 
+    public final static char relationshipLove = '♥';
+
+    public final static char relationshipHate = '♠';
+
+    public final static char relationshipPeace = '☮'; //9774
+
+    public final static char relationshipFist = 'F';//✊ forment
+
+    public final static char relationshipRage = '☠';
+
+    public final static char flag = '⚑';//🌸
+
+    public final static char culture = '♫';
+    public final static char food = '⌠';//🍞
+    public final static char science = 'ƒ';//💡
+    public final static char book = 'm';//📖
+    public final static char law = '§';
+    public final static char information = 'B';
+    public final static char gold = '$';
+    public final static char building = '■';
+    public final static char drugs = '+';//💊
+    public final static char skills = '*';
+    public final static char motors = '⚙';//🚗 🚂 ♞
+    public final static char weapons = '↑';//🔫
+    public final static char victory = 'V';//✌
+
+    public final static char population = '☺';//🚹
+
+    public final static char happyFace = '☺';
+
+    public final static char unhappyFace = '☹';
+
+    public final static char capitalCity = '★';
+
+    public final static char nukeWinter = '❄';
+
+    public final static char globalBurn = '☼';
+
+    //lands
+
+    public final static char cityscape = '#';//🏙
+
+    public final static char roads = '×';
+
+    public final static char canals = '╬';
+
+    public final static char rails = '╪';
+
+    //units
+
     public final static char landChit = '▓';
 
-    public final static char seaChit = '±';
+    public final static char seaChit = '►';//🚢
 
-    public final static char airChit = 16;
+    public final static char airChit = '^';//✈ or ∞
+
+    public final static char rocketChit = '▲';//🚀
+
+    public final static char satellite = 'Φ'; //🛰
+
+    //buildings
+
+    public final static char propagandaTower = 'A';//🗼
+    String teletower = "🗼";//makes people happy or angry others happy or angry
+    String bank = "🏦";//adds gold and risk of bust
+
+
+
+    String school = "🏫";//adds skills
+    String artCommune = "🖌";//creates culture
+    String temple = "⛪";//makes preachers
+    String court = "§";//makes things more lawful
+    String factory = "🏭";//makes goods
+    String house = "🏠";//houses people contributes to happiness
+    String hospital = "🏥";//heals people and increases life expectancy
+    String garage = "⛽";//fuels and repairs? motorised units
+    String lab = "🔬";//adds science
+    String server = "💻";// adds information bytes
+    String farm = "🏡";//adds food
+    String market = "🏬";//makes merchants
 
     private void generateNationsList() {
          Collections.addAll(nations, Nation.names);

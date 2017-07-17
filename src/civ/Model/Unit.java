@@ -3,13 +3,15 @@ package civ.Model;
 import civ.Control.Civilization;
 import civ.Control.Player;
 
+import java.awt.*;
+
 
 /**
  * Created by miku on 30/05/2017.
  */
 public class Unit {
     //public String ownerNation;
-    public Location location;
+    public Location location = new Location();
     public ID identification = new ID();
     public String commandingNation;
     public String homeCity;
@@ -39,6 +41,7 @@ public class Unit {
     public static char chit = 254;
 
     private boolean working;
+    public Color colors;
 
     private void initialiseProperties(){
         veteran = false;
@@ -75,12 +78,13 @@ public class Unit {
         Civilization.totalUnitCount++;
         identification.id = currentPlayer.unitIndex++;
         setNameAndLocation(currentPlayer);
-
+        this.colors = currentPlayer.colors;
         identification.type = unitType.name();
         identification.fullName = currentPlayer.identification.fullName;
         System.out.println("unit made" +
         identification.type +
         identification.fullName);
+
         initialiseProperties();
         switch(unitType){
             case SETTLER:
@@ -271,6 +275,10 @@ public class Unit {
                 food = 1;
                 cost = 1;
                 morale = 1;
+                break;
+            case NULL:
+                identification.type = "";
+                identification.fullName = "";
                 break;
             default:
 

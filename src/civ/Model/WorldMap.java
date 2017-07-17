@@ -78,7 +78,7 @@ public class WorldMap {
     }
 
     private void generateLands(){
-        System.out.println("making landTypeLbels");
+        System.out.println("making landTypeLabels");
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < columns; y++) {
                 landLabelMap[x][y] =

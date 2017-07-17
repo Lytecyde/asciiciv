@@ -21,7 +21,7 @@ import static javax.swing.BorderFactory.createBevelBorder;
  */
 public class View extends JFrame implements ActionListener {
 
-    Location location = Data.CENTRE;
+    Location cursorLocation = Data.CENTRE;
 
     JTextArea textArea = new JTextArea(5, 52);
     int x;
@@ -41,8 +41,8 @@ public class View extends JFrame implements ActionListener {
     private static JLabel label;
     private final JLabel[][] gridLabels = new JLabel[rows][cols];
     private JLabel[][] visibleGrid = new JLabel[rows][cols];
-    public JPanel[][] cellGrid = new JPanel[rows][cols];
-    private JLabel temporaryContents;
+    public JPanel[][] cellPanelGrid = new JPanel[rows][cols];
+    private JLabel temporaryContentsCursor;
     private Dimension cellDimension = new Dimension(cellSize, cellSize);
     public static int currentUnitIndex = 0;
     public JButton endTurn = new JButton("End this Turn.");
@@ -52,7 +52,11 @@ public class View extends JFrame implements ActionListener {
 
     public JLabel funds, pollution, tax, year;//for databoard
     private JLabel unitType, veteran; //for unit
-    public Location cursorLocation;
+
+    public Unit active;
+    private JLabel activeLabel;
+    private JLabel temporaryContentsUnit;
+
     public View(){}
 
     public View(WorldMap wm) {
@@ -60,7 +64,7 @@ public class View extends JFrame implements ActionListener {
         //preparations
         setupView();
         placeMenuBar();
-        initCellGrid();
+        initCellGridPanels();
         initLabels();
         makeGridLabels();
 
@@ -68,8 +72,9 @@ public class View extends JFrame implements ActionListener {
         createContentDefinitions();
         getVisibleGridFromGridLabels();
         fillCellGrid();
-        placeLabels();
+        placeVisibleLabels();
         createCells();
+
 
         //placeAllContent
         placeCursorOnPanelAt(Data.CENTRE);
@@ -77,6 +82,7 @@ public class View extends JFrame implements ActionListener {
         fillCellGrid();
 
         placeUnits();
+        active = Data.listOfPlayers.getFirst().units.list.getFirst();
         replaceWorldMap();
         worldMapPanel.requestFocus();
 
@@ -109,13 +115,14 @@ public class View extends JFrame implements ActionListener {
 
     private void paintUnitSign(char sign) {
         for(Player p : Data.listOfPlayers){
-            Location l = p.startingSpot;
-            String signStr = Character.toString(sign);
-            visibleGrid[l.x][l.y].setText(signStr);
-            visibleGrid[l.x][l.y].setForeground(p.colors);
+            for(Unit u: p.units.list) {
+                Location l = u.location;
+                String signStr = Character.toString(sign);
+                visibleGrid[l.x][l.y].setText(signStr);
+                visibleGrid[l.x][l.y].setForeground(p.colors);
+            }
         }
     }
-
 
     public void updateUnitsOnMap(){
         //TODO going to moveCursor some units around!!!
@@ -139,29 +146,40 @@ public class View extends JFrame implements ActionListener {
         }
     }
 
-    private void getVisibleGridFromGridLabels() {
+    public void getVisibleGridFromGridLabels() {
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
                 visibleGrid[x][y] = gridLabels[x][y];
                 visibleGrid[x][y].setVisible(true);
-                this.visibleGrid[x][y].setPreferredSize(cellDimension);
+                visibleGrid[x][y].setPreferredSize(cellDimension);
             }
         }
     }
 
-    private void initCellGrid(){
+    private void initCellGridPanels(){
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
-                cellGrid[x][y] = new JPanel();
+                cellPanelGrid[x][y] = new JPanel();
             }
         }
     }
 
     private void initLabels(){
+        initGridLabels();
+        initVisibleGridLabels();
+    }
+
+    private void initGridLabels(){
+        for (int x = 0; x < rows; x++) {
+            for (int y = 0; y < cols; y++) {
+                gridLabels[x][y] = new JLabel();
+            }
+        }
+    }
+    private void initVisibleGridLabels(){
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
                 visibleGrid[x][y] = new JLabel();
-                gridLabels[x][y] = new JLabel();
             }
         }
     }
@@ -254,9 +272,6 @@ public class View extends JFrame implements ActionListener {
 
         exit.addActionListener(this);
         jmiAbout.addActionListener(this);
-
-
-
         this.setJMenuBar(menuBar);
     }
 
@@ -316,21 +331,26 @@ public class View extends JFrame implements ActionListener {
 
     private void createUnitBoard() {
         unitBoard.setLayout(new GridLayout(4,1));
+        nextUnit = new JButton("Next Unit");
+        UnitSwitchListener unitSwitchListener =
+                new UnitSwitchListener(this);
+        nextUnit.addActionListener(unitSwitchListener);
         unitType = new JLabel("Unit ID : ");
         veteran = new JLabel("Experience:");
-        nextUnit = new JButton("Next Unit");
         nextUnit.setFocusPainted(false);
         unitBoard.add(nextUnit);
         unitBoard.add(unitType);
         unitBoard.add(veteran);
 
-        UnitSwitchListener unitSwitchListener = new UnitSwitchListener(this);
-        nextUnit.addActionListener(unitSwitchListener);
-
 
     }
 
-    public void  updateUnitBoard(){
+    public void updateUnitBoardWithEmpty(){
+        unitBoard.removeAll();
+        createUnitBoard();
+    }
+
+    public void updateUnitBoardWithCurrentPlayerUnit(){
         unitBoard.removeAll();
         createUnitBoard();
         Player player = Data.Turn.currentPlayer;
@@ -339,6 +359,20 @@ public class View extends JFrame implements ActionListener {
         Unit current = playerForces.get(currentUnitIndex);
         unitType.setText( current.getType() +
                 player.identification.fullName +
+                currentUnitIndex
+        );
+        unitBoard.add(unitType);
+        String veteranText = current.isVeteran() ? "Veteran":"Rookie";
+        veteran.setText(veteranText);
+        unitBoard.add(veteran);
+
+    }
+    public void  updateUnitBoardWithActiveUnit(){
+        unitBoard.removeAll();
+        createUnitBoard();
+        Unit current = active;
+        unitType.setText( current.getType() +
+                active.identification.fullName +
                 currentUnitIndex
         );
         unitBoard.add(unitType);
@@ -407,12 +441,12 @@ public class View extends JFrame implements ActionListener {
 
     private void placeCursorTo(Location l) {
         JLabel c = new JLabel();
-        temporaryContents = gridLabels[l.x][l.y];
+        temporaryContentsCursor = gridLabels[l.x][l.y];
         c.setOpaque(true);
-        c.setText(temporaryContents.getText());
+        c.setText(temporaryContentsCursor.getText());
         c.setForeground(Color.red);
         c.setBackground(Color.white);
-        c.setPreferredSize(temporaryContents.getPreferredSize());
+        c.setPreferredSize(temporaryContentsCursor.getPreferredSize());
         c.setVisible(true);
         c.setFocusable(true);
         c.requestFocus();
@@ -421,19 +455,26 @@ public class View extends JFrame implements ActionListener {
     }
 
     public void placeOldLabelBackTo(Location previous) {
-        JLabel c = getPreviousLabel();
+        JLabel c = getPreviousLabel(temporaryContentsCursor);
         replaceVisible(previous, c);
         fillCellGrid();
         showMap();
     }
 
-    private JLabel getPreviousLabel() {
+    public void placeUnitOldLabelBackTo(Location previous) {
+        JLabel c = getPreviousLabel(temporaryContentsUnit);
+        replaceVisible(previous, c);
+        fillCellGrid();
+        showMap();
+    }
+
+    private JLabel getPreviousLabel(JLabel temporary) {
         JLabel c = new JLabel();
         c.setOpaque(true);
-        c.setText(temporaryContents.getText());
-        c.setForeground(temporaryContents.getForeground());
-        c.setBackground(temporaryContents.getBackground());
-        c.setPreferredSize(temporaryContents.getPreferredSize());
+        c.setText(temporary.getText());
+        c.setForeground(temporary.getForeground());
+        c.setBackground(temporary.getBackground());
+        c.setPreferredSize(temporary.getPreferredSize());
         c.setVisible(true);
         return c;
     }
@@ -449,22 +490,20 @@ public class View extends JFrame implements ActionListener {
 
     private void fillCell(int x, int y) {
         defineCellGrid(x, y);
-        cellGrid[x][y].add(visibleGrid[x][y]);
-        setVisible(cellGrid[x][y]);
+        cellPanelGrid[x][y].add(visibleGrid[x][y]);
+        setVisible(cellPanelGrid[x][y]);
     }
 
     private void defineCellGrid(int x, int y) {
-        cellGrid[x][y] = new JPanel();
-        cellGrid[x][y].setLayout(new GridLayout(1,1));
-        cellGrid[x][y].setSize(cellDimension);
+        cellPanelGrid[x][y] = new JPanel();
+        cellPanelGrid[x][y].setLayout(new GridLayout(1,1));
+        cellPanelGrid[x][y].setSize(cellDimension);
     }
 
     private void setVisible(JPanel jPanel) {
         jPanel.setVisible(true);
         showMap();
     }
-
-
 
     public void replaceVisible(Location previous, JLabel c) {
         visibleGrid[previous.x][previous.y] = c;
@@ -475,49 +514,68 @@ public class View extends JFrame implements ActionListener {
 
     }
 
-    private void placeLabel(JLabel c, Location location) {
-        c.setSize(cellDimension);
-        JPanel cell = cellGrid[location.x][location.y];
-        cell.setLayout(new GridLayout(1,1));
-        cell.setSize(cellDimension);
-        cell.add(c);
-        cell.setVisible(true);
-        replaceLabelOnCell(cell, c);
 
-        worldMapPanel.add(cell,location.y,location.x);
-        worldMapPanel.setVisible(true);
-        showMap();
-    }
 
     public void showMap() {
         worldMapPanel.revalidate();
         worldMapPanel.repaint();
     }
 
+    public void emptyMap(){
+        initVisibleGridLabels();
+        initCellGridPanels();
+        replaceWorldMap();
+    }
+
+    public void newMapWithUnits(){
+        getVisibleGridFromGridLabels();
+        clearMapToNature(); //restart gridlabels to visiblelabels
+        placeUnits();
+        placeVisibleLabels();
+    }
+
     public void showControl(){
         dataBoard.revalidate();
         dataBoard.repaint();
-
         control.revalidate();
         control.repaint();
     }
 
-
-    protected void placeLabels(){
-        Location l;
+    protected void placeVisibleLabels(){
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
-                l = new Location(x,y);
-                JLabel cellLabel = visibleGrid[l.x][l.y];//TODO:was location
-                placeLabel(cellLabel, l);
+                JLabel cellLabel = visibleGrid[x][y];
+                placeLabel(cellLabel, new Location(x,y));
             }
         }
     }
 
-    private void replaceLabelOnCell(JPanel jPanel, JLabel c) {
-        jPanel.remove(0);//
-        jPanel.add(c);
 
+    protected void clearMapToNature(){
+        for (int x = 0; x < rows; x++) {
+            for (int y = 0; y < cols; y++) {
+                JLabel cellLabel = gridLabels[x][y];
+                placeLabel(cellLabel, new Location(x,y));
+            }
+        }
+    }
+
+    private void placeLabel(JLabel c, Location location) {
+        c.setSize(cellDimension);
+        JPanel cell = cellPanelGrid[location.x][location.y];
+        cell.setLayout(new GridLayout(1,1));
+        cell.setSize(cellDimension);
+        cell.add(c);
+        cell.setVisible(true);
+        replaceLabelOnCell(cell, c);
+        worldMapPanel.add(cell,location.y,location.x);
+        worldMapPanel.setVisible(true);
+        showMap();
+    }
+
+    private void replaceLabelOnCell(JPanel jPanel, JLabel c) {
+        jPanel.remove(0);
+        jPanel.add(c);
     }
 
     private JLabel[][] getCellLabelsFromWorldMap() {
@@ -549,13 +607,13 @@ public class View extends JFrame implements ActionListener {
                 ","+
                 "y"+
                 y +
-                cellGrid[x][y].getComponents().length);
+                cellPanelGrid[x][y].getComponents().length);
         final int SINGLE_COMPONENT = 1;
-        assert cellGrid[x][y].getComponents().length <= SINGLE_COMPONENT;
+        assert cellPanelGrid[x][y].getComponents().length <= SINGLE_COMPONENT;
         String exceptionMessage;
         exceptionMessage = "Exception!";
         exceptionMessage =
-                cellGrid[x][y].getComponents().length <= SINGLE_COMPONENT ?
+                cellPanelGrid[x][y].getComponents().length <= SINGLE_COMPONENT ?
                         "":
                         exceptionMessage;
         System.out.print(exceptionMessage);
@@ -563,7 +621,7 @@ public class View extends JFrame implements ActionListener {
 
     private JPanel getCell(int x, int y) {
         JPanel p;
-        p = cellGrid[x][y];
+        p = cellPanelGrid[x][y];
         p.setLayout(new GridLayout(1,1));
         p.add(visibleGrid[x][y]);
         return p;
@@ -589,15 +647,15 @@ public class View extends JFrame implements ActionListener {
         final int NONE = 0;
         @Override
         public void keyPressed(KeyEvent e) {
-            Location aftermove;
-            Location previous = cursorLocation;
+            Location previous;
             System.out.println("Keypressed" +
                     Data.numberOfArrowKeyPresses++ +
                     " : " +
                     e.getKeyCode());
-
             try {
+                previous = cursorLocation;
                 cursorMovements(e, previous);
+                previous = cursorLocation;
                 unitMovements(e,previous);
             } catch (ArrayIndexOutOfBoundsException aiobe) {
                 System.out.println(aiobe + "movement went out");
@@ -606,16 +664,16 @@ public class View extends JFrame implements ActionListener {
 
         private void unitMovements(KeyEvent e, Location previous) {
             switch (e.getKeyChar()) {
-                case 's':
+                case 'd':
                     moveUnit(previous, DirectionType.SOUTH);
                     break;
-                case 'w':
+                case 'a':
                     moveUnit(previous, DirectionType.NORTH);
                     break;
-                case 'a':
+                case 's':
                     moveUnit(previous, DirectionType.WEST);
                     break;
-                case 'd':
+                case 'w':
                     moveUnit(previous, DirectionType.EAST);
                     break;
                 case 'n':
@@ -632,9 +690,61 @@ public class View extends JFrame implements ActionListener {
             Player currentPlayer = Data.Turn.currentPlayer;
             LinkedList<Unit> ul = currentPlayer.units.list;
             ul.get(currentUnitIndex).location = aftermove;
-            placeOldLabelBackTo(previous);
-            placeUnit(ul.get(currentUnitIndex));
+            replaceUnitThenMap(previous, aftermove);
+            showMap();
+        }
+
+        private void replaceUnitThenMap(Location previous, Location aftermove) {
+            placeUnitOldLabelBackTo(previous);
+            placeActiveUnitOnPanelAt(aftermove);
             replaceWorldMap();
+            setCursorLocation(aftermove);// too
+            checkForUnit(aftermove);//perhaps
+        }
+
+        private void placeActiveUnitOnPanelAt(Location location) {
+            setActiveUnitsLocation(location);
+            placeUnit(active);
+            JLabel activeunit = makeUnitLabel(location);
+            replaceVisible(location, activeunit);
+            fillCellGrid();
+            showMap();
+        }
+
+        private JLabel makeUnitLabel(Location location) {
+            JLabel c = new JLabel();
+            temporaryContentsUnit = gridLabels[location.x][location.y];
+            c.setOpaque(true);
+            c.setText(temporaryContentsUnit.getText());
+            c.setForeground(active.colors);
+            c.setPreferredSize(temporaryContentsUnit.getPreferredSize());
+            c.setVisible(true);
+            c.setFocusable(true);
+            c.requestFocus();
+            activeLabel = c;
+            visibleGrid[location.x][location.y] = c;
+            return c;
+        }
+
+        public LinkedList<Location> createAllUnitsLocations(){
+            LinkedList<Location> ull = new LinkedList<Location>();
+            for(Player p : Data.listOfPlayers){
+                for(Unit unit: p.units.list){
+                    ull.add(unit.location);
+                }
+            }
+            return ull;
+        }
+
+        public void unitCountAt(Location x){
+            LinkedList<Location> ull = createAllUnitsLocations();
+            int countUnits = 0;
+            for (int i = 0; i < ull.size(); i++) {
+                while((ull.get(i).x == x.x) && (ull.get(i).y == x.y)) {
+                    countUnits++;
+                    break;
+                }
+            }
         }
 
         private void cursorMovements(KeyEvent e, Location previous) {
@@ -652,18 +762,26 @@ public class View extends JFrame implements ActionListener {
                     moveCursor(previous, DirectionType.EAST);
                     break;
                 case KeyEvent.VK_SPACE:
-                    //activate unit on location for movement
+                    //activate unit on cursorLocation for movement
                 default:
 
             }
         }
 
         private void moveCursor(Location previous, DirectionType direction) {
-            Location aftermove;
-            aftermove = previous.movement(direction);
+            Location aftermove = previous.movement(direction);
             replaceLabelThenMap(aftermove, previous);
-            setLocation(aftermove);
+            setCursorLocation(aftermove);
             checkForUnit(aftermove);
+            while(isLandUnitPresent(visibleGrid[aftermove.x][aftermove.y])){
+                LinkedList<Unit> lu = getUnitsAt(aftermove);
+                updateUnitBoardWith(lu);
+                break;
+            }
+            while(!isLandUnitPresent(visibleGrid[aftermove.x][aftermove.y])){
+                updateUnitBoardWithEmpty();
+                break;
+            }
         }
 
         private void checkForUnit(Location l) {
@@ -674,40 +792,24 @@ public class View extends JFrame implements ActionListener {
             }
         }
 
-        //CHECK IF THERE ARE ANY UNITS IF SO update the unitboard
-        private boolean getResponse(Location l) {
-            LinkedList<Unit> unitsAtLocation = new LinkedList<Unit>();
-
-            for(Player p: Data.listOfPlayers){
-                while(!p.units.list.isEmpty()){
-                    for(Unit u:p.units.list){
-                        System.out.println(p.identification.fullName + "  " + u
-                                .getType());
-                        try {
-                            while(u.location != null) {
-                                while (u.location.x == l.x &&
-                                        u.location.y == l.y) {
-                                    unitsAtLocation.add(u);
-                                    break;
-                                }
-                                break;
-                            }
-                        }catch(NullPointerException npe){
-                            System.err.print(npe);
-                        }
-                    }
-                    break;
-                }
+        private boolean isLandUnitPresent(JLabel jLabel) {
+            boolean unitPresent = jLabel.getText().equals(
+                    String.valueOf(Data.landChit));
+            while(!unitPresent) {
+                emptyUnitBoard();
+                break;
             }
+            return unitPresent;
+        }
+
+        private boolean getResponse(Location l) {
+            LinkedList<Unit> unitsAtLocation = getUnitsAt(l);
             boolean updated = isLandUnitPresent(visibleGrid[l.x][l.y]) ?
                     updateUnitBoardWith(unitsAtLocation):
                     emptyUnitBoard();
+            updateUnitBoardWithCurrentPlayerUnit();
             return updated;
 
-        }
-
-        private boolean isLandUnitPresent(JLabel jLabel) {
-            return jLabel.getText().equals(String.valueOf(Data.landChit));
         }
 
         private void replaceLabelThenMap(Location aftermove,
@@ -716,6 +818,35 @@ public class View extends JFrame implements ActionListener {
             placeCursorOnPanelAt(aftermove);
             replaceWorldMap();
         }
+    }
+
+    private LinkedList<Unit> getUnitsAt(Location l) {
+        LinkedList<Unit> unitsAtLocation = new LinkedList<Unit>();
+
+        for(Player p: Data.listOfPlayers){
+            while(!p.units.list.isEmpty()){
+                for(Unit u:p.units.list){
+                    try {
+                        while(u.location != null) {
+                            while (u.location.x == l.x &&
+                                    u.location.y == l.y) {
+                                unitsAtLocation.add(u);
+                                break;
+                            }
+                            break;
+                        }
+                    }catch(NullPointerException npe){
+                        System.err.print(npe);
+                    }
+                }
+                break;
+            }
+        }
+        return unitsAtLocation;
+    }
+
+    private void setActiveUnitsLocation(Location aftermove) {
+        active.location = aftermove;
     }
 
     private void placeUnit(Unit unit) {
@@ -733,7 +864,7 @@ public class View extends JFrame implements ActionListener {
         }
     }
 
-    void setLocation(Location aftermove){ this.location = aftermove; }
+    void setCursorLocation(Location aftermove){ this.cursorLocation = aftermove; }
 
     public boolean updateUnitBoardWith(LinkedList<Unit> unitsAtLocation) {
         unitBoard.removeAll();
@@ -766,20 +897,27 @@ public class View extends JFrame implements ActionListener {
 
     public void replaceWorldMap() {
         worldMapPanel.removeAll();
-        //TODO: refactorisation define cellGrid as JPanel with JLabel
-        initCellGrid();
+        initCellGridPanels();
         fillCellGrid();
-        placeLabels();
+        //clearMapToNature();//either or prolly two functions needed
+        placeVisibleLabels();
         worldMapPanel = createWorldMap();
         createCells();
         worldMapPanel.setVisible(true);
     }
-    //LOCATION
+    public void clearWorldMap() {
+        worldMapPanel.removeAll();
+        initCellGridPanels();
+        fillCellGrid();
+        clearMapToNature();
+        worldMapPanel = createWorldMap();
+        createCells();
+        worldMapPanel.setVisible(true);
+    }
 
-    //LOCATION
     //tests
     private void testLocationPrint(Location aftermove, Location previous) {
-        System.out.println("location:"+previous.x +", "+
+        System.out.println("cursorLocation:"+previous.x +", "+
                 previous.y +"::"+aftermove.x + ", " +
                 aftermove.y);
     }
