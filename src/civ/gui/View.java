@@ -682,24 +682,73 @@ public class View extends JFrame implements ActionListener {
         }
 
         private void unitMovements(KeyEvent e, Location previous) {
+            MoveUnit mu = active.chit==Data.landChit ? new MoveLandUnit() :
+                    active.chit==Data.seaChit ? new MoveSeaUnit() :
+                    active.chit == Data.airChit? new MoveAirUnit():
+                    active.chit == Data.rocketChit? new MoveToOrbit():
+                            new StayPut();
             switch (e.getKeyChar()) {
                 case 'd':
-                    moveUnit(previous, DirectionType.SOUTH);
+                    mu.move(previous, DirectionType.SOUTH);
                     break;
                 case 'a':
-                    moveUnit(previous, DirectionType.NORTH);
+                    mu.move(previous, DirectionType.NORTH);
                     break;
                 case 's':
-                    moveUnit(previous, DirectionType.WEST);
+                    mu.move(previous, DirectionType.WEST);
                     break;
                 case 'w':
-                    moveUnit(previous, DirectionType.EAST);
+                    mu.move(previous, DirectionType.EAST);
                     break;
                 case 'n':
                     nextUnit.doClick();
                     break;
                 default:
 
+            }
+        }
+
+        abstract class MoveUnit{
+            abstract void move(Location previous, DirectionType direction);
+        }
+        class StayPut extends MoveUnit{
+            void move(Location previous, DirectionType direction){}
+        }
+        class MoveLandUnit extends MoveUnit
+        {
+
+            void move(Location previous, DirectionType direction){
+                Location aftermove = getLocationAfterMove(previous, direction);
+                while(!visibleGrid[aftermove.x][aftermove.y].getBackground()
+                        .equals(Color.cyan) ){
+                    moveUnit(previous, direction);
+                    break;
+                }
+            }
+        }
+
+        class MoveSeaUnit extends MoveUnit
+        {
+            void move(Location previous, DirectionType direction){
+                Location aftermove = getLocationAfterMove(previous, direction);
+                while(visibleGrid[aftermove.x][aftermove.y].getBackground()
+                        .equals(Color.cyan)){
+                    moveUnit(previous, direction);
+                    break;
+                }
+            }
+        }
+
+        class MoveAirUnit extends MoveUnit
+        {
+            void move(Location previous, DirectionType direction){
+                moveUnit(previous,direction);
+            }
+        }
+        class MoveToOrbit extends MoveUnit{
+            void move(Location previous, DirectionType direction){
+                //countdown...
+                // orbit achieved!
             }
         }
 
@@ -729,7 +778,7 @@ public class View extends JFrame implements ActionListener {
             ulAtPrevious =getUnitsAt(previous);
             while(ulAtPrevious.size() > 0){
                 placeUnitOldLabelBackTo(previous);
-                for(Unit u: ulAtPrevious)placeUnit(u);
+                for(Unit u: ulAtPrevious) placeUnit(u);
                 break;
             }
         }
