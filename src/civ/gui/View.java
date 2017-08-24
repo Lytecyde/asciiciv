@@ -54,6 +54,7 @@ public class View extends JFrame implements ActionListener {
     private JLabel unitType, veteran; //for unit
 
     public Unit active;
+    public Unit underCursor;
     private JLabel activeLabel;
     private JLabel temporaryContentsUnit;
 
@@ -126,10 +127,6 @@ public class View extends JFrame implements ActionListener {
                 visibleGrid[l.x][l.y].setForeground(p.colors);
             }
         }
-    }
-
-    public void updateUnitsOnMap(){
-        //TODO going to moveCursor some units around!!!
     }
 
     private void setupView() {
@@ -614,7 +611,7 @@ public class View extends JFrame implements ActionListener {
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
                 p = getCell(x, y);
-                l= new Location(x,y);
+                l = new Location(x,y);
                 addCellToWorldMap(p, l);
             }
         }
@@ -662,8 +659,6 @@ public class View extends JFrame implements ActionListener {
         public void keyReleased(KeyEvent e) {
 
         }
-        final int UPDATE = 1;
-        final int NONE = 0;
         @Override
         public void keyPressed(KeyEvent e) {
             Location previous;
@@ -684,43 +679,35 @@ public class View extends JFrame implements ActionListener {
         private void unitMovements(KeyEvent e, Location previous) {
             MoveUnit mu = active.chit==Data.landChit ? new MoveLandUnit() :
                     active.chit==Data.seaChit ? new MoveSeaUnit() :
-                    active.chit == Data.airChit? new MoveAirUnit():
-                    active.chit == Data.rocketChit? new MoveToOrbit():
+                            active.chit==Data.airChit ? new MoveAirUnit():
+                    active.chit==Data.rocketChit ? new MoveToOrbit():
                             new StayPut();
-            switch (e.getKeyChar()) {
-                case 'd':
-                    mu.move(previous, DirectionType.SOUTH);
-                    break;
-                case 'a':
-                    mu.move(previous, DirectionType.NORTH);
-                    break;
-                case 's':
-                    mu.move(previous, DirectionType.WEST);
-                    break;
-                case 'w':
-                    mu.move(previous, DirectionType.EAST);
-                    break;
-                case 'n':
-                    nextUnit.doClick();
-                    break;
-                default:
+            
+            MoveInDirection mid = e.getKeyChar()== 'd'? new MoveSouth(mu):
+                    e.getKeyChar()== 'a'? new MoveNorth(mu):
+                            e.getKeyChar()== 's'? new MoveWest(mu):
+                                    e.getKeyChar()== 'w'? new MoveEast(mu):
+                    new StayAtSpot();
 
-            }
         }
 
-        abstract class MoveUnit{
+        abstract class MoveUnit
+        {
             abstract void move(Location previous, DirectionType direction);
         }
-        class StayPut extends MoveUnit{
+
+        class StayPut extends MoveUnit
+        {
             void move(Location previous, DirectionType direction){}
         }
+
         class MoveLandUnit extends MoveUnit
         {
 
             void move(Location previous, DirectionType direction){
                 Location aftermove = getLocationAfterMove(previous, direction);
-                while(!visibleGrid[aftermove.x][aftermove.y].getBackground()
-                        .equals(Color.cyan) ){
+                while(!(visibleGrid[aftermove.x][aftermove.y].getBackground()
+                        .equals(Color.cyan)) ){
                     moveUnit(previous, direction);
                     break;
                 }
@@ -745,7 +732,8 @@ public class View extends JFrame implements ActionListener {
                 moveUnit(previous,direction);
             }
         }
-        class MoveToOrbit extends MoveUnit{
+        class MoveToOrbit extends MoveUnit
+        {
             void move(Location previous, DirectionType direction){
                 //countdown...
                 // orbit achieved!
@@ -773,15 +761,69 @@ public class View extends JFrame implements ActionListener {
             return aftermove;
         }
 
+        abstract class MoveInDirection
+        {
+            abstract void move(Location previous);
+        }
+        class MoveSouth extends MoveInDirection
+        {
+            MoveUnit mu;
+            MoveSouth(MoveUnit mu){
+                this.mu = mu;
+            }
+            @Override
+            void move(Location previous) {
+                mu.move(previous, DirectionType.SOUTH);
+            }
+
+        }
+        class MoveWest extends MoveInDirection
+        {
+            MoveUnit mu;
+            MoveWest(MoveUnit mu){
+                this.mu = mu;
+            }
+
+            @Override
+            void move(Location previous) {
+                mu.move(previous, DirectionType.WEST);
+            }
+        }
+        class MoveNorth extends MoveInDirection
+        {
+            MoveUnit mu;
+            MoveNorth(MoveUnit mu){
+                this.mu = mu;
+            }
+            @Override
+            void move(Location previous) {
+                mu.move(previous, DirectionType.NORTH);
+            }
+        }
+
+        class MoveEast extends MoveInDirection
+        {
+            MoveUnit mu;
+            MoveEast(MoveUnit mu){
+                this.mu = mu;
+            }
+            @Override
+            void move(Location previous) {
+                mu.move(previous, DirectionType.EAST);
+            }
+        }
+
         private void placeRemainingUnitsBack(Location previous) {
-            LinkedList<Unit> ulAtPrevious = new LinkedList<Unit>();
-            ulAtPrevious =getUnitsAt(previous);
+            LinkedList<Unit> ulAtPrevious;
+            ulAtPrevious = getUnitsAt(previous);
             while(ulAtPrevious.size() > 0){
                 placeUnitOldLabelBackTo(previous);
                 for(Unit u: ulAtPrevious) placeUnit(u);
                 break;
             }
         }
+
+
 
         private void placeActiveUnitOnPanelAt(Location location) {
             setActiveUnitsLocation(location);
@@ -914,6 +956,13 @@ public class View extends JFrame implements ActionListener {
             placeOldLabelBackTo(previous);
             placeUnitOnPanelAt(aftermove);
             replaceWorldMap();
+        }
+
+        private class StayAtSpot extends MoveInDirection {
+            @Override
+            void move(Location previous) {
+
+            }
         }
     }
 
