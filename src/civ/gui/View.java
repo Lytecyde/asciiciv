@@ -677,18 +677,20 @@ public class View extends JFrame implements ActionListener {
         }
 
         private void unitMovements(KeyEvent e, Location previous) {
-            MoveUnit mu = active.chit==Data.landChit ? new MoveLandUnit() :
+            MoveUnit mu =
+                    active.chit==Data.landChit ? new MoveLandUnit() :
                     active.chit==Data.seaChit ? new MoveSeaUnit() :
-                            active.chit==Data.airChit ? new MoveAirUnit():
+                    active.chit==Data.airChit ? new MoveAirUnit():
                     active.chit==Data.rocketChit ? new MoveToOrbit():
-                            new StayPut();
-            
-            MoveInDirection mid = e.getKeyChar()== 'd'? new MoveSouth(mu):
-                    e.getKeyChar()== 'a'? new MoveNorth(mu):
-                            e.getKeyChar()== 's'? new MoveWest(mu):
-                                    e.getKeyChar()== 'w'? new MoveEast(mu):
+                    new StayPut();
+            char keyPressed = e.getKeyChar();
+            MoveInDirection mid =
+                    keyPressed == 'd'? new MoveSouth(mu):
+                    keyPressed == 'a'? new MoveNorth(mu):
+                    keyPressed == 's'? new MoveWest(mu):
+                    keyPressed == 'w'? new MoveEast(mu):
                     new StayAtSpot();
-
+            mid.move(previous);
         }
 
         abstract class MoveUnit
@@ -729,7 +731,7 @@ public class View extends JFrame implements ActionListener {
         class MoveAirUnit extends MoveUnit
         {
             void move(Location previous, DirectionType direction){
-                moveUnit(previous,direction);
+                moveUnit(previous, direction);
             }
         }
         class MoveToOrbit extends MoveUnit
@@ -839,6 +841,12 @@ public class View extends JFrame implements ActionListener {
         private JLabel makeUnitLabel(Location location) {
             JLabel c = new JLabel();
             temporaryContentsUnit = gridLabels[location.x][location.y];
+            activeLabel = makeUnitJLabel(c);
+            visibleGrid[location.x][location.y] = c;
+            return c;
+        }
+
+        private JLabel makeUnitJLabel(JLabel c) {
             c.setOpaque(true);
             c.setText(temporaryContentsUnit.getText());
             c.setForeground(active.colors);
@@ -846,12 +854,9 @@ public class View extends JFrame implements ActionListener {
             c.setVisible(true);
             c.setFocusable(true);
             c.requestFocus();
-            activeLabel = c;
-            visibleGrid[location.x][location.y] = c;
             return c;
         }
 
-        
 
         public LinkedList<Location> createAllUnitsLocations(){
             LinkedList<Location> ull = new LinkedList<Location>();
