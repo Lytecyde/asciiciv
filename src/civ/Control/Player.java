@@ -19,7 +19,7 @@ public class Player {
     //Lists
     public Units units;
     Advances advances = new Advances();
-    public Cities cities = new Cities();
+    public Cities cities;
     public Corporations corporations = new Corporations();
     //Values
     public int happiness;
@@ -38,6 +38,7 @@ public class Player {
         units = new Units(this);
         unitCount = units.list.size();
         System.out.println("ID" + id.fullName + id.id + "power:" + unitCount);
+        cities = new Cities();
     }
 
 }

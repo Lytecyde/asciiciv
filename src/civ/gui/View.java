@@ -62,34 +62,46 @@ public class View extends JFrame implements ActionListener {
 
     public View(WorldMap wm) {
         worldMapPanelContents = wm;
-        //preparations
-        setupView();
-        placeMenuBar();
-        initCellGridPanels();
-        initLabels();
-        makeGridLabels();
 
-        //makeContents
-        createContentDefinitions();
-        getVisibleGridFromGridLabels();
-        fillCellGrid();
-        placeVisibleLabels();
-        createCells();
-        setAllUnitLocationsAtStart();
-
-        //placeAllContent
-        placeCursorOnPanelAt(Data.CENTRE);
-        placeContentToView();
-        fillCellGrid();
-
+        preparations();
+        makeContents();
+        placeAllContentToView();
         placeUnits();
-        active = Data.listOfPlayers.getFirst().units.list.getFirst();
+
+        setFirstActiveUnit();
         replaceWorldMap();
         worldMapPanel.requestFocus();
 
         setVisible(true);
         pack();
         repaint();
+    }
+
+    private void setFirstActiveUnit() {
+        active = Data.listOfPlayers.getFirst().units.list.getFirst();
+    }
+
+    private void placeAllContentToView() {
+        placeCursorOnPanelAt(Data.CENTRE);
+        placeContentToView();
+        fillCellGrid();
+    }
+
+    private void makeContents() {
+        createContentDefinitions();
+        setVisibleGridFromGridLabels();
+        fillCellGrid();
+        placeVisibleLabels();
+        createCells();
+        setAllUnitLocationsAtStart();
+    }
+
+    private void preparations() {
+        setupView();
+        placeMenuBar();
+        initCellGridPanels();
+        initLabels();
+        makeGridLabels();
     }
 
     public void setAllUnitLocationsAtStart() {
@@ -129,6 +141,15 @@ public class View extends JFrame implements ActionListener {
         }
     }
 
+    public void placeCities(){
+        String citySign = "#";
+        for(Player p : Data.listOfPlayers){
+            for(City c : p.cities.list){
+                
+            }
+        }
+    }
+
     private void setupView() {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setPreferredSize(new Dimension(820, 640));
@@ -147,7 +168,7 @@ public class View extends JFrame implements ActionListener {
         }
     }
 
-    public void getVisibleGridFromGridLabels() {
+    public void setVisibleGridFromGridLabels() {
         for (int x = 0; x < rows; x++) {
             for (int y = 0; y < cols; y++) {
                 visibleGrid[x][y] = gridLabels[x][y];
@@ -156,6 +177,8 @@ public class View extends JFrame implements ActionListener {
             }
         }
     }
+
+
 
     private void initCellGridPanels(){
         for (int x = 0; x < rows; x++) {
@@ -203,7 +226,7 @@ public class View extends JFrame implements ActionListener {
 
         //orders, ministrydata, ministry orders?, advances
         JMenu orders = new JMenu("Orders");
-        JMenuItem operate = new JMenuItem("Operate");
+        JMenuItem operate = new JMenuItem("Operation");
         JMenuItem heal = new JMenuItem("Heal");
         JMenuItem vigil = new JMenuItem("Vigil");
         JMenuItem fortify = new JMenuItem("Fortify");
@@ -343,43 +366,10 @@ public class View extends JFrame implements ActionListener {
 
     }
 
-    public void updateUnitBoardWithEmpty(){
-        unitBoard.removeAll();
-        createUnitBoard();
-    }
 
-    public void updateUnitBoardWithCurrentPlayerUnit(){
-        unitBoard.removeAll();
-        createUnitBoard();
-        Player player = Data.Turn.currentPlayer;
-        LinkedList<Unit> playerForces = new LinkedList<Unit>();
-        playerForces.addAll(player.units.getList());
-        Unit current = playerForces.get(currentUnitIndex);
-        unitType.setText( current.getType() +
-                player.identification.fullName +
-                currentUnitIndex
-        );
-        unitBoard.add(unitType);
-        String veteranText = current.isVeteran() ? "Veteran":"Rookie";
-        veteran.setText(veteranText);
-        unitBoard.add(veteran);
 
-    }
-    public void  updateUnitBoardWithActiveUnit(){
-        unitBoard.removeAll();
-        createUnitBoard();
-        while(active!=null) {
-            unitType.setText(active.getType() +
-                    active.identification.fullName +
-                    currentUnitIndex
-            );
-            unitBoard.add(unitType);
-            String veteranText = active.isVeteran() ? "Veteran" : "Rookie";
-            veteran.setText(veteranText);
-            unitBoard.add(veteran);
-            break;
-        }
-    }
+
+
 
     private void createDataBoard() {
         dataBoard.setLayout(new GridLayout(4,1));
@@ -421,11 +411,19 @@ public class View extends JFrame implements ActionListener {
                 textArea.setText(about);
                 break;
             case "Exit":
-                //save game
+                //save game dialog are you sure?
                 System.exit(0);
+                break;
+            case "Operation":
+                //TODO:NEXT !!!
+                new civ.Model.Operation(Data.Turn.currentPlayer);
+                break;
             default:
                 textArea.setText(command);
         }
+    }
+
+    private void operate(Unit unit) {
     }
 
 
@@ -544,7 +542,7 @@ public class View extends JFrame implements ActionListener {
     }
 
     public void newMapWithUnits(){
-        getVisibleGridFromGridLabels();
+        setVisibleGridFromGridLabels();
         clearMapToNature(); //restart gridlabels to visiblelabels
         placeUnits();
         placeVisibleLabels();
@@ -826,7 +824,7 @@ public class View extends JFrame implements ActionListener {
         }
 
 
-
+        //use for first turn first player
         private void placeActiveUnitOnPanelAt(Location location) {
             setActiveUnitsLocation(location);
             while(active != null) {
@@ -895,13 +893,14 @@ public class View extends JFrame implements ActionListener {
                     moveCursor(previous, DirectionType.EAST);
                     break;
                 case KeyEvent.VK_SPACE:
-                    //activate unit on cursorLocation for movement
+                    //TODO:activate unit on cursorLocation for movement
                 default:
 
             }
         }
 
         private void moveCursor(Location previous, DirectionType direction) {
+            UpdateUnitBoard uub = new UpdateUnitBoard();
             Location aftermove = previous.movement(direction);
             temporaryContentsUnit = visibleGrid[previous.x][previous.y];
             replaceLabelThenMap(aftermove, previous);
@@ -910,11 +909,11 @@ public class View extends JFrame implements ActionListener {
             while(unitCountAt(aftermove)>0){
                 LinkedList<Unit> lu = getUnitsAt(aftermove);
                 active = lu.peekFirst();
-                updateUnitBoardWith(lu);
+                uub.updateUnitBoardWith(lu);
                 break;
             }
             while(unitCountAt(aftermove)==0){
-                updateUnitBoardWithEmpty();
+                uub.updateUnitBoardWithEmpty();
                 break;
             }
             placeUnits();
@@ -939,12 +938,13 @@ public class View extends JFrame implements ActionListener {
         }
 
         private boolean getResponse(Location l) {
+            UpdateUnitBoard uub = new UpdateUnitBoard();
             LinkedList<Unit> unitsAtLocation = getUnitsAt(l);
             boolean updated = isLandUnitDisplayed(visibleGrid[l.x][l.y]) ?
-                    updateUnitBoardWith(unitsAtLocation):
+                    uub.updateUnitBoardWith(unitsAtLocation):
                     emptyUnitBoard();
             active = unitsAtLocation.peekFirst();
-            updateUnitBoardWithActiveUnit();
+            uub.updateUnitBoardWithActiveUnit();
             return updated;
 
         }
@@ -1027,29 +1027,71 @@ public class View extends JFrame implements ActionListener {
 
     void setCursorLocation(Location aftermove){ this.cursorLocation = aftermove; }
 
-    public boolean updateUnitBoardWith(LinkedList<Unit> unitsAtLocation) {
-        unitBoard.removeAll();
-        createUnitBoard();
-        try {
-            while(!unitsAtLocation.isEmpty()) {
-                Unit current = unitsAtLocation.getFirst();
-                unitType.setText(current.getType() +
-                        current.identification.fullName +
-                        current.identification.id
+
+    public class UpdateUnitBoard{
+        public boolean updateUnitBoardWith(LinkedList<Unit> unitsAtLocation) {
+            unitBoard.removeAll();
+            createUnitBoard();
+            try {
+                while(!unitsAtLocation.isEmpty()) {
+                    Unit current = unitsAtLocation.getFirst();
+                    unitType.setText(current.getType() +
+                            current.identification.fullName +
+                            current.identification.id
+                    );
+                    unitBoard.add(unitType);
+                    String veteranText = current.isVeteran() ?
+                            "Veteran" :
+                            "Rookie";
+                    veteran.setText(veteranText);
+                    break;
+                }
+            }catch(NullPointerException npe){
+                System.err.println("hey no units at this location" + npe);
+            }
+            unitBoard.add(veteran);
+            return !unitsAtLocation.isEmpty();
+        }
+
+        public void  updateUnitBoardWithActiveUnit(){
+            unitBoard.removeAll();
+            createUnitBoard();
+            while(active!=null) {
+                unitType.setText(active.getType() +
+                        active.identification.fullName +
+                        currentUnitIndex
                 );
                 unitBoard.add(unitType);
-                String veteranText = current.isVeteran() ?
-                        "Veteran" :
-                        "Rookie";
+                String veteranText = active.isVeteran() ? "Veteran" : "Rookie";
                 veteran.setText(veteranText);
+                unitBoard.add(veteran);
                 break;
             }
-        }catch(NullPointerException npe){
-            System.err.println("hey" + npe);
         }
-        unitBoard.add(veteran);
-        return !unitsAtLocation.isEmpty();
+        public void updateUnitBoardWithCurrentPlayerUnit(){
+            unitBoard.removeAll();
+            createUnitBoard();
+            Player player = Data.Turn.currentPlayer;
+            LinkedList<Unit> playerForces = new LinkedList<Unit>();
+            playerForces.addAll(player.units.getList());
+            Unit current = playerForces.get(currentUnitIndex);
+            unitType.setText( current.getType() +
+                    player.identification.fullName +
+                    currentUnitIndex
+            );
+            unitBoard.add(unitType);
+            String veteranText = current.isVeteran() ? "Veteran":"Rookie";
+            veteran.setText(veteranText);
+            unitBoard.add(veteran);
+
+        }
+        public void updateUnitBoardWithEmpty(){
+            unitBoard.removeAll();
+            createUnitBoard();
+        }
     }
+
+
 
     public boolean emptyUnitBoard() {
         unitBoard.removeAll();
@@ -1093,8 +1135,11 @@ public class View extends JFrame implements ActionListener {
     }
 
     private void testLabel(int x, int y) {
-        System.out.println(x + "," + y + visibleGrid[x][y].getText()
-                + visibleGrid[x][y].getSize().height
+        System.out.println(x +
+                "," +
+                y +
+                visibleGrid[x][y].getText() +
+                visibleGrid[x][y].getSize().height
         );
 
         System.out.println(x +

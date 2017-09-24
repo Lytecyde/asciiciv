@@ -1,10 +1,8 @@
 package civ.Model;
 
 import civ.Control.Player;
-import civ.Control.RoundTable;
 
 import java.awt.*;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 
@@ -37,17 +35,9 @@ public class Data {
 
     public Data() {
         generateNationsList();
+        Relationship popularRegard = new Relationship();
+
     }
-
-    public final static char relationshipLove = '♥';
-
-    public final static char relationshipHate = '♠';
-
-    public final static char relationshipPeace = '☮'; //9774
-
-    public final static char relationshipFist = 'F';//✊ forment
-
-    public final static char relationshipRage = '☠';
 
     public final static char flag = '⚑';//🌸
 
@@ -102,23 +92,21 @@ public class Data {
     //buildings
 
     public final static char propagandaTower = 'A';//🗼
-    String teletower = "🗼";//makes people happy or angry others happy or angry
-    String bank = "🏦";//adds gold and risk of bust
-
-
-
-    String school = "🏫";//adds skills
-    String artCommune = "🖌";//creates culture
+    String teletower = "🗼";//makes people happy or angry (others happy or angry
+    String bank = "🏦";//adds gold and risk of bust and chance of boom
+    String press = "🖨";//makes books
+    String school = "🏫";//adds skills to units or converts units
+    String artCommune = "🖌";//adds culture
     String temple = "⛪";//makes preachers
-    String court = "§";//makes things more lawful
+    String court = "§";//makes people more lawful
     String factory = "🏭";//makes goods
-    String house = "🏠";//houses people contributes to happiness
+    String house = "🏠";//houses people contributes to amenities > to happiness
     String hospital = "🏥";//heals people and increases life expectancy
     String garage = "⛽";//fuels and repairs? motorised units
     String lab = "🔬";//adds science
     String server = "💻";// adds information bytes
-    String farm = "🏡";//adds food
-    String market = "🏬";//makes merchants
+    String farm = "🏡";//adds food, houses people
+    String market = "🏬";//makes merchants trades goods with other cities
 
     private void generateNationsList() {
          Collections.addAll(nations, Nation.names);
@@ -129,7 +117,6 @@ public class Data {
     
 
     public static class Map {
-
         final static int normalXmax = 90;
         final static int  normalYmax = 52;
     }
