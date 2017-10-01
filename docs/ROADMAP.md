@@ -38,6 +38,8 @@ built in, diplomacy works with treaties and ultimatums and other features
 
 
 **1.0** the game is fully playable and should be launched :) to space!
+I would love to get this game played in orbit or on the way to Mars in 2024.
+
 
 *1.2* moddability with text files in the rulesets 
 
