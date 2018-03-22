@@ -39,6 +39,7 @@ public class Data {
 
     }
 
+    public final static char cursor = '█';
     public final static char flag = '⚑';//🌸
 
     public final static char culture = '♫';

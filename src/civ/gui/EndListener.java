@@ -54,10 +54,10 @@ public class EndListener implements ActionListener{
     private void updateView(int timeNow) {
         v.setTitle(Data.Turn.currentPlayer.identification.fullName);
         v.year.setText("Year: " + timeNow);
-        v.updateUnitBoardWithCurrentPlayerUnit();
-        v.replaceWorldMap();
+        v.new UpdateUnitBoard().updateUnitBoardWithCurrentPlayerUnit();
+        v.new WorldMapFunctionality().replaceWorldMap();
         v.showControl();
-        v.showMap();
+        v.new Replacement().showMap();
 
     }
 

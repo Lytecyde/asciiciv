@@ -98,15 +98,33 @@ avatar
 Promised Land  
 Exodus  
 Laws  
+Coming Saviour
+Coming Deluge
+
+ 
 Healings  
 Feasts
 
 Unity  
 Angelic Beings  
-Ecstacy  
+Ecstacy Enoch  
 Enthusiasm  
 Secessation    
 Liberation  
 Ascendence  
 Enlightenment  
+
+#Science
+First the scientists have insights  
+or they backengineer a tool into an insight   
+which are turned into books by scholars  
+which then turn into theories by scientists  
+books on theories turn into useful new skills among units   
+books on tech turn into useful tools by mechanics  
+
+
+science is divided into lines of thought  
+12 lines  
+and 10 epochs 
+an epoch may have several  
 

@@ -1,12 +1,11 @@
 package civ.gui;
 
 
-
 import civ.Control.Player;
 import civ.Model.Data;
 import civ.Model.Location;
 
-
+import javax.swing.JLabel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -26,7 +25,8 @@ public class UnitSwitchListener implements ActionListener{
         Player currentPlayer = Data.Turn.currentPlayer;
         View.currentUnitIndex = ++View.currentUnitIndex%
                 (currentPlayer.unitCount );
-        v.updateUnitBoardWithCurrentPlayerUnit();
+        View.UpdateUnitBoard uub = v.new UpdateUnitBoard();
+        uub.updateUnitBoardWithCurrentPlayerUnit();
         v.switchPlayer.setFocusPainted(false);
         v.requestFocus();
         while(currentPlayer != null &&
@@ -44,13 +44,15 @@ public class UnitSwitchListener implements ActionListener{
             System.out.println("is fine");
             Location firstUnit = currentPlayer
                     .units.list.get(View.currentUnitIndex).location;
-            v.replaceWorldMap();
-            v.fillCellGrid();
+            v.new WorldMapFunctionality().replaceWorldMap();
+            v.new CellGrid().fillCellGrid();
             //v.placeOldLabelBackTo(v.cursorLocation);
-            v.placeCursorOnPanelAt(firstUnit);
+            String cursor =String.valueOf(Data.cursor);
+            JLabel jLabel= v.new Placement().placementOnPanelAt(
+                    cursor,
+                    firstUnit);
             v.cursorLocation = firstUnit;
-
-            v.showMap();
+            v.new Replacement().showMap();
             break;
         }
     }

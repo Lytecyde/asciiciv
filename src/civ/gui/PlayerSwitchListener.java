@@ -35,7 +35,8 @@ public class PlayerSwitchListener implements ActionListener {
         v.setTitle(playerNation);
         v.emptyUnitBoard();
         LinkedList<Unit> list = Civilization.currentPlayer.units.list;
-        v.updateUnitBoardWith(list);
+        View.UpdateUnitBoard updateUnitBoard = v.new UpdateUnitBoard();
+        updateUnitBoard.update(list);
         v.switchPlayer.setFocusPainted(false);
         v.nextUnit.doClick();
         v.requestFocus();

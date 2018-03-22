@@ -11,18 +11,23 @@ public class City {
     int x,y;
 
 
-    public City(String nationName){
-        ownerNation = nationName;
+    public City(Unit founderUnit){
+        ownerNation = founderUnit.commandingNation;
         infrastructure = new Buildings();
         setLocation();
         cityCoordinates = new MapCoordinates(x,  y);
     }
 
+    public City(String nationName) {
+
+    }
+
     public void setLocation() {
-        //TODO going to give them values
-        x = 0;
-        y = 0;
+        //founding
     }
 
 
+    public MapCoordinates getLocation() {
+        return new MapCoordinates(x,y);
+    }
 }

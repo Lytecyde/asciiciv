@@ -21,18 +21,26 @@ import static javax.swing.BorderFactory.createBevelBorder;
  */
 public class View extends JFrame implements ActionListener {
 
+    private final Init init = new Init(this);
+    private final Cell cell = new Cell(this);
     Location cursorLocation = Data.CENTRE;
 
     JTextArea textArea = new JTextArea(5, 52);
-    int x;
+
     int y;
     JPanel text = new JPanel();
     public JPanel control = new JPanel();
     public JPanel globeMapPanel = new JPanel();
-    public JPanel dataBoard = new JPanel();
-    public JPanel unitBoard = new JPanel();
-    public JPanel worldMapPanel = new JPanel();
+    public static JLabel funds, pollution, tax, year;//for databoard
+    private static JLabel unitType, veteran; //for unit
+    public static JButton nextUnit;
+    private static JLabel artifacts;
+    private static JLabel terrainType;
+    private static JLabel structure;
 
+
+    public JPanel worldMapPanel = new JPanel();
+    private CellGrid cellGrid = new CellGrid();
 
 
     public static final int cellSize = 15;
@@ -42,21 +50,22 @@ public class View extends JFrame implements ActionListener {
     private final JLabel[][] gridLabels = new JLabel[rows][cols];
     private JLabel[][] visibleGrid = new JLabel[rows][cols];
     public JPanel[][] cellPanelGrid = new JPanel[rows][cols];
-    private JLabel temporaryContentsCursor;
+
     private Dimension cellDimension = new Dimension(cellSize, cellSize);
     public static int currentUnitIndex = 0;
     public JButton endTurn = new JButton("End this Turn.");
     public JButton switchPlayer = new JButton("Next player");
-    public JButton nextUnit;
 
 
-    public JLabel funds, pollution, tax, year;//for databoard
-    private JLabel unitType, veteran; //for unit
+
+
 
     public Unit active;
     public Unit underCursor;
     private JLabel activeLabel;
     private JLabel temporaryContentsUnit;
+    private JLabel temporaryContentsCursor;
+
 
     public View(){}
 
@@ -69,7 +78,7 @@ public class View extends JFrame implements ActionListener {
         placeUnits();
 
         setFirstActiveUnit();
-        replaceWorldMap();
+        new WorldMapFunctionality().replaceWorldMap();
         worldMapPanel.requestFocus();
 
         setVisible(true);
@@ -82,26 +91,18 @@ public class View extends JFrame implements ActionListener {
     }
 
     private void placeAllContentToView() {
-        placeCursorOnPanelAt(Data.CENTRE);
-        placeContentToView();
-        fillCellGrid();
+        ViewContents c = new ViewContents();
+        ViewContents.Placer p = c.new Placer();
+        p.invoke();
     }
 
     private void makeContents() {
-        createContentDefinitions();
-        setVisibleGridFromGridLabels();
-        fillCellGrid();
-        placeVisibleLabels();
-        createCells();
-        setAllUnitLocationsAtStart();
+        ViewContents c = new ViewContents();
+        c.new Maker().invoke();
     }
 
     private void preparations() {
-        setupView();
-        placeMenuBar();
-        initCellGridPanels();
-        initLabels();
-        makeGridLabels();
+        new Preparations().invoke();
     }
 
     public void setAllUnitLocationsAtStart() {
@@ -109,293 +110,73 @@ public class View extends JFrame implements ActionListener {
     }
 
     public void placeUnits() {
-        placeLandUnits();
-        //placeSeaUnits();
-        //placeAirUnits();
+        new UnitPlacer().invoke();
         //TODO:placeSatellites();
     }
 
-    private void placeAirUnits() {
-        char sign = Data.airChit;
-        paintUnitSign(sign);
-    }
 
-    private void placeSeaUnits() {
-        char sign = Data.seaChit;
-        paintUnitSign(sign);
-    }
-
-    private void placeLandUnits() {
-        char sign = Data.landChit;
-        paintUnitSign(sign);
-    }
-
-    private void paintUnitSign(char sign) {
-        for(Player p : Data.listOfPlayers){
-            for(Unit u: p.units.list) {
-                Location l = u.location;
-                String signStr = Character.toString(sign);
-                visibleGrid[l.x][l.y].setText(signStr);
-                visibleGrid[l.x][l.y].setForeground(p.colors);
-            }
-        }
-    }
-
+    //SKETCH
     public void placeCities(){
         String citySign = "#";
+        MapCoordinates cityLocation;
         for(Player p : Data.listOfPlayers){
             for(City c : p.cities.list){
-                
+                //TODO roughly
+                cityLocation = c.getLocation();
+
+                //Location loc = new Location(
+                //        cityLocation.getX(),
+                //        cityLocation.getY()
+                //);
+                //addCellToWorldMap(cell, loc);
             }
         }
-    }
-
-    private void setupView() {
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new Dimension(820, 640));
-        setLayout(new BorderLayout());
-        setFocusable(true);
-        MyKeyListener mkl = new MyKeyListener();
-        addKeyListener(mkl);
-
-    }
-
-    private void makeGridLabels(){
-        for (int x = 0; x < rows; x++) {
-            for (int y = 0; y < cols; y++) {
-                gridLabels[x][y] = getCellLabelsFromWorldMapOriginal()[x][y];
-            }
-        }
-    }
-
-    public void setVisibleGridFromGridLabels() {
-        for (int x = 0; x < rows; x++) {
-            for (int y = 0; y < cols; y++) {
-                visibleGrid[x][y] = gridLabels[x][y];
-                visibleGrid[x][y].setVisible(true);
-                visibleGrid[x][y].setPreferredSize(cellDimension);
-            }
-        }
-    }
-
-
-
-    private void initCellGridPanels(){
-        for (int x = 0; x < rows; x++) {
-            for (int y = 0; y < cols; y++) {
-                cellPanelGrid[x][y] = new JPanel();
-            }
-        }
-    }
-
-    private void initLabels(){
-        initGridLabels();
-        initVisibleGridLabels();
-    }
-
-    private void initGridLabels(){
-        for (int x = 0; x < rows; x++) {
-            for (int y = 0; y < cols; y++) {
-                gridLabels[x][y] = new JLabel();
-            }
-        }
-    }
-    private void initVisibleGridLabels(){
-        for (int x = 0; x < rows; x++) {
-            for (int y = 0; y < cols; y++) {
-                visibleGrid[x][y] = new JLabel();
-            }
-        }
-    }
-
-    private void placeMenuBar() {
-        JMenuBar menuBar = new JMenuBar();
-
-        JMenu file = new JMenu("File");
-        JMenuItem open = new JMenuItem("Open");
-        JMenuItem close = new JMenuItem("Close");
-        JMenuItem save = new JMenuItem("Save");
-        JMenuItem exit = new JMenuItem("Exit");
-
-        file.add(open);
-        file.add(close);
-        file.add(save);
-        file.addSeparator();
-        file.add(exit);
-        menuBar.add(file);
-
-        //orders, ministrydata, ministry orders?, advances
-        JMenu orders = new JMenu("Orders");
-        JMenuItem operate = new JMenuItem("Operation");
-        JMenuItem heal = new JMenuItem("Heal");
-        JMenuItem vigil = new JMenuItem("Vigil");
-        JMenuItem fortify = new JMenuItem("Fortify");
-
-        orders.add(operate);
-        orders.add(heal);
-        orders.add(vigil);
-        orders.add(fortify);
-        menuBar.add(orders);
-
-        JMenu jmMinistries = new JMenu("Ministries");
-        JMenuItem jmiFinancial = new JMenuItem("Financial");
-        JMenuItem jmiSocial = new JMenuItem("Social");
-        JMenuItem jmiInterior = new JMenuItem("Interior");
-        JMenuItem jmiForeignAffairs = new JMenuItem("Foreign Affairs");
-        JMenuItem jmiDefence = new JMenuItem("Defence");
-
-        jmMinistries.add(jmiFinancial);
-        jmMinistries.add(jmiSocial);
-        jmMinistries.add(jmiInterior);
-        jmMinistries.add(jmiForeignAffairs);
-        jmMinistries.add(jmiDefence);
-        menuBar.add(jmMinistries);
-
-        JMenu data = new JMenu("Data");
-        JMenuItem wonders = new JMenuItem("Wonders of the World");
-        JMenuItem topCities = new JMenuItem("Top Cities");
-        JMenuItem demographics = new JMenuItem("Demographics");
-        JMenuItem progress = new JMenuItem("Progress chart");
-        JMenuItem international = new JMenuItem("Affairs");
-
-        data.add(wonders);
-        data.add(topCities);
-        data.add(demographics);
-        data.add(progress);
-        data.add(international);
-        menuBar.add(data);
-
-        JMenu jmHelp = new JMenu("Help");
-        JMenuItem jmiAbout = new JMenuItem("About");
-        jmHelp.add(jmiAbout);
-        menuBar.add(jmHelp);
-
-        open.addActionListener(this);
-        close.addActionListener(this);
-        save.addActionListener(this);
-
-        operate.addActionListener(this);
-        heal.addActionListener(this);
-        vigil.addActionListener(this);
-        fortify.addActionListener(this);
-
-        jmiFinancial.addActionListener(this);
-        jmiSocial.addActionListener(this);
-        jmiInterior.addActionListener(this);
-        jmiForeignAffairs.addActionListener(this);
-        jmiDefence.addActionListener(this);
-
-        wonders.addActionListener(this);
-        topCities.addActionListener(this);
-        demographics.addActionListener(this);
-        progress.addActionListener(this);
-        international.addActionListener(this);
-
-        exit.addActionListener(this);
-        jmiAbout.addActionListener(this);
-        this.setJMenuBar(menuBar);
-    }
-
-    private void placeContentToView() {
-        textArea.setEnabled(false);
-        this.add(text, BorderLayout.SOUTH);
-        this.add(control, BorderLayout.EAST);
-        this.add(worldMapPanel, BorderLayout.CENTER);
     }
 
     private void createContentDefinitions() {
-        worldMapPanelContents.createWorld();
-        createControlPanel();
-        createTextPanel();
-        createMapPanel();
-        createWorldMap();
-        createGlobeMap();
+        ViewContents c = new ViewContents();
+        ViewContents.Definitions d = c.new Definitions(this);
     }
 
-    protected JPanel createWorldMap() {
-        worldMapPanel.setLayout(new GridLayout(rows, cols));
-        worldMapPanel.setSize(cols *15, rows *15);
-        worldMapPanel.setVisible(true);
-        worldMapPanel.repaint();
+    public JPanel[][] getCellPanelGrid() {
+        return cellPanelGrid;
+    }
+
+    public JLabel[][] getGridLabels() {
+        return gridLabels;
+    }
+
+    public JLabel[][] getVisibleGrid() {
+        return visibleGrid;
+    }
+
+    public Dimension getCellDimension() {
+        return cellDimension;
+    }
+
+    public JPanel getWorldMapPanel() {
         return worldMapPanel;
     }
 
-    private JPanel createGlobeMap() {
-        globeMapPanel.setBackground(Color.black);
-        globeMapPanel.setLayout(new GridLayout(rows, cols));
-        globeMapPanel.setSize(cols*4, rows*4);
-        globeMapPanel.setVisible(true);
-        globeMapPanel.repaint();
-        return globeMapPanel;
-    }
+    public class WorldMapFunctionality{
+        private JPanel createWorldMap() {
+            ViewContents c = new ViewContents();
+            c.new Definitions().createWorldMap();
+            return worldMapPanel;
+        }
 
-    private void createTextPanel() {
-        text.add(textArea);
-    }
-
-    private void createControlPanel() {
-        control.setLayout(new GridLayout(5, 1));
-        createGlobeMap();
-        control.add(globeMapPanel);
-        createDataBoard();
-        control.add(dataBoard);
-        createUnitBoard();
-        control.add(unitBoard);
-        PlayerSwitchListener psl = new PlayerSwitchListener(this);
-        switchPlayer.addActionListener(psl);
-        EndListener endListener = new EndListener(this);
-        endTurn.addActionListener(endListener);
-        control.add(endTurn);
-        control.add(switchPlayer);
-        control.repaint();
-    }
-
-    private void createUnitBoard() {
-        unitBoard.setLayout(new GridLayout(4,1));
-        nextUnit = new JButton("Next Unit");
-        UnitSwitchListener unitSwitchListener =
-                new UnitSwitchListener(this);
-        nextUnit.addActionListener(unitSwitchListener);
-        unitType = new JLabel("Unit ID : ");
-        veteran = new JLabel("Experience:");
-        nextUnit.setFocusPainted(false);
-        unitBoard.add(nextUnit);
-        unitBoard.add(unitType);
-        unitBoard.add(veteran);
-
+        public void replaceWorldMap() {
+            worldMapPanel.removeAll();
+            init.initCellGridPanels();
+            new CellGrid().fillCellGrid();
+            //clearMapToNature();//either or prolly two functions needed
+            cell.placeVisibleLabels();
+            worldMapPanel = createWorldMap();
+            cell.createCells();
+            worldMapPanel.setVisible(true);
+        }
 
     }
-
-
-
-
-
-
-    private void createDataBoard() {
-        dataBoard.setLayout(new GridLayout(4,1));
-        funds = new JLabel("Funds: " +
-                Data.Turn.currentPlayer.funds);
-        pollution = new JLabel("Pollution: " +
-                Data.Turn.currentPlayer.pollution);
-        tax = new JLabel("Taxrate: " +
-                Data.Turn.currentPlayer.tax);
-        year = new JLabel("Year: " +
-                Civilization.year);
-        dataBoard.add(year);
-        dataBoard.add(tax);
-        dataBoard.add(funds);
-        dataBoard.add(pollution);
-
-    }
-
-    private void createMapPanel() {
-        worldMapPanel.setPreferredSize(
-                new Dimension(
-                        cols * cellSize + 10,
-                        rows * cellSize + 10));
-        worldMapPanel.setVisible(true);
-    }
-
 
 
     @Override
@@ -424,227 +205,118 @@ public class View extends JFrame implements ActionListener {
     }
 
     private void operate(Unit unit) {
+        //unit.works();
+    }
+
+    //placement of units and cursors on map
+    public class Placement{
+        protected JLabel placementOnPanelAt(String letter,
+                                            Location location) {
+            cursorLocation = location;
+            JLabel receptacle = placement(letter, location);;
+            new Replacement().replaceVisible(location, receptacle);
+            cellGrid.fillCellGrid();
+            new Replacement().showMap();
+            return receptacle;
+        }
+
+
+        private JLabel placement(String letter, Location l){
+            JLabel c = new JLabel();
+            temporaryContentsUnit = gridLabels[l.x][l.y];
+            c.setOpaque(true);
+            c.setText(letter); //@
+            c.setForeground(Color.red);
+            c.setBackground(Color.white);
+            c.setPreferredSize(temporaryContentsUnit.getPreferredSize());
+            c.setVisible(true);
+            c.setFocusable(true);
+            c.requestFocus();
+            assignment(c, l);
+            return c;
+        }
+
+        private void assignment(JLabel c, Location l) {
+            visibleGrid[l.x][l.y] = c;
+        }
+
     }
 
 
-    protected void placeCursorOnPanelAt(Location location) {
-        cursorLocation = location;
-        placeCursorTo(location);
-        replaceVisible(location, cursor);
-        fillCellGrid();
-        showMap();
-    }
-    protected void placeUnitOnPanelAt(Location location) {
-        cursorLocation = location;
-        placeUnitTo(location);
-        replaceVisible(location, activeLabel);
-        fillCellGrid();
-        showMap();
-    }
 
-    private void placeCursorTo(Location l) {
-        JLabel c = new JLabel();
-        temporaryContentsCursor = gridLabels[l.x][l.y];
-        c.setOpaque(true);
-        c.setText(temporaryContentsCursor.getText());
-        c.setForeground(Color.red);
-        c.setBackground(Color.white);
-        c.setPreferredSize(temporaryContentsCursor.getPreferredSize());
-        c.setVisible(true);
-        c.setFocusable(true);
-        c.requestFocus();
-        cursor = c;
-        visibleGrid[l.x][l.y] = c;
-    }
-    private void placeUnitTo(Location l) {
-        JLabel c = new JLabel();
-        temporaryContentsUnit = gridLabels[l.x][l.y];
-        c.setOpaque(true);
-        c.setText(Character.toString(Data.landChit));
-        c.setForeground(Color.red);
-        c.setBackground(Color.white);
-        c.setPreferredSize(temporaryContentsUnit.getPreferredSize());
-        c.setVisible(true);
-        c.setFocusable(true);
-        c.requestFocus();
-        activeLabel = c;
-        visibleGrid[l.x][l.y] = c;
-    }
+    public class Replacement {
+        public void returnToBefore(JLabel temporary, Location previous) {
+            JLabel c = getPrevious(temporary);
+            replaceVisible(previous, c);
+            cellGrid.fillCellGrid();
+            showMap();
+        }
+        private JLabel getPrevious(JLabel temporary) {
+            JLabel c = new JLabel();
+            c.setOpaque(true);
+            c.setText(temporary.getText());
+            c.setForeground(temporary.getForeground());
+            c.setBackground(temporary.getBackground());
+            c.setPreferredSize(temporary.getPreferredSize());
+            c.setVisible(true);
+            return c;
+        }
 
-    public void placeOldLabelBackTo(Location previous) {
-        JLabel c = getPreviousLabel(temporaryContentsCursor);
-        replaceVisible(previous, c);
-        fillCellGrid();
-        showMap();
-    }
+        public void replaceVisible(Location previous, JLabel c) {
+            visibleGrid[previous.x][previous.y] = c;
+            visibleGrid[previous.x][previous.y].setText(c.getText());
+            visibleGrid[previous.x][previous.y].setForeground(c.getForeground());
+            visibleGrid[previous.x][previous.y].setBackground(c.getBackground());
+            visibleGrid[previous.x][previous.y].setSize(cellDimension);
+        }
 
-    public void placeUnitOldLabelBackTo(Location previous) {
-        JLabel c = getPreviousLabel(temporaryContentsUnit);
-        replaceVisible(previous, c);
-        fillCellGrid();
-        showMap();
-    }
 
-    private JLabel getPreviousLabel(JLabel temporary) {
-        JLabel c = new JLabel();
-        c.setOpaque(true);
-        c.setText(temporary.getText());
-        c.setForeground(temporary.getForeground());
-        c.setBackground(temporary.getBackground());
-        c.setPreferredSize(temporary.getPreferredSize());
-        c.setVisible(true);
-        return c;
-    }
-
-    public void fillCellGrid() {
-        for (int x = 0; x < rows; x++) {
-            for (int y = 0; y < cols; y++) {
-                fillCell(x, y);
-                showMap();
-            }
+        public void showMap() {
+            worldMapPanel.revalidate();
+            worldMapPanel.repaint();
         }
     }
 
-    private void fillCell(int x, int y) {
-        defineCellGrid(x, y);
-        cellPanelGrid[x][y].add(visibleGrid[x][y]);
-        setVisible(cellPanelGrid[x][y]);
-    }
 
-    private void defineCellGrid(int x, int y) {
-        cellPanelGrid[x][y] = new JPanel();
-        cellPanelGrid[x][y].setLayout(new GridLayout(1,1));
-        cellPanelGrid[x][y].setSize(cellDimension);
-    }
 
-    private void setVisible(JPanel jPanel) {
-        jPanel.setVisible(true);
-        showMap();
-    }
 
-    public void replaceVisible(Location previous, JLabel c) {
-        visibleGrid[previous.x][previous.y] = c;
-        visibleGrid[previous.x][previous.y].setText(c.getText());
-        visibleGrid[previous.x][previous.y].setForeground(c.getForeground());
-        visibleGrid[previous.x][previous.y].setBackground(c.getBackground());
-        visibleGrid[previous.x][previous.y].setSize(cellDimension);
-    }
 
-    public void showMap() {
-        worldMapPanel.revalidate();
-        worldMapPanel.repaint();
-    }
 
-    public void emptyMap(){
-        initVisibleGridLabels();
-        initCellGridPanels();
-        replaceWorldMap();
-    }
+    public class CellGrid {
+        public void fillCellGrid() {
+            for (int x = 0; x < rows; x++) {
+                for (int y = 0; y < cols; y++) {
+                    fillCell(x, y);
+                    new Replacement().showMap();
+                }
+            }
+        }
 
-    public void newMapWithUnits(){
-        setVisibleGridFromGridLabels();
-        clearMapToNature(); //restart gridlabels to visiblelabels
-        placeUnits();
-        placeVisibleLabels();
+        private void fillCell(int x, int y) {
+            defineCellGrid(x, y);
+            cellPanelGrid[x][y].add(visibleGrid[x][y]);
+            setVisible(cellPanelGrid[x][y]);
+        }
+
+        private void defineCellGrid(int x, int y) {
+            cellPanelGrid[x][y] = new JPanel();
+            cellPanelGrid[x][y].setLayout(new GridLayout(1, 1));
+            cellPanelGrid[x][y].setSize(cellDimension);
+        }
+
+        private void setVisible(JPanel jPanel) {
+            jPanel.setVisible(true);
+            new Replacement().showMap();
+        }
     }
 
     public void showControl(){
-        dataBoard.revalidate();
-        dataBoard.repaint();
+        Board.data.revalidate();
+        Board.data.repaint();
         control.revalidate();
         control.repaint();
     }
 
-    protected void placeVisibleLabels(){
-        for (int x = 0; x < rows; x++) {
-            for (int y = 0; y < cols; y++) {
-                JLabel cellLabel = visibleGrid[x][y];
-                placeLabelOnMap(cellLabel, new Location(x,y));
-            }
-        }
-    }
-
-
-    protected void clearMapToNature(){
-        for (int x = 0; x < rows; x++) {
-            for (int y = 0; y < cols; y++) {
-                JLabel cellLabel = gridLabels[x][y];
-                placeLabelOnMap(cellLabel, new Location(x,y));
-            }
-        }
-    }
-
-    private void placeLabelOnMap(JLabel c, Location location) {
-        c.setSize(cellDimension);
-        JPanel cell = cellPanelGrid[location.x][location.y];
-        cell.setLayout(new GridLayout(1,1));
-        cell.setSize(cellDimension);
-        cell.add(c);
-        cell.setVisible(true);
-        replaceLabelOnCell(cell, c);
-        worldMapPanel.add(cell,location.y,location.x);
-        worldMapPanel.setVisible(true);
-        showMap();
-    }
-
-    private void replaceLabelOnCell(JPanel jPanel, JLabel c) {
-        jPanel.remove(0);
-        jPanel.add(c);
-    }
-
-    private JLabel[][] getCellLabelsFromWorldMapOriginal() {
-        JLabel[][] localMapCells = new JLabel[rows][cols];
-        for (int x = 0; x < rows; x++) {
-            for (int y = 0; y < cols; y++) {
-                gridLabels[x][y] = WorldMap.mapCells[x][y];
-                localMapCells[x][y] = gridLabels[x][y];
-            }
-        }
-        return localMapCells;
-    }
-
-    protected void createCells() {
-        JPanel p;
-        Location l;
-        for (int x = 0; x < rows; x++) {
-            for (int y = 0; y < cols; y++) {
-                p = getCell(x, y);
-                l = new Location(x,y);
-                addCellToWorldMap(p, l);
-            }
-        }
-    }
-
-    private void testCountComponentsOfCell(int x, int y) {
-        System.out.println("componentlength at xy "+
-                x+
-                ","+
-                "y"+
-                y +
-                cellPanelGrid[x][y].getComponents().length);
-        final int SINGLE_COMPONENT = 1;
-        assert cellPanelGrid[x][y].getComponents().length <= SINGLE_COMPONENT;
-        String exceptionMessage;
-        exceptionMessage = "Exception!";
-        exceptionMessage =
-                cellPanelGrid[x][y].getComponents().length <= SINGLE_COMPONENT ?
-                        "":
-                        exceptionMessage;
-        System.out.print(exceptionMessage);
-    }
-
-    private JPanel getCell(int x, int y) {
-        JPanel p;
-        p = cellPanelGrid[x][y];
-        p.setLayout(new GridLayout(1,1));
-        p.add(visibleGrid[x][y]);
-        return p;
-    }
-
-    protected void addCellToWorldMap(JPanel p, Location loc) {
-        worldMapPanel.add(p,loc.x,loc.y);
-        showMap();
-    }
 
     private class MyKeyListener implements KeyListener {
 
@@ -817,7 +489,9 @@ public class View extends JFrame implements ActionListener {
             LinkedList<Unit> ulAtPrevious;
             ulAtPrevious = getUnitsAt(previous);
             while(ulAtPrevious.size() > 0){
-                placeUnitOldLabelBackTo(previous);
+                new Replacement().returnToBefore(
+                        temporaryContentsUnit,
+                        previous);
                 for(Unit u: ulAtPrevious) placeUnit(u);
                 break;
             }
@@ -831,9 +505,9 @@ public class View extends JFrame implements ActionListener {
                 placeUnit(active);
             }
             JLabel activeunit = makeUnitLabel(location);
-            replaceVisible(location, activeunit);
-            fillCellGrid();
-            showMap();
+            new Replacement().replaceVisible(location, activeunit);
+            cellGrid.fillCellGrid();
+            new Replacement().showMap();
         }
 
         private JLabel makeUnitLabel(Location location) {
@@ -909,7 +583,7 @@ public class View extends JFrame implements ActionListener {
             while(unitCountAt(aftermove)>0){
                 LinkedList<Unit> lu = getUnitsAt(aftermove);
                 active = lu.peekFirst();
-                uub.updateUnitBoardWith(lu);
+                uub.update(lu);
                 break;
             }
             while(unitCountAt(aftermove)==0){
@@ -941,7 +615,7 @@ public class View extends JFrame implements ActionListener {
             UpdateUnitBoard uub = new UpdateUnitBoard();
             LinkedList<Unit> unitsAtLocation = getUnitsAt(l);
             boolean updated = isLandUnitDisplayed(visibleGrid[l.x][l.y]) ?
-                    uub.updateUnitBoardWith(unitsAtLocation):
+                    uub.update(unitsAtLocation):
                     emptyUnitBoard();
             active = unitsAtLocation.peekFirst();
             uub.updateUnitBoardWithActiveUnit();
@@ -951,16 +625,23 @@ public class View extends JFrame implements ActionListener {
 
         private void replaceLabelThenMap(Location aftermove,
                                          Location previous) {
-            placeOldLabelBackTo(previous);
-            placeCursorOnPanelAt(aftermove);
-            replaceWorldMap();
+            new Replacement().returnToBefore(
+                    temporaryContentsCursor,
+                    previous);
+            String letter = temporaryContentsCursor.getText();
+            cursor = new Placement().placementOnPanelAt(letter, aftermove );
+            new WorldMapFunctionality().replaceWorldMap();
         }
 
         private void replaceUnitThenMap(Location aftermove,
                                          Location previous) {
-            placeOldLabelBackTo(previous);
-            placeUnitOnPanelAt(aftermove);
-            replaceWorldMap();
+            new Replacement().returnToBefore(
+                    temporaryContentsCursor,
+                    previous);
+            String letter = Character.toString(Data.landChit);
+            activeLabel = new Placement().placementOnPanelAt(letter,
+                    aftermove );
+            new WorldMapFunctionality().replaceWorldMap();
         }
 
         private class StayAtSpot extends MoveInDirection {
@@ -971,13 +652,7 @@ public class View extends JFrame implements ActionListener {
         }
     }
 
-    public void removeOldUnitAt(Location previous) {
-        JLabel[][] allLabels = getCellLabelsFromWorldMapOriginal();
-        JLabel old = allLabels[previous.x][previous.y];
-        replaceVisible(previous, old);
-        placeLabelOnMap(old, previous);
-        showMap();
-    }
+
 
     private LinkedList<Unit> getUnitsAt(Location l) {
         LinkedList<Unit> unitsAtLocation = new LinkedList<Unit>();
@@ -1020,6 +695,18 @@ public class View extends JFrame implements ActionListener {
                 visibleGrid[location.x][location.y].setForeground(
                         active.colors);
                 break;
+            case Data.airChit:
+                visibleGrid[location.x][location.y].setText(
+                        Character.toString(unit.chit));
+                visibleGrid[location.x][location.y].setForeground(
+                        active.colors);
+                break;
+            case Data.seaChit:
+                visibleGrid[location.x][location.y].setText(
+                        Character.toString(unit.chit));
+                visibleGrid[location.x][location.y].setForeground(
+                        active.colors);
+                break;
             default:
 
         }
@@ -1029,9 +716,10 @@ public class View extends JFrame implements ActionListener {
 
 
     public class UpdateUnitBoard{
-        public boolean updateUnitBoardWith(LinkedList<Unit> unitsAtLocation) {
-            unitBoard.removeAll();
-            createUnitBoard();
+
+        public boolean update(LinkedList<Unit> unitsAtLocation) {
+            Board.unit.removeAll();
+            Board.createUnitBoard(View.this);
             try {
                 while(!unitsAtLocation.isEmpty()) {
                     Unit current = unitsAtLocation.getFirst();
@@ -1039,7 +727,7 @@ public class View extends JFrame implements ActionListener {
                             current.identification.fullName +
                             current.identification.id
                     );
-                    unitBoard.add(unitType);
+                    Board.unit.add(unitType);
                     String veteranText = current.isVeteran() ?
                             "Veteran" :
                             "Rookie";
@@ -1049,28 +737,28 @@ public class View extends JFrame implements ActionListener {
             }catch(NullPointerException npe){
                 System.err.println("hey no units at this location" + npe);
             }
-            unitBoard.add(veteran);
+            Board.unit.add(veteran);
             return !unitsAtLocation.isEmpty();
         }
 
         public void  updateUnitBoardWithActiveUnit(){
-            unitBoard.removeAll();
-            createUnitBoard();
+            Board.unit.removeAll();
+            Board.createUnitBoard(View.this);
             while(active!=null) {
                 unitType.setText(active.getType() +
                         active.identification.fullName +
                         currentUnitIndex
                 );
-                unitBoard.add(unitType);
+                Board.unit.add(unitType);
                 String veteranText = active.isVeteran() ? "Veteran" : "Rookie";
                 veteran.setText(veteranText);
-                unitBoard.add(veteran);
+                Board.unit.add(veteran);
                 break;
             }
         }
         public void updateUnitBoardWithCurrentPlayerUnit(){
-            unitBoard.removeAll();
-            createUnitBoard();
+            Board.unit.removeAll();
+            Board.createDataBoard();
             Player player = Data.Turn.currentPlayer;
             LinkedList<Unit> playerForces = new LinkedList<Unit>();
             playerForces.addAll(player.units.getList());
@@ -1079,76 +767,321 @@ public class View extends JFrame implements ActionListener {
                     player.identification.fullName +
                     currentUnitIndex
             );
-            unitBoard.add(unitType);
+            Board.unit.add(unitType);
             String veteranText = current.isVeteran() ? "Veteran":"Rookie";
             veteran.setText(veteranText);
-            unitBoard.add(veteran);
+            Board.unit.add(veteran);
 
         }
         public void updateUnitBoardWithEmpty(){
-            unitBoard.removeAll();
-            createUnitBoard();
+            Board.unit.removeAll();
+            Board.createUnitBoard(View.this);
         }
     }
 
 
 
     public boolean emptyUnitBoard() {
-        unitBoard.removeAll();
+        Board.unit.removeAll();
         return false;
     }
 
-    public void replaceWorldMap() {
-        worldMapPanel.removeAll();
-        initCellGridPanels();
-        fillCellGrid();
-        //clearMapToNature();//either or prolly two functions needed
-        placeVisibleLabels();
-        worldMapPanel = createWorldMap();
-        createCells();
-        worldMapPanel.setVisible(true);
-    }
-    public void clearWorldMap() {
-        worldMapPanel.removeAll();
-        initCellGridPanels();
-        fillCellGrid();
-        clearMapToNature();
-        worldMapPanel = createWorldMap();
-        createCells();
-        worldMapPanel.setVisible(true);
-    }
 
-    //tests
-    private void testLocationPrint(Location aftermove, Location previous) {
-        System.out.println("cursorLocation:"+previous.x +", "+
-                previous.y +"::"+aftermove.x + ", " +
-                aftermove.y);
-    }
 
-    private void testLabelsAll(String s) {
-        System.out.println(s+"test");
-        for (int x = 0; x < rows; x++) {
-            for (int y = 0; y < cols; y++) {
-                testLabel(x, y);
+    private class Preparations {
+        public void invoke() {
+            setupView();
+            placeMenuBar();
+            init.initCellGridPanels();
+            initLabels();
+            makeGridLabels();
+        }
+
+        private void setupView() {
+            setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+            setPreferredSize(new Dimension(820, 640));
+            setLayout(new BorderLayout());
+            setFocusable(true);
+            MyKeyListener mkl = new MyKeyListener();
+            addKeyListener(mkl);
+
+        }
+
+        private void placeMenuBar() {
+            JMenuBar menuBar = new JMenuBar();
+
+            JMenu file = new JMenu("File");
+            JMenuItem open = new JMenuItem("Open");
+            JMenuItem close = new JMenuItem("Close");
+            JMenuItem save = new JMenuItem("Save");
+            JMenuItem exit = new JMenuItem("Exit");
+
+            file.add(open);
+            file.add(close);
+            file.add(save);
+            file.addSeparator();
+            file.add(exit);
+            menuBar.add(file);
+
+            //orders, ministrydata, ministry orders?, advances
+            JMenu orders = new JMenu("Orders");
+            JMenuItem operate = new JMenuItem("Operation");
+            JMenuItem heal = new JMenuItem("Heal");
+            JMenuItem vigil = new JMenuItem("Vigil");
+            JMenuItem fortify = new JMenuItem("Fortify");
+
+            orders.add(operate);
+            orders.add(heal);
+            orders.add(vigil);
+            orders.add(fortify);
+            menuBar.add(orders);
+
+            JMenu jmMinistries = new JMenu("Ministries");
+            JMenuItem jmiFinancial = new JMenuItem("Financial");
+            JMenuItem jmiSocial = new JMenuItem("Social");
+            JMenuItem jmiInterior = new JMenuItem("Interior");
+            JMenuItem jmiForeignAffairs = new JMenuItem("Foreign Affairs");
+            JMenuItem jmiDefence = new JMenuItem("Defence");
+
+            jmMinistries.add(jmiFinancial);
+            jmMinistries.add(jmiSocial);
+            jmMinistries.add(jmiInterior);
+            jmMinistries.add(jmiForeignAffairs);
+            jmMinistries.add(jmiDefence);
+            menuBar.add(jmMinistries);
+
+            JMenu data = new JMenu("Data");
+            JMenuItem wonders = new JMenuItem("Wonders of the World");
+            JMenuItem topCities = new JMenuItem("Top Cities");
+            JMenuItem demographics = new JMenuItem("Demographics");
+            JMenuItem progress = new JMenuItem("Progress chart");
+            JMenuItem international = new JMenuItem("Affairs");
+
+            data.add(wonders);
+            data.add(topCities);
+            data.add(demographics);
+            data.add(progress);
+            data.add(international);
+            menuBar.add(data);
+
+            JMenu jmHelp = new JMenu("Help");
+            JMenuItem jmiAbout = new JMenuItem("About");
+            jmHelp.add(jmiAbout);
+            menuBar.add(jmHelp);
+
+            open.addActionListener(View.this);
+            close.addActionListener(View.this);
+            save.addActionListener(View.this);
+
+            operate.addActionListener(View.this);
+            heal.addActionListener(View.this);
+            vigil.addActionListener(View.this);
+            fortify.addActionListener(View.this);
+
+            jmiFinancial.addActionListener(View.this);
+            jmiSocial.addActionListener(View.this);
+            jmiInterior.addActionListener(View.this);
+            jmiForeignAffairs.addActionListener(View.this);
+            jmiDefence.addActionListener(View.this);
+
+            wonders.addActionListener(View.this);
+            topCities.addActionListener(View.this);
+            demographics.addActionListener(View.this);
+            progress.addActionListener(View.this);
+            international.addActionListener(View.this);
+
+            exit.addActionListener(View.this);
+            jmiAbout.addActionListener(View.this);
+            View.this.setJMenuBar(menuBar);
+        }
+
+        private void initLabels(){
+            init.initGridLabels();
+            init.initVisibleGridLabels();
+        }
+
+        private void makeGridLabels(){
+            for (int x = 0; x < rows; x++) {
+                for (int y = 0; y < cols; y++) {
+                    gridLabels[x][y] = cell.getCellLabelsFromWorldMapOriginal()[x][y];
+                }
             }
         }
     }
+    public class ViewContents {
+        public class Definitions {
+            Definitions(View view) {
+                worldMapPanelContents.createWorld();
+                createControlPanel(view);
+                createTextPanel();
+                createMapPanel();
+                createWorldMap();
+                createGlobeMap();
+            }
 
-    private void testLabel(int x, int y) {
-        System.out.println(x +
-                "," +
-                y +
-                visibleGrid[x][y].getText() +
-                visibleGrid[x][y].getSize().height
-        );
+            Definitions() {
+            }
 
-        System.out.println(x +
-                "," +
-                y +
-                gridLabels[x][y].getText()
+            private void createControlPanel(View view) {
+                control.setLayout(new GridLayout(5, 1));
+                createGlobeMap();
+                control.add(globeMapPanel);
+                Board.createDataBoard();
+                control.add(Board.data);
+                Board.createUnitBoard(view);
+                control.add(Board.unit);
+                PlayerSwitchListener psl = new PlayerSwitchListener(view);
+                switchPlayer.addActionListener(psl);
+                EndListener endListener = new EndListener(view);
+                endTurn.addActionListener(endListener);
+                control.add(endTurn);
+                control.add(switchPlayer);
+                control.repaint();
+            }
 
-        );
+            private void createTextPanel() {
+                text.add(textArea);
+            }
+
+            private void createMapPanel() {
+                worldMapPanel.setPreferredSize(
+                        new Dimension(
+                                cols * cellSize + 10,
+                                rows * cellSize + 10));
+                worldMapPanel.setVisible(true);
+            }
+
+            private void createWorldMap() {
+                worldMapPanel.setLayout(new GridLayout(rows, cols));
+                worldMapPanel.setSize(cols * 15, rows * 15);
+                worldMapPanel.setVisible(true);
+                worldMapPanel.repaint();
+            }
+
+            private JPanel createGlobeMap() {
+                globeMapPanel.setBackground(Color.black);
+                globeMapPanel.setLayout(new GridLayout(rows, cols));
+                globeMapPanel.setSize(cols * 4, rows * 4);
+                globeMapPanel.setVisible(true);
+                globeMapPanel.repaint();
+                return globeMapPanel;
+            }
+        }
+
+        public class Maker {
+            public void invoke() {
+                createContentDefinitions();
+                setVisibleGridFromGridLabels();
+                new CellGrid().fillCellGrid();
+                cell.placeVisibleLabels();
+                cell.createCells();
+                setAllUnitLocationsAtStart();
+            }
+            public void setVisibleGridFromGridLabels() {
+                for (int x = 0; x < rows; x++) {
+                    for (int y = 0; y < cols; y++) {
+                        visibleGrid[x][y] = gridLabels[x][y];
+                        visibleGrid[x][y].setVisible(true);
+                        visibleGrid[x][y].setPreferredSize(cellDimension);
+                    }
+                }
+            }
+        }
+
+        public class Placer {
+            public void invoke() {
+                cursor = new Placement().placementOnPanelAt(
+                        temporaryContentsCursor.getText(),
+                        Data.CENTRE);
+                placeContentToView();
+                new CellGrid().fillCellGrid();
+            }
+
+            private void placeContentToView() {
+                textArea.setEnabled(false);
+                View.this.add(text, BorderLayout.SOUTH);
+                View.this.add(control, BorderLayout.EAST);
+                View.this.add(worldMapPanel, BorderLayout.CENTER);
+            }
+        }
+    }
+    public static class Board{
+        public static JPanel data = new JPanel();
+        public static JPanel unit = new JPanel();
+        public static JPanel terrain = new JPanel();
+        private static void createDataBoard() {
+            Board.data.setLayout(new GridLayout(4,1));
+            funds = new JLabel("Funds: " +
+                    Data.Turn.currentPlayer.funds);
+            pollution = new JLabel("Pollution: " +
+                    Data.Turn.currentPlayer.pollution);
+            tax = new JLabel("Taxrate: " +
+                    Data.Turn.currentPlayer.tax);
+            year = new JLabel("Year: " +
+                    Civilization.year);
+            Board.data.add(year);
+            Board.data.add(tax);
+            Board.data.add(funds);
+            Board.data.add(pollution);
+        }
+        private static void createUnitBoard(View view) {
+            Board.unit.setLayout(new GridLayout(4,1));
+            nextUnit = new JButton("Next Unit");
+            UnitSwitchListener unitSwitchListener =
+                    new UnitSwitchListener(view);
+            nextUnit.addActionListener(unitSwitchListener);
+            unitType = new JLabel("Unit ID : ");
+            veteran = new JLabel("Experience:");
+            nextUnit.setFocusPainted(false);
+            Board.unit.add(nextUnit);
+            Board.unit.add(unitType);
+            Board.unit.add(veteran);
+
+
+        }
+        private static void createTerrainBoard() {
+            Board.terrain.setLayout(new GridLayout(4,1));
+            terrainType = new JLabel("Terrain:" );
+            structure = new JLabel("Infrastructure:");//city road, canal mine
+            // bridge
+            artifacts = new JLabel("Artifacts:");//pollution, resource, village
+            Board.terrain.add(terrainType);
+            Board.terrain.add(structure);
+            Board.terrain.add(artifacts);
+        }
     }
 
+    private class UnitPlacer {
+        public void invoke() {
+            placeLandUnits();
+            //placeSeaUnits();
+            //placeAirUnits();
+        }
+
+        private void placeLandUnits() {
+            char sign = Data.landChit;
+            paintUnitSign(sign);
+        }
+
+        private void placeSeaUnits() {
+            char sign = Data.seaChit;
+            paintUnitSign(sign);
+        }
+
+        private void placeAirUnits() {
+            char sign = Data.airChit;
+            paintUnitSign(sign);
+        }
+        private void paintUnitSign(char sign) {
+            for(Player p : Data.listOfPlayers){
+                for(Unit u: p.units.list) {
+                    Location l = u.location;
+                    String signStr = Character.toString(sign);
+                    visibleGrid[l.x][l.y].setText(signStr);
+                    visibleGrid[l.x][l.y].setForeground(p.colors);
+                }
+            }
+        }
+    }
 }
 

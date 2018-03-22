@@ -45,7 +45,7 @@ public class Civilization {
         allPlayersAllUnitsDataSet();
         firstPlayerSetup();
         View v = new View(map);
-        v.updateUnitBoardWithCurrentPlayerUnit();
+        v.new UpdateUnitBoard().updateUnitBoardWithCurrentPlayerUnit();
         roundLoop();
     }
 
