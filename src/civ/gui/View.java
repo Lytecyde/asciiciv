@@ -32,44 +32,43 @@ public class View extends JFrame implements ActionListener {
     public JPanel control = new JPanel();
     public JPanel globeMapPanel = new JPanel();
     public static JLabel funds, pollution, tax, year;//for databoard
-    private static JLabel unitType, veteran; //for unit
+    public static JLabel unitType, veteran; //for unit
     public static JButton nextUnit;
-    private static JLabel artifacts;
-    private static JLabel terrainType;
-    private static JLabel structure;
+    public static JLabel artifacts;
+    public static JLabel terrainType;
+    public static JLabel structure;
 
 
     public JPanel worldMapPanel = new JPanel();
-    private CellGrid cellGrid = new CellGrid();
+    public CellGrid cellGrid = new CellGrid();
 
 
     public static final int cellSize = 15;
     public static WorldMap worldMapPanelContents;
     public JLabel cursor;
     private static JLabel label;
-    private final JLabel[][] gridLabels = new JLabel[rows][cols];
-    private JLabel[][] visibleGrid = new JLabel[rows][cols];
+    public final JLabel[][] gridLabels = new JLabel[rows][cols];
+    public JLabel[][] visibleGrid = new JLabel[rows][cols];
     public JPanel[][] cellPanelGrid = new JPanel[rows][cols];
 
     private Dimension cellDimension = new Dimension(cellSize, cellSize);
     public static int currentUnitIndex = 0;
     public JButton endTurn = new JButton("End this Turn.");
     public JButton switchPlayer = new JButton("Next player");
-
-
-
-
+    public Board board;
 
     public Unit active;
     public Unit underCursor;
     private JLabel activeLabel;
     private JLabel temporaryContentsUnit;
-    private JLabel temporaryContentsCursor;
+    private JLabel temporaryContentsCursor = new JLabel();
 
 
-    public View(){}
+    public View() {
+    }
 
     public View(WorldMap wm) {
+        board = new Board(this);
         worldMapPanelContents = wm;
 
         preparations();
@@ -92,8 +91,7 @@ public class View extends JFrame implements ActionListener {
 
     private void placeAllContentToView() {
         ViewContents c = new ViewContents();
-        ViewContents.Placer p = c.new Placer();
-        p.invoke();
+        c.new Placer().invoke();
     }
 
     private void makeContents() {
@@ -110,17 +108,17 @@ public class View extends JFrame implements ActionListener {
     }
 
     public void placeUnits() {
-        new UnitPlacer().invoke();
+        new UnitPlacer(this).invoke();
         //TODO:placeSatellites();
     }
 
 
     //SKETCH
-    public void placeCities(){
+    public void placeCities() {
         String citySign = "#";
         MapCoordinates cityLocation;
-        for(Player p : Data.listOfPlayers){
-            for(City c : p.cities.list){
+        for (Player p : Data.listOfPlayers) {
+            for (City c : p.cities.list) {
                 //TODO roughly
                 cityLocation = c.getLocation();
 
@@ -134,8 +132,10 @@ public class View extends JFrame implements ActionListener {
     }
 
     private void createContentDefinitions() {
+        board = new Board(this);
         ViewContents c = new ViewContents();
-        ViewContents.Definitions d = c.new Definitions(this);
+
+        ViewContents.Definitions d = c.new Definitions(this, board);
     }
 
     public JPanel[][] getCellPanelGrid() {
@@ -158,7 +158,7 @@ public class View extends JFrame implements ActionListener {
         return worldMapPanel;
     }
 
-    public class WorldMapFunctionality{
+    public class WorldMapFunctionality {
         private JPanel createWorldMap() {
             ViewContents c = new ViewContents();
             c.new Definitions().createWorldMap();
@@ -209,11 +209,11 @@ public class View extends JFrame implements ActionListener {
     }
 
     //placement of units and cursors on map
-    public class Placement{
+    public class Placement {
         protected JLabel placementOnPanelAt(String letter,
                                             Location location) {
             cursorLocation = location;
-            JLabel receptacle = placement(letter, location);;
+            JLabel receptacle = placement(letter, location);
             new Replacement().replaceVisible(location, receptacle);
             cellGrid.fillCellGrid();
             new Replacement().showMap();
@@ -221,7 +221,7 @@ public class View extends JFrame implements ActionListener {
         }
 
 
-        private JLabel placement(String letter, Location l){
+        private JLabel placement(String letter, Location l) {
             JLabel c = new JLabel();
             temporaryContentsUnit = gridLabels[l.x][l.y];
             c.setOpaque(true);
@@ -243,7 +243,6 @@ public class View extends JFrame implements ActionListener {
     }
 
 
-
     public class Replacement {
         public void returnToBefore(JLabel temporary, Location previous) {
             JLabel c = getPrevious(temporary);
@@ -251,6 +250,7 @@ public class View extends JFrame implements ActionListener {
             cellGrid.fillCellGrid();
             showMap();
         }
+
         private JLabel getPrevious(JLabel temporary) {
             JLabel c = new JLabel();
             c.setOpaque(true);
@@ -276,10 +276,6 @@ public class View extends JFrame implements ActionListener {
             worldMapPanel.repaint();
         }
     }
-
-
-
-
 
 
     public class CellGrid {
@@ -310,13 +306,17 @@ public class View extends JFrame implements ActionListener {
         }
     }
 
-    public void showControl(){
-        Board.data.revalidate();
-        Board.data.repaint();
+    public void showControl(Board board) {
+        board.data.revalidate();
+        board.data.repaint();
         control.revalidate();
         control.repaint();
     }
 
+    public boolean emptyUnitBoard(Board board) {
+        board.unit.removeAll();
+        return false;
+    }
 
     private class MyKeyListener implements KeyListener {
 
@@ -329,18 +329,20 @@ public class View extends JFrame implements ActionListener {
         public void keyReleased(KeyEvent e) {
 
         }
+
         @Override
         public void keyPressed(KeyEvent e) {
             Location previous;
+
             System.out.println("Keypressed" +
                     Data.numberOfArrowKeyPresses++ +
                     " : " +
                     e.getKeyCode());
             try {
                 previous = cursorLocation;
-                cursorMovements(e, previous);
+                cursorMovements(e, previous, board);
                 previous = cursorLocation;
-                unitMovements(e,previous);
+                unitMovements(e, previous);
             } catch (ArrayIndexOutOfBoundsException aiobe) {
                 System.out.println(aiobe + "movement went out");
             }
@@ -348,65 +350,61 @@ public class View extends JFrame implements ActionListener {
 
         private void unitMovements(KeyEvent e, Location previous) {
             MoveUnit mu =
-                    active.chit==Data.landChit ? new MoveLandUnit() :
-                    active.chit==Data.seaChit ? new MoveSeaUnit() :
-                    active.chit==Data.airChit ? new MoveAirUnit():
-                    active.chit==Data.rocketChit ? new MoveToOrbit():
-                    new StayPut();
+                    active.chit == Data.landChit ? new MoveLandUnit() :
+                    active.chit == Data.seaChit ? new MoveSeaUnit() :
+                    active.chit == Data.airChit ? new MoveAirUnit() :
+                    active.chit == Data.rocketChit ? new MoveToOrbit() :
+                                                    new StayPut();
             char keyPressed = e.getKeyChar();
             MoveInDirection mid =
-                    keyPressed == 'd'? new MoveSouth(mu):
-                    keyPressed == 'a'? new MoveNorth(mu):
-                    keyPressed == 's'? new MoveWest(mu):
-                    keyPressed == 'w'? new MoveEast(mu):
-                    new StayAtSpot();
+                    keyPressed == 'd' ? new MoveSouth(mu) :
+                            keyPressed == 'a' ? new MoveNorth(mu) :
+                                    keyPressed == 's' ? new MoveWest(mu) :
+                                            keyPressed == 'w' ? new MoveEast(mu) :
+                                                    new StayAtSpot();
             mid.move(previous);
         }
 
-        abstract class MoveUnit
-        {
+        abstract class MoveUnit {
             abstract void move(Location previous, DirectionType direction);
         }
 
-        class StayPut extends MoveUnit
-        {
-            void move(Location previous, DirectionType direction){}
+        class StayPut extends MoveUnit {
+            void move(Location previous, DirectionType direction) {
+            }
         }
 
-        class MoveLandUnit extends MoveUnit
-        {
+        class MoveLandUnit extends MoveUnit {
 
-            void move(Location previous, DirectionType direction){
+            void move(Location previous, DirectionType direction) {
                 Location aftermove = getLocationAfterMove(previous, direction);
-                while(!(visibleGrid[aftermove.x][aftermove.y].getBackground()
-                        .equals(Color.cyan)) ){
+                while (!(visibleGrid[aftermove.x][aftermove.y].getBackground()
+                        .equals(Color.cyan))) {
                     moveUnit(previous, direction);
                     break;
                 }
             }
         }
 
-        class MoveSeaUnit extends MoveUnit
-        {
-            void move(Location previous, DirectionType direction){
+        class MoveSeaUnit extends MoveUnit {
+            void move(Location previous, DirectionType direction) {
                 Location aftermove = getLocationAfterMove(previous, direction);
-                while(visibleGrid[aftermove.x][aftermove.y].getBackground()
-                        .equals(Color.cyan)){
+                while (visibleGrid[aftermove.x][aftermove.y].getBackground()
+                        .equals(Color.cyan)) {
                     moveUnit(previous, direction);
                     break;
                 }
             }
         }
 
-        class MoveAirUnit extends MoveUnit
-        {
-            void move(Location previous, DirectionType direction){
+        class MoveAirUnit extends MoveUnit {
+            void move(Location previous, DirectionType direction) {
                 moveUnit(previous, direction);
             }
         }
-        class MoveToOrbit extends MoveUnit
-        {
-            void move(Location previous, DirectionType direction){
+
+        class MoveToOrbit extends MoveUnit {
+            void move(Location previous, DirectionType direction) {
                 //countdown...
                 // orbit achieved!
             }
@@ -419,7 +417,7 @@ public class View extends JFrame implements ActionListener {
             temporaryContentsUnit = visibleGrid[previous.x][previous.y];
             replaceUnitThenMap(aftermove, previous);
             checkForUnit(aftermove);
-            moveCursor(previous,direction);
+            moveCursor(previous, direction, board);
         }
 
         private Location getLocationAfterMove(
@@ -433,26 +431,28 @@ public class View extends JFrame implements ActionListener {
             return aftermove;
         }
 
-        abstract class MoveInDirection
-        {
+        abstract class MoveInDirection {
             abstract void move(Location previous);
         }
-        class MoveSouth extends MoveInDirection
-        {
+
+        class MoveSouth extends MoveInDirection {
             MoveUnit mu;
-            MoveSouth(MoveUnit mu){
+
+            MoveSouth(MoveUnit mu) {
                 this.mu = mu;
             }
+
             @Override
             void move(Location previous) {
                 mu.move(previous, DirectionType.SOUTH);
             }
 
         }
-        class MoveWest extends MoveInDirection
-        {
+
+        class MoveWest extends MoveInDirection {
             MoveUnit mu;
-            MoveWest(MoveUnit mu){
+
+            MoveWest(MoveUnit mu) {
                 this.mu = mu;
             }
 
@@ -461,24 +461,27 @@ public class View extends JFrame implements ActionListener {
                 mu.move(previous, DirectionType.WEST);
             }
         }
-        class MoveNorth extends MoveInDirection
-        {
+
+        class MoveNorth extends MoveInDirection {
             MoveUnit mu;
-            MoveNorth(MoveUnit mu){
+
+            MoveNorth(MoveUnit mu) {
                 this.mu = mu;
             }
+
             @Override
             void move(Location previous) {
                 mu.move(previous, DirectionType.NORTH);
             }
         }
 
-        class MoveEast extends MoveInDirection
-        {
+        class MoveEast extends MoveInDirection {
             MoveUnit mu;
-            MoveEast(MoveUnit mu){
+
+            MoveEast(MoveUnit mu) {
                 this.mu = mu;
             }
+
             @Override
             void move(Location previous) {
                 mu.move(previous, DirectionType.EAST);
@@ -488,11 +491,11 @@ public class View extends JFrame implements ActionListener {
         private void placeRemainingUnitsBack(Location previous) {
             LinkedList<Unit> ulAtPrevious;
             ulAtPrevious = getUnitsAt(previous);
-            while(ulAtPrevious.size() > 0){
+            while (ulAtPrevious.size() > 0) {
                 new Replacement().returnToBefore(
                         temporaryContentsUnit,
                         previous);
-                for(Unit u: ulAtPrevious) placeUnit(u);
+                for (Unit u : ulAtPrevious) placeUnit(u);
                 break;
             }
         }
@@ -501,7 +504,7 @@ public class View extends JFrame implements ActionListener {
         //use for first turn first player
         private void placeActiveUnitOnPanelAt(Location location) {
             setActiveUnitsLocation(location);
-            while(active != null) {
+            while (active != null) {
                 placeUnit(active);
             }
             JLabel activeunit = makeUnitLabel(location);
@@ -530,21 +533,21 @@ public class View extends JFrame implements ActionListener {
         }
 
 
-        public LinkedList<Location> createAllUnitsLocations(){
+        public LinkedList<Location> createAllUnitsLocations() {
             LinkedList<Location> ull = new LinkedList<Location>();
-            for(Player p : Data.listOfPlayers){
-                for(Unit unit: p.units.list){
+            for (Player p : Data.listOfPlayers) {
+                for (Unit unit : p.units.list) {
                     ull.add(unit.location);
                 }
             }
             return ull;
         }
 
-        public int unitCountAt(Location x){
+        public int unitCountAt(Location x) {
             LinkedList<Location> ull = createAllUnitsLocations();
             int countUnits = 0;
             for (int i = 0; i < ull.size(); i++) {
-                while((ull.get(i).x == x.x) && (ull.get(i).y == x.y)) {
+                while ((ull.get(i).x == x.x) && (ull.get(i).y == x.y)) {
                     countUnits++;
                     break;
                 }
@@ -552,19 +555,21 @@ public class View extends JFrame implements ActionListener {
             return countUnits;
         }
 
-        private void cursorMovements(KeyEvent e, Location previous) {
+        private void cursorMovements(KeyEvent e,
+                                     Location previous,
+                                     Board board) {
             switch (e.getKeyCode()) {
                 case 39:
-                    moveCursor(previous, DirectionType.SOUTH);
+                    moveCursor(previous, DirectionType.SOUTH, board);
                     break;
                 case 37:
-                    moveCursor(previous, DirectionType.NORTH);
+                    moveCursor(previous, DirectionType.NORTH, board);
                     break;
                 case 40:
-                    moveCursor(previous, DirectionType.WEST);
+                    moveCursor(previous, DirectionType.WEST, board);
                     break;
                 case 38:
-                    moveCursor(previous, DirectionType.EAST);
+                    moveCursor(previous, DirectionType.EAST, board);
                     break;
                 case KeyEvent.VK_SPACE:
                     //TODO:activate unit on cursorLocation for movement
@@ -573,20 +578,22 @@ public class View extends JFrame implements ActionListener {
             }
         }
 
-        private void moveCursor(Location previous, DirectionType direction) {
-            UpdateUnitBoard uub = new UpdateUnitBoard();
+        private void moveCursor(Location previous,
+                                DirectionType direction,
+                                Board board) {
+            UpdateUnitBoard uub = new UpdateUnitBoard(board);
             Location aftermove = previous.movement(direction);
             temporaryContentsUnit = visibleGrid[previous.x][previous.y];
             replaceLabelThenMap(aftermove, previous);
             setCursorLocation(aftermove);
             checkForUnit(aftermove);
-            while(unitCountAt(aftermove)>0){
+            while (unitCountAt(aftermove) > 0) {
                 LinkedList<Unit> lu = getUnitsAt(aftermove);
                 active = lu.peekFirst();
                 uub.update(lu);
                 break;
             }
-            while(unitCountAt(aftermove)==0){
+            while (unitCountAt(aftermove) == 0) {
                 uub.updateUnitBoardWithEmpty();
                 break;
             }
@@ -595,8 +602,8 @@ public class View extends JFrame implements ActionListener {
 
         private void checkForUnit(Location l) {
             boolean presentUnit = isLandUnitDisplayed(visibleGrid[l.x][l.y]);
-            while(presentUnit) {
-                getResponse(l);
+            while (presentUnit) {
+                getResponse(l, board);
                 break;
             }
         }
@@ -604,23 +611,28 @@ public class View extends JFrame implements ActionListener {
         private boolean isLandUnitDisplayed(JLabel jLabel) {
             boolean unitPresent = jLabel.getText().equals(
                     String.valueOf(Data.landChit));
-            while(!unitPresent) {
-                emptyUnitBoard();
+            while (!unitPresent) {
+                emptyUnitBoard(board);
                 break;
             }
             return unitPresent;
         }
 
-        private boolean getResponse(Location l) {
-            UpdateUnitBoard uub = new UpdateUnitBoard();
+        private boolean getResponse(Location l, Board board) {
+            UpdateUnitBoard uub = new UpdateUnitBoard(board);
             LinkedList<Unit> unitsAtLocation = getUnitsAt(l);
             boolean updated = isLandUnitDisplayed(visibleGrid[l.x][l.y]) ?
-                    uub.update(unitsAtLocation):
-                    emptyUnitBoard();
+                    uub.update(unitsAtLocation) :
+                    emptyUnitBoard(board);
             active = unitsAtLocation.peekFirst();
             uub.updateUnitBoardWithActiveUnit();
             return updated;
 
+        }
+
+        public boolean emptyUnitBoard(Board board) {
+            board.unit.removeAll();
+            return false;
         }
 
         private void replaceLabelThenMap(Location aftermove,
@@ -629,18 +641,18 @@ public class View extends JFrame implements ActionListener {
                     temporaryContentsCursor,
                     previous);
             String letter = temporaryContentsCursor.getText();
-            cursor = new Placement().placementOnPanelAt(letter, aftermove );
+            cursor = new Placement().placementOnPanelAt(letter, aftermove);
             new WorldMapFunctionality().replaceWorldMap();
         }
 
         private void replaceUnitThenMap(Location aftermove,
-                                         Location previous) {
+                                        Location previous) {
             new Replacement().returnToBefore(
                     temporaryContentsCursor,
                     previous);
             String letter = Character.toString(Data.landChit);
             activeLabel = new Placement().placementOnPanelAt(letter,
-                    aftermove );
+                    aftermove);
             new WorldMapFunctionality().replaceWorldMap();
         }
 
@@ -653,15 +665,14 @@ public class View extends JFrame implements ActionListener {
     }
 
 
-
     private LinkedList<Unit> getUnitsAt(Location l) {
         LinkedList<Unit> unitsAtLocation = new LinkedList<Unit>();
 
-        for(Player p: Data.listOfPlayers){
-            while(!p.units.list.isEmpty()){
-                for(Unit u:p.units.list){
+        for (Player p : Data.listOfPlayers) {
+            while (!p.units.list.isEmpty()) {
+                for (Unit u : p.units.list) {
                     try {
-                        while(u.location != null) {
+                        while (u.location != null) {
                             while (u.location.x == l.x &&
                                     u.location.y == l.y) {
                                 unitsAtLocation.add(u);
@@ -669,7 +680,7 @@ public class View extends JFrame implements ActionListener {
                             }
                             break;
                         }
-                    }catch(NullPointerException npe){
+                    } catch (NullPointerException npe) {
                         System.err.print(npe);
                     }
                 }
@@ -680,7 +691,7 @@ public class View extends JFrame implements ActionListener {
     }
 
     private void setActiveUnitsLocation(Location aftermove) {
-        while(active!=null){
+        while (active != null) {
             active.location = aftermove;
             break;
         }
@@ -688,7 +699,7 @@ public class View extends JFrame implements ActionListener {
 
     private void placeUnit(Unit unit) {
         Location location = unit.location;
-        switch(unit.chit){
+        switch (unit.chit) {
             case Data.landChit:
                 visibleGrid[location.x][location.y].setText(
                         Character.toString(unit.chit));
@@ -712,82 +723,81 @@ public class View extends JFrame implements ActionListener {
         }
     }
 
-    void setCursorLocation(Location aftermove){ this.cursorLocation = aftermove; }
+    void setCursorLocation(Location aftermove) {
+        this.cursorLocation = aftermove;
+    }
 
 
-    public class UpdateUnitBoard{
-
+    public class UpdateUnitBoard {
+        Board board;
+        public UpdateUnitBoard(Board board){
+            this.board = board;
+        }
         public boolean update(LinkedList<Unit> unitsAtLocation) {
-            Board.unit.removeAll();
-            Board.createUnitBoard(View.this);
+            board.unit.removeAll();
+            board.createUnitBoard(View.this);
             try {
-                while(!unitsAtLocation.isEmpty()) {
+                while (!unitsAtLocation.isEmpty()) {
                     Unit current = unitsAtLocation.getFirst();
                     unitType.setText(current.getType() +
                             current.identification.fullName +
                             current.identification.id
                     );
-                    Board.unit.add(unitType);
+                    board.unit.add(unitType);
                     String veteranText = current.isVeteran() ?
                             "Veteran" :
                             "Rookie";
                     veteran.setText(veteranText);
                     break;
                 }
-            }catch(NullPointerException npe){
+            } catch (NullPointerException npe) {
                 System.err.println("hey no units at this location" + npe);
             }
-            Board.unit.add(veteran);
+            board.unit.add(veteran);
             return !unitsAtLocation.isEmpty();
         }
 
-        public void  updateUnitBoardWithActiveUnit(){
-            Board.unit.removeAll();
-            Board.createUnitBoard(View.this);
-            while(active!=null) {
+        public void updateUnitBoardWithActiveUnit() {
+            board.unit.removeAll();
+            board.createUnitBoard(View.this);
+            while (active != null) {
                 unitType.setText(active.getType() +
                         active.identification.fullName +
                         currentUnitIndex
                 );
-                Board.unit.add(unitType);
+                board.unit.add(unitType);
                 String veteranText = active.isVeteran() ? "Veteran" : "Rookie";
                 veteran.setText(veteranText);
-                Board.unit.add(veteran);
+                board.unit.add(veteran);
                 break;
             }
         }
-        public void updateUnitBoardWithCurrentPlayerUnit(){
-            Board.unit.removeAll();
-            Board.createDataBoard();
+
+        public void updateUnitBoardWithCurrentPlayerUnit() {
+            board.unit.removeAll();
+            board.createDataBoard();
             Player player = Data.Turn.currentPlayer;
             LinkedList<Unit> playerForces = new LinkedList<Unit>();
             playerForces.addAll(player.units.getList());
             Unit current = playerForces.get(currentUnitIndex);
-            unitType.setText( current.getType() +
+            unitType.setText(current.getType() +
                     player.identification.fullName +
                     currentUnitIndex
             );
-            Board.unit.add(unitType);
-            String veteranText = current.isVeteran() ? "Veteran":"Rookie";
+            board.unit.add(unitType);
+            String veteranText = current.isVeteran() ? "Veteran" : "Rookie";
             veteran.setText(veteranText);
-            Board.unit.add(veteran);
+            board.unit.add(veteran);
 
         }
-        public void updateUnitBoardWithEmpty(){
-            Board.unit.removeAll();
-            Board.createUnitBoard(View.this);
+
+        public void updateUnitBoardWithEmpty() {
+            board.unit.removeAll();
+            board.createUnitBoard(View.this);
         }
+
+
     }
-
-
-
-    public boolean emptyUnitBoard() {
-        Board.unit.removeAll();
-        return false;
-    }
-
-
-
     private class Preparations {
         public void invoke() {
             setupView();
@@ -895,12 +905,12 @@ public class View extends JFrame implements ActionListener {
             View.this.setJMenuBar(menuBar);
         }
 
-        private void initLabels(){
+        private void initLabels() {
             init.initGridLabels();
             init.initVisibleGridLabels();
         }
 
-        private void makeGridLabels(){
+        private void makeGridLabels() {
             for (int x = 0; x < rows; x++) {
                 for (int y = 0; y < cols; y++) {
                     gridLabels[x][y] = cell.getCellLabelsFromWorldMapOriginal()[x][y];
@@ -908,11 +918,12 @@ public class View extends JFrame implements ActionListener {
             }
         }
     }
+
     public class ViewContents {
         public class Definitions {
-            Definitions(View view) {
+            Definitions(View view, Board board) {
                 worldMapPanelContents.createWorld();
-                createControlPanel(view);
+                createControlPanel(view, board);
                 createTextPanel();
                 createMapPanel();
                 createWorldMap();
@@ -922,14 +933,14 @@ public class View extends JFrame implements ActionListener {
             Definitions() {
             }
 
-            private void createControlPanel(View view) {
+            private void createControlPanel(View view, Board board) {
                 control.setLayout(new GridLayout(5, 1));
                 createGlobeMap();
                 control.add(globeMapPanel);
-                Board.createDataBoard();
-                control.add(Board.data);
-                Board.createUnitBoard(view);
-                control.add(Board.unit);
+                board.createDataBoard();
+                control.add(board.data);
+                board.createUnitBoard(view);
+                control.add(board.unit);
                 PlayerSwitchListener psl = new PlayerSwitchListener(view);
                 switchPlayer.addActionListener(psl);
                 EndListener endListener = new EndListener(view);
@@ -977,6 +988,7 @@ public class View extends JFrame implements ActionListener {
                 cell.createCells();
                 setAllUnitLocationsAtStart();
             }
+
             public void setVisibleGridFromGridLabels() {
                 for (int x = 0; x < rows; x++) {
                     for (int y = 0; y < cols; y++) {
@@ -997,6 +1009,9 @@ public class View extends JFrame implements ActionListener {
                 new CellGrid().fillCellGrid();
             }
 
+
+
+
             private void placeContentToView() {
                 textArea.setEnabled(false);
                 View.this.add(text, BorderLayout.SOUTH);
@@ -1005,53 +1020,74 @@ public class View extends JFrame implements ActionListener {
             }
         }
     }
-    public static class Board{
-        public static JPanel data = new JPanel();
-        public static JPanel unit = new JPanel();
-        public static JPanel terrain = new JPanel();
-        private static void createDataBoard() {
-            Board.data.setLayout(new GridLayout(4,1));
-            funds = new JLabel("Funds: " +
-                    Data.Turn.currentPlayer.funds);
-            pollution = new JLabel("Pollution: " +
-                    Data.Turn.currentPlayer.pollution);
-            tax = new JLabel("Taxrate: " +
-                    Data.Turn.currentPlayer.tax);
-            year = new JLabel("Year: " +
-                    Civilization.year);
-            Board.data.add(year);
-            Board.data.add(tax);
-            Board.data.add(funds);
-            Board.data.add(pollution);
+
+    public static class Board {
+        public View view;
+
+        public Board(View view) {
+            this.view = view;
         }
-        private static void createUnitBoard(View view) {
-            Board.unit.setLayout(new GridLayout(4,1));
-            nextUnit = new JButton("Next Unit");
+
+        public Board getBoard(){
+            return this;
+        }
+        public  JPanel data = new JPanel();
+        public JPanel unit = new JPanel();
+        public  JPanel terrain = new JPanel();
+
+        private void createDataBoard() {
+            data.setLayout(new GridLayout(4, 1));
+            view.funds = new JLabel("Funds: " +
+                    Data.Turn.currentPlayer.funds);
+            view.pollution = new JLabel("Pollution: " +
+                    Data.Turn.currentPlayer.pollution);
+            view.tax = new JLabel("Taxrate: " +
+                    Data.Turn.currentPlayer.tax);
+            view.year = new JLabel("Year: " +
+                    Civilization.year);
+            data.add(view.year);
+            data.add(view.tax);
+            data.add(view.funds);
+            data.add(view.pollution);
+        }
+
+        private void createUnitBoard(View view) {
+            unit.setLayout(new GridLayout(4, 1));
+            view.nextUnit = new JButton("Next Unit");
             UnitSwitchListener unitSwitchListener =
                     new UnitSwitchListener(view);
-            nextUnit.addActionListener(unitSwitchListener);
-            unitType = new JLabel("Unit ID : ");
-            veteran = new JLabel("Experience:");
-            nextUnit.setFocusPainted(false);
-            Board.unit.add(nextUnit);
-            Board.unit.add(unitType);
-            Board.unit.add(veteran);
+            view.nextUnit.addActionListener(unitSwitchListener);
+            view.unitType = new JLabel("Unit ID : ");
+            view.veteran = new JLabel("Experience:");
+            view.nextUnit.setFocusPainted(false);
+            unit.add(view.nextUnit);
+            unit.add(view.unitType);
+            unit.add(view.veteran);
 
 
         }
-        private static void createTerrainBoard() {
-            Board.terrain.setLayout(new GridLayout(4,1));
-            terrainType = new JLabel("Terrain:" );
-            structure = new JLabel("Infrastructure:");//city road, canal mine
+
+        private void createTerrainBoard() {
+            terrain.setLayout(new GridLayout(4, 1));
+            view.terrainType = new JLabel("Terrain:");
+            view.structure = new JLabel("Infrastructure:");//city road, canal
+            // mine
             // bridge
-            artifacts = new JLabel("Artifacts:");//pollution, resource, village
-            Board.terrain.add(terrainType);
-            Board.terrain.add(structure);
-            Board.terrain.add(artifacts);
+            view.artifacts = new JLabel("Artifacts:");//pollution, resource,
+            // village
+            terrain.add(view.terrainType);
+            terrain.add(view.structure);
+            terrain.add(view.artifacts);
         }
     }
 
-    private class UnitPlacer {
+    class UnitPlacer {
+        public View view;
+
+        public UnitPlacer(View view) {
+            this.view = view;
+        }
+
         public void invoke() {
             placeLandUnits();
             //placeSeaUnits();
@@ -1060,28 +1096,30 @@ public class View extends JFrame implements ActionListener {
 
         private void placeLandUnits() {
             char sign = Data.landChit;
-            paintUnitSign(sign);
+            paintUnitSign(view, sign);
         }
 
         private void placeSeaUnits() {
             char sign = Data.seaChit;
-            paintUnitSign(sign);
+            paintUnitSign(view, sign);
         }
 
         private void placeAirUnits() {
             char sign = Data.airChit;
-            paintUnitSign(sign);
+            paintUnitSign(view, sign);
         }
-        private void paintUnitSign(char sign) {
-            for(Player p : Data.listOfPlayers){
-                for(Unit u: p.units.list) {
+
+        private void paintUnitSign(View view, char sign) {
+            for (Player p : Data.listOfPlayers) {
+                for (Unit u : p.units.list) {
                     Location l = u.location;
                     String signStr = Character.toString(sign);
-                    visibleGrid[l.x][l.y].setText(signStr);
-                    visibleGrid[l.x][l.y].setForeground(p.colors);
+                    view.visibleGrid[l.x][l.y]
+                            .setText(signStr);
+                    view.visibleGrid[l.x][l.y].setForeground(p.colors);
                 }
             }
         }
     }
-}
 
+}

@@ -25,7 +25,7 @@ public class UnitSwitchListener implements ActionListener{
         Player currentPlayer = Data.Turn.currentPlayer;
         View.currentUnitIndex = ++View.currentUnitIndex%
                 (currentPlayer.unitCount );
-        View.UpdateUnitBoard uub = v.new UpdateUnitBoard();
+        View.UpdateUnitBoard uub = v.new UpdateUnitBoard(v.board);
         uub.updateUnitBoardWithCurrentPlayerUnit();
         v.switchPlayer.setFocusPainted(false);
         v.requestFocus();

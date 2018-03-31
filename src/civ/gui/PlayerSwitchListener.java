@@ -33,9 +33,9 @@ public class PlayerSwitchListener implements ActionListener {
 
     private void updateView(String playerNation) {
         v.setTitle(playerNation);
-        v.emptyUnitBoard();
+        v.emptyUnitBoard(v.board);
         LinkedList<Unit> list = Civilization.currentPlayer.units.list;
-        View.UpdateUnitBoard updateUnitBoard = v.new UpdateUnitBoard();
+        View.UpdateUnitBoard updateUnitBoard = v.new UpdateUnitBoard(v.board);
         updateUnitBoard.update(list);
         v.switchPlayer.setFocusPainted(false);
         v.nextUnit.doClick();
